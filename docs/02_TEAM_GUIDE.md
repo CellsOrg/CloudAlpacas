@@ -17,7 +17,7 @@
 | Sara | PM / Solution Architect / Product Designer | [`members/00_SARA.md`](./members/00_SARA.md) |
 | 승우 | Salesforce Builder | [`members/01_SEUNGWOO.md`](./members/01_SEUNGWOO.md) |
 | 은영 | Developer Lead / Team Lead | [`members/02_EUNYEONG.md`](./members/02_EUNYEONG.md) |
-| 혜준 | Salesforce Experience Lead / QA Lead | [`members/03_HYEJUN.md`](./members/03_HYEJUN.md) |
+| 혜준 | Salesforce Experience Lead / QA Lead | [`members/03_HYEJUNE.md`](./members/03_HYEJUNE.md) |
 | 아론 | Business Analyst / Demo Experience Lead | [`members/04_AARON.md`](./members/04_AARON.md) |
 
 각 역할이 프로젝트 전체에서 어떤 영역을 책임지는지는 아래와 같다. **구체적으로 어떤

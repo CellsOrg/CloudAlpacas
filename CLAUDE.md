@@ -153,7 +153,7 @@ CloudAlpacas/
 │   │   ├── 00_SARA.md
 │   │   ├── 01_SEUNGWOO.md
 │   │   ├── 02_EUNYEONG.md
-│   │   ├── 03_HYEJUN.md
+│   │   ├── 03_HYEJUNE.md
 │   │   └── 04_AARON.md
 │   │
 │   └── data/

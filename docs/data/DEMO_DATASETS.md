@@ -124,7 +124,7 @@ VIP 후보 조건(03_SYSTEM.md §4.5): **재방문 3회 이상 AND 총 지출 �
 | 2026-06-01 | 멤버십 가입 (Membership Campaign 추천 Executed) |
 
 > 혜준은 이 표의 날짜 순서가 실제 Org 데이터와 정확히 일치하는지(특히 Admission이
-> Order 이후에 생성되는지) 검증한다(`03_HYEJUN.md` Week 2).
+> Order 이후에 생성되는지) 검증한다(`03_HYEJUNE.md` Week 2).
 
 ---
 
