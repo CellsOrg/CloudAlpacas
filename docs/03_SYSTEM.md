@@ -18,6 +18,7 @@ flowchart LR
     B --> C["Field 설계<br/>(이 문서 §2)"]
     C --> D["관계·ERD<br/>(이 문서 §3)"]
     D --> E["자동화·Flow<br/>(이 문서 §4)"]
+    E --> F["화면·Screen<br/>(04_DEMO.md §4)"]
 ```
 
 이 문서에 나오는 모든 Object 선택은 이미 팀과 함께 확정한 결정이며(05_DECISIONS.md
@@ -361,6 +362,77 @@ graph TD
     F -->|Related_Order__c| CASE[Case]
 ```
 
+### 3.4 Relationship Summary — 전체 관계 표 (공식 버전)
+
+§3.1~3.3의 3개 다이어그램에 흩어진 관계를 하나도 빠짐없이 모은 표준 `erDiagram`이다.
+Baby Team 워크숍(`workshop/`)에서 그림으로 먼저 논의한 뒤, 이 블록으로 옮겨 공식화한
+것이다 — 이후 관계가 바뀌면 이 코드를 고치고 아래 표도 함께 갱신한다.
+
+```mermaid
+erDiagram
+    CONTACT ||--o{ PERSON_ACCOUNT : "선호 선수로 지정됨"
+    CONTACT ||--o{ PRODUCT2 : "관련 상품(굿즈)"
+    CONTACT ||--o{ ENGAGEMENT_SIGNAL__C : "관련 선수 신호"
+
+    PRODUCT2 ||--o{ PRICEBOOKENTRY : "가격 등록"
+    PRICEBOOKENTRY ||--o{ ORDERITEM : "가격 참조"
+
+    PERSON_ACCOUNT ||--o{ ORDER : "구매"
+    PERSON_ACCOUNT ||--o{ ORDERITEM : "현재 소유자(양도)"
+    GAME__C ||--o{ ORDER : "티켓 판매 경기"
+    ORDER ||--o{ ORDERITEM : "포함"
+
+    PERSON_ACCOUNT ||--o{ ADMISSION__C : "입장"
+    GAME__C ||--o{ ADMISSION__C : "경기 입장"
+    ORDERITEM ||--o{ ADMISSION__C : "티켓으로 입장"
+    PERSON_ACCOUNT ||--o| ATTENDANCE_RECORD__C : "누적 집계(팬당 1건)"
+
+    PERSON_ACCOUNT ||--o{ RECOMMENDATION__C : "추천 대상"
+    RECOMMENDATION__C ||--o{ BENEFIT__C : "추천으로 발급"
+    PERSON_ACCOUNT ||--o{ BENEFIT__C : "혜택 수령"
+
+    PERSON_ACCOUNT ||--o{ FAN_ACTIVITY_PATTERN__C : "활동 패턴"
+    PERSON_ACCOUNT ||--o{ FAN_SEGMENT_HISTORY__C : "세그먼트 이력"
+    PERSON_ACCOUNT ||--o{ ENGAGEMENT_SIGNAL__C : "관심 신호"
+
+    CAMPAIGN ||--o{ CAMPAIGNMEMBER : "발송 대상 목록"
+    PERSON_ACCOUNT ||--o{ CAMPAIGNMEMBER : "캠페인 참여"
+    CAMPAIGN ||--o{ NOTIFICATION_LOG__C : "캠페인으로 발송"
+    PERSON_ACCOUNT ||--o{ NOTIFICATION_LOG__C : "안내 수신"
+
+    ORDER ||--o{ CASE : "관련 문의"
+```
+
+| Parent | Child | Cardinality | Meaning |
+|---|---|---|---|
+| Contact (Player) | Person Account (Fan) | 1:N | 한 선수는 여러 팬의 "최애 선수"가 될 수 있다 |
+| Contact (Player) | Product2 (Goods) | 1:N | 한 선수는 여러 굿즈에 연결될 수 있다 |
+| Contact (Player) | `Engagement_Signal__c` | 1:N | 한 선수는 여러 관심 신호에 등장할 수 있다 |
+| Product2 | PricebookEntry | 1:N | 한 상품은 여러 가격(좌석 등급별 등)을 가질 수 있다 |
+| PricebookEntry | OrderItem | 1:N | 한 가격 기준이 여러 주문 항목에 적용된다 |
+| Person Account (Fan) | Order | 1:N | 한 팬은 여러 번 구매한다 |
+| Person Account (Fan) | OrderItem | 1:N | 팬은 (양도로) 다른 팬 티켓의 현재 소유자가 될 수 있다 |
+| `Game__c` | Order | 1:N | 한 경기에 여러 티켓 주문이 발생한다 |
+| Order | OrderItem | 1:N | 표준 Master-Detail |
+| Person Account (Fan) | `Admission__c` | 1:N | 한 팬은 여러 번 입장한다 |
+| `Game__c` | `Admission__c` | 1:N | 한 경기에 여러 입장 기록이 쌓인다 |
+| OrderItem | `Admission__c` | 1:N | 티켓 1건으로 입장 기록이 생긴다 |
+| Person Account (Fan) | `Attendance_Record__c` | 1:1 | 팬당 누적 집계 레코드는 1건 |
+| Person Account (Fan) | `Recommendation__c` | 1:N | 한 팬에게 여러 추천이 쌓인다 |
+| `Recommendation__c` | `Benefit__c` | 1:N | 추천 하나가 혜택 발급으로 이어질 수 있다 |
+| Person Account (Fan) | `Benefit__c` | 1:N | 한 팬은 여러 혜택을 받을 수 있다 |
+| Person Account (Fan) | `Fan_Activity_Pattern__c` | 1:N | 시즌/기간별로 여러 건 쌓일 수 있다 |
+| Person Account (Fan) | `Fan_Segment_History__c` | 1:N | Segment가 바뀔 때마다 이력이 쌓인다 |
+| Person Account (Fan) | `Engagement_Signal__c` | 1:N | 관심 신호가 여러 번 기록된다 |
+| Campaign | CampaignMember | 1:N | 표준 발송 대상 목록 |
+| Person Account (Fan) | CampaignMember | 1:N | 한 팬이 여러 캠페인에 속할 수 있다 |
+| Campaign | `Notification_Log__c` | 1:N | 캠페인 하나로 여러 건이 발송된다 |
+| Person Account (Fan) | `Notification_Log__c` | 1:N | 한 팬에게 여러 안내가 쌓인다(Fan Timeline) |
+| Order | Case | 1:N | 한 거래에 여러 문의가 달릴 수 있다 |
+
+> Campaign이 Fan Meeting(01_PROJECT.md §6.1 제안)까지 표현할지는 아직 팀 결정이
+> 없어 이 표에 넣지 않았다 — 확정되면 이 표와 위 erDiagram에 한 줄을 추가한다.
+
 ---
 
 ## 4. Flow 설계
@@ -425,6 +497,25 @@ flowchart TD
     B -- No --> F["아무 동작 없음"]
 ```
 
+### 4.6 아직 정의되지 않은 Trigger — 구현 전 확정 필요
+
+§4.2 표의 Flow 중 "경과 시간"이나 "누적값"을 조건으로 삼는 Flow는, **그 값을 누가
+언제 계산해서 채워 넣는지**가 아직 정의되어 있지 않다. Record-Triggered Flow는
+레코드가 생성·수정될 때만 실행되는데, "가입 후 7일 경과"나 "무활동 90일" 같은
+조건은 아무 레코드 변경 없이도 시간이 지나면 참이 되기 때문이다.
+
+| Flow | 빠진 부분 |
+|---|---|
+| First Ticket Campaign (2번) | "가입 후 7일 경과"를 누가 매일 검사하는가 |
+| First Merchandise Campaign (4번) | "관람했지만 굿즈 미구매" 상태를 언제 검사하는가 |
+| VIP 후보 감지 (6번) | 트리거 조건인 `Fan_Activity_Pattern__c` 자체를 **누가 갱신하는가** — 이 계산 Flow가 없다 |
+| Win-back Campaign (7번) | "무활동 90일"을 누가 매일 검사하는가 |
+
+**구현 전 결정할 것**: 매일 정해진 시간에 도는 Scheduled-Triggered Flow(가칭
+"Daily Fan Analytics Refresh") 1개를 새로 설계해, `Fan_Activity_Pattern__c` 재계산과
+위 4개 Flow의 조건 검사를 여기서 함께 처리할지 팀이 확정한다. 이 Flow의 실행
+시각에 맞춰 `04_DEMO.md` §5 Sample Data의 날짜도 역산해서 만들어야 한다.
+
 ---
 
 ## 5. Future Scope
@@ -442,3 +533,5 @@ flowchart TD
 | Marketing Consent 이력 Object | Marketing Cloud 도입, 감사 요구 | Decision 004 |
 | Renewal Object | 갱신 임박 자동 알림·캠페인 | Decision 004 |
 | Sponsor/Partner 전체 Object군 | 스폰서십·파트너십 관리 기능 확장 | Decision 005 |
+| Apex (Batch/Scheduled) | `Fan_Activity_Pattern__c` 재계산 등이 Flow로 감당하기 느려질 만큼 팬 수가 늘어날 때 | §4.6 |
+| Apex (Recommendation 우선순위 로직) | 여러 NBA 조건이 동시에 겹쳐 Flow Decision으로는 정리가 안 될 때 | §4.6 |
