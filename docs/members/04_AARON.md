@@ -2,9 +2,12 @@
 
 > **"이루키의 이야기가 청중에게 설득력 있게 전달되도록 만든다."**
 
-아론은 Cloud Alpacas의 Demo Lead / Business Analyst다. Demo Story와 발표 시나리오를
-설계하고, Demo에 필요한 Sample/Dummy Data를 기획한다. Salesforce가 만든 결과물이
-"그래서 팬에게 어떤 의미인지"를 발표로 옮기는 역할이다.
+아론은 Cloud Alpacas의 Business Analyst / Demo Experience Lead다. 완성된 결과를
+검사하는 사람이 아니라, **Sara와 함께 Customer Journey를 설계하고, Business Story를
+다듬으며, Demo가 가장 자연스럽게 전달되도록 만드는 사람**이다(02_TEAM_GUIDE.md §1).
+Object나 Field를 먼저 찾지 않고, Business Story를 먼저 만들고 그 Story에 필요한
+Object를 함께 찾는다 — CLAUDE.md §3 Business First 철학을 가장 앞장서서 실천하는
+역할이다.
 
 ---
 
@@ -21,14 +24,18 @@
 
 # Role
 
-Demo Lead / Business Analyst. Demo Story·발표 시나리오 설계와 Sample/Dummy Data
-기획을 담당한다.
+Business Analyst / Demo Experience Lead. Customer Journey와 Business Story를
+설계하고, 그 Story가 Demo Experience로 자연스럽게 이어지도록 만든다.
 
 ---
 
 # Responsibility
 
-- `04_DEMO.md`의 Scene 구조와 발표 시나리오(멘트 포함) 작성·유지
+- Happy Path 설계 — 이루키가 신규 팬에서 충성 팬으로 성장하는 여정을 구체적인
+  단계로 정리
+- Business Story 보완, Business Flow 검토 — Sara가 정리한 Domain Model이 실제
+  이야기와 맞는지 함께 확인
+- `04_DEMO.md`의 Scene 구조와 발표 시나리오(멘트 포함) 작성·유지, Demo Experience 설계
 - `docs/data/SAMPLE_DATA.md`, `docs/data/DEMO_DATASETS.md`의 실제 더미 데이터 기획
 - Recommendation·Notification Log의 문구(어떤 메시지를 보낼지) 기획
 - 발표 리허설 주도
@@ -62,7 +69,7 @@ Object를 직접 구축하지는 않지만(승우 담당), 아래는 **콘텐츠
 
 # Owned Screens
 
-Recommendation Panel의 **문구·콘텐츠** — 화면 UX는 Sara, 구현은 승우, 문구는 아론.
+Recommendation Panel의 **문구·콘텐츠** — 화면 UX는 Sara, 구현은 혜준, 문구는 아론.
 
 ---
 
@@ -143,7 +150,7 @@ Task와 진행 상황은 GitHub Projects에서 관리한다.
    깊게 이해한다.
 2. Customer 360 이해: `03_SYSTEM.md` §3(ERD)으로 데이터가 어떻게 연결되는지 알아야
    Sample Data를 앞뒤가 맞게 기획할 수 있다.
-3. Salesforce 구현: Demo에서 클릭할 화면의 실제 동작을 승우와 함께 미리 손에 익힌다.
+3. Salesforce 구현: Demo에서 클릭할 화면의 실제 동작을 혜준과 함께 미리 손에 익힌다.
 
 ---
 

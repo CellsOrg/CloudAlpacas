@@ -26,6 +26,105 @@ Decision 003~006), 여기서는 "왜 그렇게 정했는지"를 반복하지 않
 
 ---
 
+## 0-1. MVP Implementation Matrix
+
+> **"이 Entity는 이번에 구현하나요?"** 팀원이 이 질문을 할 때 가장 먼저 펼쳐봐야 하는
+> 표다. 01_PROJECT.md §4의 Business Entity 전체를 기준으로, MVP 포함 여부와 최종
+> 구현 방식을 한 페이지로 요약한다. 이유(Why)는 `05_DECISIONS.md`의 결정을 한 줄로
+> 압축한 것이며, 자세한 배경은 표에 적힌 Decision 번호로 `05_DECISIONS.md`에서 찾아
+> 읽는다(CLAUDE.md §7 중복 방지 — 이 표는 `05_DECISIONS.md`를 대체하지 않고 요약만
+> 한다).
+>
+> **범례** — MVP: ✅ 포함 / ⛔ 제외(Future Scope) / 🔸 해당 없음(레코드 불필요).
+> 구현 방식: `표준 Object` · `Custom Object` · `Field` · `Flow 로직` · `Report/Dashboard` ·
+> `Future Scope`.
+
+### 👤 Person
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Fan | ✅ | 표준 Object — Person Account | B2C 개인 고객이 직접 구매·이용의 주체(Decision 004) |
+| Player | ✅ | 표준 Object — Contact (RecordType=Player) | 표준 기능으로 충분(01_PROJECT.md §6.1) |
+| Staff | ✅ | 표준 Object — User | 별도 설계 불필요 |
+| Partner Contact | ⛔ | Future Scope | Sponsorship/Partnership Domain 전체 제외(Decision 005) |
+
+### 🏢 Organization
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Cloud Alpacas | 🔸 | 해당 없음 | 내부 조직 자체는 레코드로 만들지 않음 |
+| Sponsor | ⛔ | Future Scope | Decision 005 |
+| Partner | ⛔ | Future Scope | Decision 005 |
+
+### 🎫 Product
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Ticket / Season Pass / Membership / Goods | ✅ | 표준 Object — Product2 (RecordType) | 표준 판매 구조가 이미 검증되어 있음(Decision 003) |
+| Collaboration Item | ⛔ | Future Scope | Partnership Domain 제외(Decision 005) |
+| Benefit | ✅ | Custom Object — `Benefit__c` | 마케팅/멤버십/굿즈 공통 혜택, Recommendation의 결과물(Decision 006) |
+
+### ⚙️ Policy & Eligibility
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Ticket Policy | ✅ | 표준 Object — Price Book Entry | 좌석 등급별 Product2 + 표준 가격 기능으로 충분(Decision 003) |
+| Membership Tier | ✅ | Field — Product2.`Tier__c` + Price Book Entry | 등급도 Product2 RecordType 안에서 표현(Decision 003, 03_SYSTEM.md §2.3) |
+| Sponsorship Package | ⛔ | Future Scope | Decision 005 |
+| Eligibility Rule | ✅ | Flow 로직 (Object 없음) | 규칙 종류가 적고 자주 안 바뀜(Decision 004) |
+
+### ⚾ Event
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Game | ✅ | Custom Object — `Game__c` | 표준 Object 없음(03_SYSTEM.md §1.2) |
+| Campaign | ✅ | 표준 Object — Campaign/CampaignMember | Marketing 관점에서 그대로 재사용(01_PROJECT.md §6.1) |
+| Fan Meeting | ✅ | 표준 Object — Campaign 재사용 (별도 구현 없음) | 01_PROJECT.md §6.1 제안대로 Campaign으로 흡수. **주의**: 04_DEMO.md에 아직 별도 Scene이 없다 — 실제로 쓰일지 팀 확인 필요 |
+
+### 💰 Transaction
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Ticket Purchase / Goods Purchase / Membership Enrollment | ✅ | 표준 Object — Order/OrderItem (`Order_Type__c`로 구분) | 셀프서비스형 거래에 적합(Decision 003) |
+| Ticket Transfer | ✅ | Field — OrderItem.`Current_Owner__c`/`Transfer_Status__c` | 양도가 핵심 비즈니스가 아니고 이력 추적이 이번 범위 밖(Decision 004) |
+| Admission | ✅ | Custom Object — `Admission__c` | "몇 번 왔는가"와 "언제 왔는가"를 구분해야 함(01_PROJECT.md §3.1) |
+| Shipment | ⛔ | Future Scope | 이 프로젝트의 목적은 물류가 아니라 Customer 360(Decision 006) |
+| Return | ⛔ | Future Scope | Decision 006 |
+| Benefit Redemption | ⛔ | Future Scope (Field로 대체) | `Benefit__c.Status__c`(Issued/Used/Expired)로 충분(Decision 006) |
+| Renewal | ⛔ | Future Scope (Field로 대체) | Order.`Membership_Status__c`/`Membership_End_Date__c` 상태 전이로 충분(Decision 004) |
+| Proposal / Sponsor Contract / Settlement | ⛔ | Future Scope | Sponsorship/Partnership Domain 제외(Decision 005) |
+
+### 📍 Location
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Ballpark | ⛔ | Future Scope | 단일 홈구장 MVP — 별도 Object 불필요(Decision 006) |
+| Section / Seat | ✅ | Field — OrderItem.`Section__c`/`Row__c`/`Seat_Number__c` | 구매 시점 정보이며 필드만으로 충분(Decision 006) |
+| Gate | ✅ | Field — `Admission__c.Gate__c` | 입장 시점 정보(Decision 006) |
+| Partner Store | ⛔ | Future Scope | Partnership Domain 제외(Decision 005) |
+
+### 💬 Service
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Inquiry | ✅ | 표준 Object — Case | 표준 문의 처리 기능으로 충분(01_PROJECT.md §6.1) |
+| Notification | ✅ | Custom Object — `Notification_Log__c` | Fan Timeline의 핵심 데이터, 발송 이력이 남아야 함(Decision 006) |
+| Marketing Consent | ✅ | Field — Person Account.`Email/SMS/Push/Kakao_Opt_In__c` | 감사(Audit) 목적 이력 추적이 이번 범위 밖(Decision 004) |
+
+### 📊 Analytics
+
+| Business Entity | MVP | 구현 방식 | Why |
+|---|---|---|---|
+| Attendance Record | ✅ | Custom Object — `Attendance_Record__c` | Admission 여러 건을 집계한 분석 결과, 자동화 트리거로 필요(Decision 003) |
+| Engagement Signal | ✅ | Custom Object — `Engagement_Signal__c` | 구매 이전 관심 신호를 기록(Decision 003) |
+| Fan Activity Pattern | ✅ | Custom Object — `Fan_Activity_Pattern__c` | VIP 후보 감지 Flow의 트리거 근거(Decision 003) |
+| Fan Segment | ✅ | Custom Object — `Fan_Segment_History__c` + Field(`Current_Segment__c` 캐시) | "언제 상태가 바뀌었는지"가 자동화의 근거(Decision 003) |
+| Recommendation | ✅ | Custom Object — `Recommendation__c` | 시스템이 생성한 Next Best Action 결과물(01_PROJECT.md §3.1) |
+| Campaign Performance | ✅ | Report/Dashboard (Object 없음) | Marketing 관점 집계만 필요, 별도 저장 불필요(01_PROJECT.md §6.1) |
+| Sponsor Performance | ⛔ | Future Scope | Partnership Domain 제외(Decision 005) |
+
+---
+
 ## 1. Object 전체 지도
 
 ### 1.1 표준 Object를 그대로 쓰는 것

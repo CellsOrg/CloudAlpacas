@@ -5,7 +5,7 @@
 > 시간순으로 따라가는 시나리오 데이터는 `DEMO_DATASETS.md`를 참고한다(CLAUDE.md §7
 > 중복 방지 — 같은 값을 두 문서에 쓰지 않는다).
 >
-> 담당: 아론(Demo Lead / Business Analyst), 검증: 혜준(`02_TEAM_GUIDE.md` §2).
+> 담당: 아론(Business Analyst / Demo Experience Lead), 검증: 혜준(`02_TEAM_GUIDE.md` §2).
 > Object/Field 정의 근거는 `03_SYSTEM.md`를 따른다.
 
 ---

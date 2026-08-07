@@ -152,7 +152,7 @@ CloudAlpacas/
 │   │   ├── README.md
 │   │   ├── 00_SARA.md
 │   │   ├── 01_SEUNGWOO.md
-│   │   ├── 02_EUNYOUNG.md
+│   │   ├── 02_EUNYEONG.md
 │   │   ├── 03_HYEJUN.md
 │   │   └── 04_AARON.md
 │   │

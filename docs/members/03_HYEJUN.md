@@ -2,8 +2,13 @@
 
 > **"Demo 당일, 화면이 예상대로 정확하게 동작한다는 것을 보장한다."**
 
-혜준은 Cloud Alpacas의 Platform Lead / QA Lead다. Salesforce Org 환경(Sandbox,
-배포)을 관리하고, 데이터와 화면이 설계대로 정확하게 동작하는지 검증한다.
+혜준은 Cloud Alpacas의 Salesforce Experience Lead / QA Lead다. **Salesforce를
+직원들이 편하게 사용할 수 있도록 만드는 사람** — 자동차에 비유하면 운전하기 편하도록
+내부를 완성하고 품질을 확인하는 역할이다(02_TEAM_GUIDE.md §1-1). 승우가 만든 데이터
+구조 위에 화면(Lightning Page/App), 권한, Navigation을 완성해 김매니저 같은 실제
+직원이 쓸 수 있는 시스템으로 만들고, 설계대로 정확하게 동작하는지 검증한다. Salesforce
+Admin 자격증을 보유하고 있어 Platform(화면·권한) 영역뿐 아니라 운영(Admin: QA·UAT·
+배포) 영역도 함께 담당한다.
 
 ---
 
@@ -19,15 +24,19 @@
 
 # Role
 
-Platform Lead / QA Lead. Org 환경 관리와 테스트·QA를 담당한다.
+Salesforce Experience Lead / QA Lead. Customer 360을 직원이 쓰기 좋은 화면·권한
+구조로 완성하고, 설계대로 동작하는지 검증한다.
 
 ---
 
 # Responsibility
 
+- Fan 360 Dashboard 등 4개 화면의 Lightning Page/App 구현, Navigation, Dynamic Page 구성
+- Permission Set, Sharing 설정 — 누가 어떤 데이터를 볼 수 있는지 관리
+- Report/Dashboard 구성 — Campaign Performance 등 집계 화면
 - Sandbox 환경 준비 및 관리, Phase 1→2 브랜치 전략에 맞춘 배포 지원
   (`02_TEAM_GUIDE.md` §4)
-- `03_SYSTEM.md`에 정의된 Object/Field/Flow가 설계대로 동작하는지 검증
+- `03_SYSTEM.md`에 정의된 Object/Field/Flow가 설계대로 동작하는지 QA·UAT
 - 분석성 Object(`Attendance_Record__c`, `Fan_Activity_Pattern__c`)의 데이터 정합성
   확인 — 예: 관람 횟수가 실제 Admission 건수와 맞는지
 - Demo 리허설에서 발생하는 오류 발견 및 재현 시나리오 정리
@@ -36,6 +45,7 @@ Platform Lead / QA Lead. Org 환경 관리와 테스트·QA를 담당한다.
 
 # Deliverables
 
+- Fan 360 Dashboard 등 4개 화면의 Lightning Page/App 구현
 - QA 이슈 목록(GitHub Projects에서 관리, Label로 구분)
 - Demo 백업 환경(녹화 영상 재생 포함) 점검 결과
 
@@ -60,7 +70,8 @@ Log, Slack 알림)가 트리거 조건과 맞게 생성되는지 검증한다.
 
 # Owned Screens
 
-Fan 360 Dashboard 등 4개 화면 — **QA 담당** (UX 설계는 Sara, 구현은 승우)
+Fan 360 Dashboard, Fan Profile, Fan Timeline, Recommendation Panel — **구현 + QA**
+담당 (UX 설계는 Sara, 화면이 쓰는 Object/Field 데이터 연동은 승우와 협업)
 
 ---
 
@@ -78,15 +89,16 @@ Fan 360 Dashboard 등 4개 화면 — **QA 담당** (UX 설계는 Sara, 구현�
 
 ### Week 2 — MVP Completion
 
-- **이번 주 목표**: 구축된 Object/Flow/화면을 실제 시나리오로 검증한다(목표:
-  2026-08-14).
+- **이번 주 목표**: 4개 화면(Lightning Page)을 구현하고, 구축된 Object/Flow/화면을
+  실제 시나리오로 검증한다(목표: 2026-08-14).
 - **왜 이 작업을 하는가**: Demo 당일 오류가 나오면 안 된다 — 미리 발견해야 한다.
-- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: `04_DEMO.md`의 8개 Scene을 한 번씩
-  직접 재현해본 QA 결과.
-- **누구와 협업해야 하는가**: 승우(이슈 수정), 아론(Sample Data 요구사항 확인).
+- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: 4개 화면 구현 완료, `04_DEMO.md`의
+  8개 Scene을 한 번씩 직접 재현해본 QA 결과.
+- **누구와 협업해야 하는가**: 승우(화면이 쓰는 데이터 연동, 이슈 수정), 아론(Sample
+  Data 요구사항 확인).
 - **먼저 읽어야 하는 문서**: `04_DEMO.md` §3, §5(Sample Data 요구사항).
-- **추천 구현 순서**: Scene 순서대로 재현 → 이슈 기록(GitHub Projects) → 승우에게
-  전달.
+- **추천 구현 순서**: 화면 구현 → Scene 순서대로 재현 → 이슈 기록(GitHub Projects) →
+  승우에게 전달.
 
 ### Week 3 — Future Scope
 
@@ -146,7 +158,8 @@ Task와 진행 상황은 GitHub Projects에서 관리한다.
 
 # 🤝 협업 포인트
 
-- **승우**: 발견한 QA 이슈를 구체적인 재현 시나리오와 함께 전달한다.
-- **Sara**: 화면 UX가 실제 사용성과 맞는지 QA 관점에서 피드백을 준다.
+- **승우**: 화면 구현에 필요한 Object/Field를 미리 맞추고, 발견한 QA 이슈를 구체적인
+  재현 시나리오와 함께 전달한다.
+- **Sara**: 화면 UX 설계를 넘겨받아 구현하고, 실제 사용성 피드백을 준다.
 - **은영**: Fan App이 만든 데이터가 시간 순서 등에서 자연스러운지 확인한다.
 - **아론**: Demo Scene 순서와 필요한 Sample Data를 미리 공유받는다.

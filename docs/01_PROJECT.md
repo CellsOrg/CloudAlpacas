@@ -327,7 +327,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | Engagement Signal | SNS 반응 등 관심 신호 | Fan / Marketing |
 | Fan Activity Pattern | 팬의 시즌별 활동 패턴 | Fan |
 | **Fan Segment** `신규` | 특정 기준으로 묶인 팬 그룹 | Marketing |
-| **Recommendation** `신규` | 팬별 맞춤 상품 추천 결과 | Marketing / Operations |
+| **Recommendation** `신규` | 팬에게 제안할 개인화 Action | Marketing / Operations |
 | Campaign Performance | 캠페인 성과 | Marketing / Partnership |
 | Sponsor Performance | 스폰서십 성과 | Partnership |
 

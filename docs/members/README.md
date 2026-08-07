@@ -40,10 +40,10 @@ Task·체크리스트·진행률을 관리하는 문서는 아니다.
 | 문서 | 담당 |
 |---|---|
 | [`00_SARA.md`](./00_SARA.md) | Sara — PM / Solution Architect / Product Designer |
-| [`01_SEUNGWOO.md`](./01_SEUNGWOO.md) | 승우 — Salesforce Admin Lead |
-| [`02_EUNYOUNG.md`](./02_EUNYOUNG.md) | 은영 — Developer Lead / Team Lead |
-| [`03_HYEJUN.md`](./03_HYEJUN.md) | 혜준 — Platform Lead / QA Lead |
-| [`04_AARON.md`](./04_AARON.md) | 아론 — Demo Lead / Business Analyst |
+| [`01_SEUNGWOO.md`](./01_SEUNGWOO.md) | 승우 — Salesforce Builder |
+| [`02_EUNYEONG.md`](./02_EUNYEONG.md) | 은영 — Developer Lead / Team Lead |
+| [`03_HYEJUN.md`](./03_HYEJUN.md) | 혜준 — Salesforce Experience Lead / QA Lead |
+| [`04_AARON.md`](./04_AARON.md) | 아론 — Business Analyst / Demo Experience Lead |
 
 역할 정의 자체(누가 무엇을 담당하는가)의 유일한 진실(Single Source of Truth)은 **`02_TEAM_GUIDE.md`**이다.
 

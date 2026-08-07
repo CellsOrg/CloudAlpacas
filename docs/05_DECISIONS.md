@@ -301,3 +301,64 @@ Object/Field 설계에 착수하기 전 4개의 세부 항목이 더 남아 있�
 - 좌석 정보 필드는 "언제 시점의 정보인가"에 따라 두 곳으로 나뉜다 — 좌석 배정(Section,
   Row, Seat Number)은 구매 시점 정보라 **OrderItem**에, 실제 입장 게이트(Gate)는 입장
   시점 정보라 **Admission**에 둔다. 이 구분은 03_SYSTEM.md에서 필드 단위로 설명한다.
+
+---
+
+## Decision 007 — 팀 역할 재정의: 직함을 "무엇을 만드는 사람인가"로 다시 표현
+
+**상태**: 확정
+**기록일**: 2026-08-07
+
+### 배경
+
+기존 직함(Salesforce Admin Lead, Platform Lead / QA Lead, Demo Lead / Business
+Analyst)은 Salesforce를 처음 접하는 Baby Team에게 "이 사람이 정확히 무엇을 하는
+사람인지" 바로 와닿지 않았다. 특히 Business Analyst 역할이 "Demo Lead"라는 이름
+때문에 완성된 결과를 마지막에 검사하는 사람처럼 오해되기 쉬웠고, 승우와 혜준의
+역할 경계(누가 화면을 만드는가)도 명확하지 않았다.
+
+### 결정
+
+팀원 직함과 책임 범위를 아래와 같이 재정의한다.
+
+| 담당자 | 기존 직함 | 새 직함 |
+|---|---|---|
+| 승우 | Salesforce Admin Lead | **Salesforce Builder** |
+| 혜준 | Platform Lead / QA Lead | **Salesforce Experience Lead / QA Lead** |
+| 아론 | Demo Lead / Business Analyst | **Business Analyst / Demo Experience Lead** |
+
+직함 변경과 함께 아래 책임도 재배분한다.
+
+- **화면(Lightning Page/App) 구현**은 승우(Salesforce Builder)에서 **혜준(Salesforce
+  Experience Lead)**으로 이동한다 — "데이터 구조를 만드는 것"과 "그 구조를 직원이 쓰기
+  좋게 완성하는 것"은 서로 다른 책임이라는 점을 직함에 정확히 반영하기 위함이다. 승우는
+  화면이 참조하는 Object/Field가 정확한 데이터를 갖도록 지원하는 역할로 남는다.
+  혜준은 Salesforce Admin 자격증을 보유하고 있어 Platform(화면·권한) 영역과 운영(Admin:
+  QA·UAT·배포) 영역을 함께 담당한다.
+- **아론(Business Analyst)**의 역할은 "완성된 결과를 검증하는 사람"이 아니라 "Customer
+  Journey와 Business Story를 함께 설계하고, Demo가 자연스럽게 전달되도록 만드는 사람"
+  으로 명확히 표현한다. Object나 Field를 먼저 찾지 않고 Business Story를 먼저 만든 뒤
+  그 Story에 필요한 Object를 함께 찾는 순서(CLAUDE.md §3 Business First)는 그대로
+  유지된다 — 바뀐 것은 표현 방식이지 실제 작업 순서가 아니다.
+- 은영님의 로마자 표기를 "Eunyoung"에서 **"Eunyeong"**으로 통일한다 — 온보딩 문서
+  파일명도 `02_EUNYOUNG.md`에서 `02_EUNYEONG.md`로 변경한다.
+
+### 이유
+
+- CLAUDE.md §6은 Claude와 팀 모두에게 "어려운 용어를 먼저 사용하지 않는다"를 요구한다
+  — 직함도 예외가 아니다. "이 사람이 자동차의 어느 부분을 만드는가"라는 비유
+  (02_TEAM_GUIDE.md §1-1)로 설명하면 Salesforce 경험이 없어도 즉시 이해할 수 있다.
+- 다섯 역할이 Sara(무엇을 만들지) → 아론(이야기가 자연스러운지) → 승우(데이터 구조) →
+  혜준(직원이 쓰기 좋은 환경) → 은영(실제 동작)의 순서로 연결된다는 것
+  (02_TEAM_GUIDE.md §1-2)을 직함에서도 드러내야 "내 일이 왜 필요한지"가 분명해진다.
+- 실제 작업 범위(Responsibility)는 바뀌지 않았다 — Object/Field/Flow 구조는 여전히
+  승우가, Business Story·Demo는 여전히 아론이 이끈다. 이번 결정은 **표현과 책임 경계를
+  명확히 하는 리팩토링**이며, MVP 범위나 Object 설계를 바꾸지 않는다.
+
+### 영향
+
+- `02_TEAM_GUIDE.md`(SSOT)와 `docs/members/*.md` 전체가 이 표를 기준으로 갱신되었다.
+- `02_TEAM_GUIDE.md` §2(Object/Flow/Screen 담당) 표의 화면 담당 행이 "혜준(구현·QA),
+  승우(데이터 연동 지원)"으로 바뀌었다.
+- 이후 팀원 역할이 다시 바뀌면 이 Decision처럼 배경/결정/이유/영향을 기록한 뒤
+  `02_TEAM_GUIDE.md`를 먼저 고치고 `docs/members/*.md`를 맞춘다(CLAUDE.md §7).

@@ -66,7 +66,7 @@ Flow 구축은 승우가 담당한다. Sara는 Flow의 **트리거 조건과 로
 # Owned Screens
 
 - Fan 360 Dashboard, Fan Profile, Fan Timeline, Recommendation Panel — UX 설계
-  (구현은 승우, QA는 혜준과 협업 — `02_TEAM_GUIDE.md` §2 참고)
+  (구현·QA는 혜준, 데이터 연동은 승우와 협업 — `02_TEAM_GUIDE.md` §2 참고)
 
 ---
 
@@ -93,9 +93,10 @@ Flow 구축은 승우가 담당한다. Sara는 Flow의 **트리거 조건과 로
   가능한 상태여야 한다.
 - **이번 주가 끝났을 때 완성되어 있어야 하는 것**: 4개 핵심 화면이 실제 데이터로 동작,
   Demo Scene 4개(Core)가 리허설 가능한 상태.
-- **누구와 협업해야 하는가**: 승우(구현 진행 상황 확인), 아론(Demo 시나리오 검증).
+- **누구와 협업해야 하는가**: 승우(Object/Flow 구현 진행 상황 확인), 혜준(화면 구현
+  진행 상황 확인), 아론(Demo 시나리오 검증).
 - **먼저 읽어야 하는 문서**: `04_DEMO.md`.
-- **추천 구현 순서**: 화면 UX 확정 → 승우의 구현 리뷰 → Demo 리허설 참여.
+- **추천 구현 순서**: 화면 UX 확정 → 혜준의 화면 구현 리뷰 → Demo 리허설 참여.
 
 ### Week 3 — Future Scope
 

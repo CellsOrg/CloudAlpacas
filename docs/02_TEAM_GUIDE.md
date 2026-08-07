@@ -15,23 +15,73 @@
 | 담당자 | 역할 | 온보딩 문서 |
 |---|---|---|
 | Sara | PM / Solution Architect / Product Designer | [`members/00_SARA.md`](./members/00_SARA.md) |
-| 승우 | Salesforce Admin Lead | [`members/01_SEUNGWOO.md`](./members/01_SEUNGWOO.md) |
-| 은영 | Developer Lead / Team Lead | [`members/02_EUNYOUNG.md`](./members/02_EUNYOUNG.md) |
-| 혜준 | Platform Lead / QA Lead | [`members/03_HYEJUN.md`](./members/03_HYEJUN.md) |
-| 아론 | Demo Lead / Business Analyst | [`members/04_AARON.md`](./members/04_AARON.md) |
+| 승우 | Salesforce Builder | [`members/01_SEUNGWOO.md`](./members/01_SEUNGWOO.md) |
+| 은영 | Developer Lead / Team Lead | [`members/02_EUNYEONG.md`](./members/02_EUNYEONG.md) |
+| 혜준 | Salesforce Experience Lead / QA Lead | [`members/03_HYEJUN.md`](./members/03_HYEJUN.md) |
+| 아론 | Business Analyst / Demo Experience Lead | [`members/04_AARON.md`](./members/04_AARON.md) |
 
 각 역할이 프로젝트 전체에서 어떤 영역을 책임지는지는 아래와 같다. **구체적으로 어떤
 Object/Flow/화면을 담당하는지**는 각자의 온보딩 문서(`docs/members/*.md`)에서 개인
 관점으로 더 자세히 풀어 설명한다 — 아직 개인 문서가 작성되지 않았다면(CLAUDE.md §8
 "이번 마지막 단계"), 이 표의 역할 정의를 기준으로 작성한다.
 
-| 역할 | 책임 영역 |
-|---|---|
-| PM / Solution Architect / Product Designer | Business Goal·Persona·Domain Model 정의(00~01_PROJECT.md), Salesforce Object 설계 전체 방향(03_SYSTEM.md), 화면 UX, 프로젝트 문서(Source of Truth) 관리 |
-| Salesforce Admin Lead | Object/Field/권한/Flow를 실제 Org에 구축, 데이터 모델 구현, 자동화(Flow) 운영 |
-| Developer Lead / Team Lead | Demo Fan App(`cloudalpacas-fan-app`) 개발, Salesforce-Fan App 연동, 팀 개발 일정 조율 |
-| Platform Lead / QA Lead | Org 환경 관리(Sandbox/배포), 테스트 데이터·시나리오 검증, 배포 전 QA |
-| Demo Lead / Business Analyst | Demo Story(04_DEMO.md)와 발표 시나리오 설계, Sample/Dummy Data 기획, 발표 리허설 |
+| 역할 | Mission | 책임 영역 |
+|---|---|---|
+| PM / Solution Architect / Product Designer | 어떤 자동차를 만들지 결정한다 | Business Goal·Persona·Domain Model 정의(00~01_PROJECT.md), Salesforce Object 설계 전체 방향(03_SYSTEM.md), 화면 UX, 프로젝트 문서(Source of Truth) 관리 |
+| Business Analyst / Demo Experience Lead | 고객이 정말 원하는 자동차인지, 운전 경험이 자연스러운지 설계한다 | Happy Path 설계, Business Story 보완, Business Flow 검토, Demo Story(04_DEMO.md) 작성, Demo Experience 설계, Sample/Dummy Data 기획 |
+| Salesforce Builder | 자동차의 프레임과 엔진을 만든다 | Object/Field/Relationship/Record Type/Validation Rule 설계, 핵심 Business Flow 구축, 실제 Org에 Metadata 구현 |
+| Salesforce Experience Lead / QA Lead | 운전하기 편하도록 내부를 완성하고, 품질을 확인한다 | Permission Set·Sharing·Lightning App·Navigation·Dynamic Page·Report·Dashboard 구성(Platform), QA·UAT·배포 검증(Admin 운영) |
+| Developer Lead / Team Lead | 자동차에 실제 기능을 넣는다 | Demo Fan App(`cloudalpacas-fan-app`) 개발, Salesforce-Fan App 연동, 팀 개발 일정 조율 |
+
+> **왜 Business Analyst를 "검증하는 사람"으로 설명하지 않나?** 아론은 완성된 결과를
+> 검사하는 사람이 아니라, Sara·전체 팀과 함께 Customer Journey를 설계하고 Business
+> Story를 다듬으며, Demo가 가장 자연스럽게 전달되도록 만드는 사람이다. Object나 Field를
+> 먼저 찾지 않고 **Business Story를 먼저 만들고, 그 Story에 필요한 Object를 함께
+> 찾는다** — 이 순서 자체가 CLAUDE.md §3 Business First 철학과 정확히 맞닿아 있다.
+
+> **왜 혜준을 "Platform Lead"가 아니라 "Salesforce Experience Lead"로 부르나?** 혜준의
+> 역할은 "Org 환경을 관리하는 사람"에 머무르지 않는다 — **완성된 Customer 360을 김매니저
+> 같은 실제 직원이 편하게 쓸 수 있도록 만드는 사람**이다. 혜준은 Salesforce Admin
+> 자격증을 보유하고 있어, 화면·권한 설계(Platform)뿐 아니라 QA·배포 같은 운영(Admin)
+> 영역도 함께 담당한다.
+
+---
+
+## 1-1. 자동차 비유로 보는 팀 역할
+
+Salesforce를 처음 접하는 사람도 한 번에 이해할 수 있도록, Cloud Alpacas라는 "자동차"를
+함께 만든다고 생각해보자.
+
+| 담당자 | 자동차 비유 | 실제 역할 |
+|---|---|---|
+| Sara | **어떤 자동차를 만들지 결정하는 사람** | PM / Solution Architect |
+| 아론 | **고객이 정말 원하는 자동차인지, 운전 경험이 자연스러운지 설계하는 사람** | Business Analyst / Demo Experience Lead |
+| 승우 | **자동차의 프레임과 엔진을 만드는 사람** | Salesforce Builder |
+| 혜준 | **운전하기 편하도록 내부를 완성하고, 품질을 확인하는 사람** | Salesforce Experience Lead / QA |
+| 은영 | **자동차에 실제 기능을 넣는 사람** | Developer |
+
+---
+
+## 1-2. 만드는 순서 — 이 흐름이 곧 Business First다
+
+다섯 역할은 순서 없이 각자 흩어져 일하는 것이 아니라, 아래 순서로 서로 연결된다. 내
+작업이 앞사람의 무엇을 이어받고, 뒷사람에게 무엇을 넘겨주는지 알면 "내 일이 왜
+필요한지"가 훨씬 분명해진다.
+
+```mermaid
+flowchart TD
+    S["Sara<br/>무엇을 만들 것인가?"] --> A["아론<br/>이 이야기가 자연스러운가?"]
+    A --> W["승우<br/>데이터 구조를 만든다"]
+    W --> H["혜준<br/>직원들이 쓰기 좋은 환경을 만든다"]
+    H --> E["은영<br/>실제로 동작하게 만든다"]
+```
+
+> **왜 이 순서인가?** Salesforce 기능부터 만들면 나중에 "왜 이 Object가 필요한지"
+> 설명할 수 없다(CLAUDE.md §3 Business First). 그래서 Business(Sara)와 Story(아론)가
+> 먼저 확정되고, 그다음 그 Story에 필요한 데이터 구조(승우)가 만들어지고, 그 구조를
+> 직원이 실제로 쓸 수 있는 화면·권한(혜준)으로 다듬고, 마지막으로 그 화면에 흘러들어갈
+> 실제 이벤트 데이터를 은영이 Fan App으로 만들어낸다. 화살표가 거꾸로 가는 일(예: 승우가
+> 먼저 Object를 만들고 나중에 왜 필요한지 찾는 것)은 이 프로젝트에서 지양한다.
 
 ---
 
@@ -43,7 +93,7 @@ Object/Flow/화면을 담당하는지**는 각자의 온보딩 문서(`docs/memb
 
 | Object / Flow / Screen | 구축 담당 | 함께 하는 사람 |
 |---|---|---|
-| Person Account(Fan), Contact(Player), Product2, PricebookEntry | 승우 (Admin Lead) | Sara (설계 검토) |
+| Person Account(Fan), Contact(Player), Product2, PricebookEntry | 승우 (Salesforce Builder) | Sara (설계 검토) |
 | Order / OrderItem, Case | 승우 | — |
 | `Game__c`, `Admission__c`, `Benefit__c` | 승우 | 은영 (Fan App에서 Admission 생성 연동) |
 | `Notification_Log__c` | 승우 (구축) | 아론 (발송 콘텐츠 기획) |
@@ -51,7 +101,7 @@ Object/Flow/화면을 담당하는지**는 각자의 온보딩 문서(`docs/memb
 | `Attendance_Record__c`, `Fan_Activity_Pattern__c` | 승우 (구축) | 혜준 (데이터 정합성 QA) |
 | `Fan_Segment_History__c`, `Recommendation__c` | 승우 (구축) | 아론 (추천 로직·문구 기획) |
 | Flow 전체(Welcome Campaign, VIP 후보 감지 등 — 03_SYSTEM.md §4) | 승우 | Sara (로직 설계), 아론 (NBA 문구) |
-| Fan 360 Dashboard, Fan Profile, Fan Timeline, Recommendation Panel (화면) | Sara (UX 설계) | 승우 (Lightning Page 구현), 혜준 (QA) |
+| Fan 360 Dashboard, Fan Profile, Fan Timeline, Recommendation Panel (화면) | Sara (UX 설계) | 혜준 (Lightning Page/Dynamic Page 구현 · QA), 승우 (Object/Field 데이터 연동 지원) |
 | Slack 알림 연동 | 승우 | 은영 |
 | Demo Fan App (`cloudalpacas-fan-app`) | 은영 | 아론 (Demo 시나리오 요구사항 전달) |
 | Sample/Dummy Data (`docs/data/`) | 아론 | 혜준 (데이터 검증) |

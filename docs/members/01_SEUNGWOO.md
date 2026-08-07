@@ -2,8 +2,10 @@
 
 > **"설계된 Object와 Flow를 실제로 동작하는 Salesforce Org로 만든다."**
 
-승우는 Cloud Alpacas의 Salesforce Admin Lead다. Sara가 설계한 Object/Field/Flow를
-실제 Org에 구축하고, 팀이 "이 화면이 진짜 동작하네"라고 믿을 수 있게 만드는 역할이다.
+승우는 Cloud Alpacas의 Salesforce Builder다. **Salesforce 안의 데이터 구조를 만드는
+사람** — 자동차에 비유하면 프레임과 엔진을 만드는 역할이다(02_TEAM_GUIDE.md §1-1). Sara와
+아론이 확정한 Business Story를 실제 Object/Field/Flow로 Org에 구축하고, 팀이 "이 화면이
+진짜 동작하네"라고 믿을 수 있게 만든다.
 
 ---
 
@@ -20,7 +22,8 @@
 
 # Role
 
-Salesforce Admin Lead. Object/Field/권한/Flow를 실제로 구축하고 운영한다.
+Salesforce Builder. Salesforce 안의 데이터 구조(Object/Field/Relationship)와 핵심
+Business Flow를 실제로 만든다.
 
 ---
 
@@ -38,7 +41,8 @@ Salesforce Admin Lead. Object/Field/권한/Flow를 실제로 구축하고 운영
 
 - 실제로 동작하는 Salesforce Org (`force-app/` 하위 Metadata)
 - `03_SYSTEM.md` §4에 정의된 Flow 전체
-- Fan 360 Dashboard 등 4개 화면의 Lightning Page 구현
+- 4개 화면(Fan 360 Dashboard 등)이 정확한 데이터를 보여주도록 Object/Field 연동 지원
+  (화면 자체의 구현은 혜준 담당)
 
 ---
 
@@ -65,8 +69,8 @@ Salesforce Admin Lead. Object/Field/권한/Flow를 실제로 구축하고 운영
 
 # Owned Screens
 
-- Fan 360 Dashboard, Fan Profile, Fan Timeline, Recommendation Panel — **구현** 담당
-  (UX 설계는 Sara, QA는 혜준)
+해당 없음 — 화면 구현은 혜준(Salesforce Experience Lead)이 담당한다(02_TEAM_GUIDE.md
+§2). 승우는 화면이 참조하는 Object/Field가 정확한 데이터를 갖도록 뒷받침한다.
 
 ---
 
@@ -91,12 +95,12 @@ Salesforce Admin Lead. Object/Field/권한/Flow를 실제로 구축하고 운영
 - **왜 이 작업을 하는가**: `02_TEAM_GUIDE.md` Phase 1 마감 — Demo가 실제로 동작해야
   한다.
 - **이번 주가 끝났을 때 완성되어 있어야 하는 것**: `03_SYSTEM.md` §1.2의 Custom
-  Object 9개, §4의 Flow 전체, 4개 화면의 Lightning Page.
-- **누구와 협업해야 하는가**: 은영(Fan App 연동 테스트), 혜준(QA), 아론(Sample Data
-  적재).
+  Object 9개, §4의 Flow 전체, 4개 화면이 필요로 하는 데이터 연동.
+- **누구와 협업해야 하는가**: 은영(Fan App 연동 테스트), 혜준(화면 구현·QA), 아론
+  (Sample Data 적재).
 - **먼저 읽어야 하는 문서**: `03_SYSTEM.md` §3(ERD), §4(Flow).
-- **추천 구현 순서**: Custom Object 구축 → Flow 구축 → Slack 연동 → 화면 구성 →
-  Sample Data로 End-to-End 테스트.
+- **추천 구현 순서**: Custom Object 구축 → Flow 구축 → Slack 연동 → 혜준과 화면
+  데이터 연동 확인 → Sample Data로 End-to-End 테스트.
 
 ### Week 3 — Future Scope
 
@@ -160,5 +164,6 @@ Task와 진행 상황은 GitHub Projects에서 관리한다.
 - **Sara**: 새 Object/Field가 필요할 때 먼저 "왜 필요한가"를 확인한다.
 - **은영**: Fan App이 만드는 이벤트(Admission, Engagement Signal 등)가 Salesforce에
   정확히 들어오는지 함께 테스트한다.
-- **혜준**: Sandbox 환경과 QA 이슈를 주기적으로 공유받는다.
+- **혜준**: Sandbox 환경과 QA 이슈를 주기적으로 공유받고, 혜준이 구현하는 화면이
+  필요로 하는 Object/Field를 미리 맞춘다.
 - **아론**: Sample Data를 언제, 어떤 형식으로 적재하면 되는지 미리 조율한다.
