@@ -1,40 +1,51 @@
 # Mission
 
-> **"이루키의 행동을 실제 데이터로 만들어, Salesforce가 보여줄 이야기를 채운다."**
+> **"표준 기능으로 안 되는 모든 것을, 코드로 만들어 실제로 동작하게 한다."**
 
-은영은 Cloud Alpacas의 Developer Lead / Team Lead다. Demo Fan App
-(`cloudalpacas-fan-app`)을 개발해 티켓 구매·체크인·굿즈 구매 같은 팬의 행동을
-이벤트로 만들고, 그 데이터가 Salesforce로 정확히 전달되게 한다. 동시에 팀 전체의
-개발 일정을 조율한다.
+은영은 Cloud Alpacas의 **Developer Lead**다. 설계된 Customer 360을 실제로 동작하는
+제품으로 만드는 사람 — Demo Fan App, 그리고 Salesforce 표준 기능만으로 해결이 안
+되는 화면 부품(LWC)과 로직(Apex), 외부 시스템 연동(Slack 등)을 코드로 만든다.
+동시에 팀 전체의 개발 일정을 조율한다.
+
+**원칙은 하나다: Salesforce 표준 기능을 먼저 쓰고, 표준으로 안 될 때만
+개발한다.** Decision 003이 Object 설계에 적용한 "Standard First, Custom When
+Needed" 원칙을 코드 레벨까지 그대로 확장한 것이다(Decision 008).
 
 ---
 
 # Quick Start
 
-1. `CLAUDE.md` §5 — Fan App이 "이번 프로젝트의 주인공이 아니라 Demo용 채널"이라는
-   점을 먼저 이해한다.
-2. `00_STORY.md` §5 — 이루키의 Customer Journey(SNS→가입→티켓→직관→굿즈→재방문→
-   멤버십)가 곧 Fan App이 만들어야 할 이벤트 목록이다.
-3. `03_SYSTEM.md` §2 — Fan App이 만든 이벤트가 어떤 Object(Order, Admission,
-   Engagement Signal 등)로 들어가는지 확인한다.
-4. `02_TEAM_GUIDE.md` §2 — Repository 구조(별도 저장소)와 담당 범위를 확인한다.
+1. `CLAUDE.md` §5, §6 — Fan App이 "이번 프로젝트의 주인공이 아니라 Demo용
+   채널"이라는 점, 그리고 Agentforce가 이번 MVP 범위 밖이라는 점을 먼저
+   확인한다.
+2. `00_STORY.md` §5 — 이루키의 Customer Journey가 곧 Fan App이 만들어야 할
+   이벤트 목록이다.
+3. `05_DECISIONS.md` Decision 003, 008 — "언제 표준으로 충분하고, 언제 직접
+   개발해야 하는가"의 판단 기준.
+4. `03_SYSTEM.md` §2, §4.6 — Fan App 이벤트가 들어갈 Object, 그리고 아직
+   누가 계산할지 정해지지 않은 로직(Apex 후보)을 확인한다.
+5. `02_TEAM_GUIDE.md` §2 — Repository 구조와 담당 범위를 확인한다.
 
 ---
 
 # Role
 
-Developer Lead / Team Lead. Demo Fan App 개발과 Salesforce 연동, 팀 개발 일정 조율을
-담당한다.
+Developer Lead. Salesforce 표준 기능으로 해결되지 않는 부분(Fan App, LWC, Apex,
+외부 연동)을 코드로 만든다. 팀 개발 일정도 조율한다.
 
 ---
 
 # Responsibility
 
-- `cloudalpacas-fan-app` 저장소 개발 (회원가입, 티켓 구매, 체크인, 굿즈 구매 등 이벤트
-  생성)
-- Fan App 이벤트를 Salesforce Object(Order, `Admission__c`, `Engagement_Signal__c`
-  등)로 정확히 전달(API 또는 Dummy Data 연동)
-- 팀 전체 개발 일정 조율(Phase 1/2 마감 기준 — `02_TEAM_GUIDE.md` §8)
+- `cloudalpacas-fan-app` 개발 (로그인, 티켓 구매, 굿즈 구매, QR 체크인 등)
+- LWC 개발 — **표준 컴포넌트로 부족할 때만** (Recommendation Panel, Fan Timeline
+  등에 들어가는 위젯)
+- Apex 개발 — **Flow로 안 되는 복잡한 로직만** (`03_SYSTEM.md` §4.6 후보 참고)
+- Salesforce API 연동 (Fan App → Salesforce 데이터 전달)
+- Slack 연동 아키텍처 (App/Webhook 설정, 메시지 Payload 형식)
+- 🔵 Agentforce (Fan Summary, Next Best Action 설명 등) — CLAUDE.md §5에 따라
+  이번 MVP 범위 밖. 지금 만들지 않는다
+- 팀 전체 개발 일정 조율 (`02_TEAM_GUIDE.md` §8)
 
 ---
 
@@ -42,6 +53,7 @@ Developer Lead / Team Lead. Demo Fan App 개발과 Salesforce 연동, 팀 개발
 
 - `cloudalpacas-fan-app` 저장소(Demo용 이벤트 생성기)
 - Fan App ↔ Salesforce 연동 가이드(API 또는 Dummy Data 주입 방식)
+- 필요해진 경우에만: LWC 컴포넌트, Apex 클래스, Slack 연동 설정 문서
 
 ---
 
@@ -58,14 +70,19 @@ Object를 직접 구축하지는 않지만(승우 담당), 아래 Object에 **�
 
 # Owned Flows
 
-해당 없음 — Flow 구축은 승우 담당이다. 다만 Flow의 Trigger가 되는 **원본 이벤트
-데이터**를 Fan App에서 만들어낸다는 점에서 간접적으로 연결된다.
+해당 없음 — Flow 구축은 승우 담당이다. 다만 **Flow가 감당하지 못하는 복잡한
+로직**은 은영이 Apex로 만든다(표준 우선 원칙 — `03_SYSTEM.md` §4.6에 이미 후보로
+기록된 항목이 실제 대상이다). 무엇을 Flow로 두고 무엇을 Apex로 옮길지는 승우와
+함께 판단한다.
 
 ---
 
 # Owned Screens
 
-해당 없음 — Fan App은 화면이 있지만 Customer 360 화면이 아니라 Demo용 영상 소재다
+Customer 360 화면(Lightning Page 레이아웃) 자체는 해당 없음 — 혜준(Salesforce
+Experience Lead) 담당이다. 다만 **표준 컴포넌트로 부족한 부분**은 은영이 LWC로
+코드를 만들고, 혜준이 그 부품을 화면에 조립한다(예: Recommendation Panel의 커스텀
+카드, VIP Badge). Fan App 화면은 Customer 360이 아니라 Demo용 영상 소재다
 (04_DEMO.md §1).
 
 ---
@@ -88,23 +105,28 @@ Object를 직접 구축하지는 않지만(승우 담당), 아래 Object에 **�
 ### Week 2 — MVP Completion
 
 - **이번 주 목표**: Fan App에서 만든 이벤트가 Salesforce에 정확히 들어가는 것까지
-  완성한다(목표: 2026-08-14).
+  완성한다(목표: 2026-08-14). Flow만으로 안 되는 부분이 있다면 승우와 함께 Apex
+  필요 여부를 판단한다(`03_SYSTEM.md` §4.6).
 - **왜 이 작업을 하는가**: Demo Scene(04_DEMO.md)이 실제 데이터를 기반으로 재현되어야
   한다.
 - **이번 주가 끝났을 때 완성되어 있어야 하는 것**: 8개 Scene에 필요한 이벤트가 모두
-  Fan App → Salesforce로 연결된 상태.
-- **누구와 협업해야 하는가**: 승우(연동 테스트), 아론(Demo Scene 순서 확인).
-- **먼저 읽어야 하는 문서**: `04_DEMO.md` §3(Scene 상세).
-- **추천 구현 순서**: 이벤트 생성 로직 완성 → 승우와 연동 테스트 → 영상 촬영용
-  화면(있다면) 정리.
+  Fan App → Salesforce로 연결된 상태. Slack 연동 아키텍처(App/Webhook) 완료.
+- **누구와 협업해야 하는가**: 승우(연동 테스트, Flow-Apex 경계 판단), 혜준(표준
+  컴포넌트로 부족한 화면 요소가 있으면 LWC 필요 여부 협의), 아론(Demo Scene 순서
+  확인).
+- **먼저 읽어야 하는 문서**: `04_DEMO.md` §3(Scene 상세), `03_SYSTEM.md` §4.6.
+- **추천 구현 순서**: 이벤트 생성 로직 완성 → 승우와 연동 테스트 → Slack 연동
+  → (필요시) LWC/Apex 개발 → 영상 촬영용 화면 정리.
 
 ### Week 3 — Future Scope
 
-- **이번 주 목표**: 확장 시나리오(Sponsorship 등)에 필요한 이벤트가 있는지 검토한다.
+- **이번 주 목표**: 확장 시나리오(Sponsorship 등)에 필요한 이벤트가 있는지
+  검토하고, Agentforce로 확장한다면 어떤 형태일지 초안을 그려본다.
 - **왜 이 작업을 하는가**: MVP 이후 방향을 팀과 맞춘다.
-- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: 필요 시 이벤트 확장 초안.
+- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: 필요 시 이벤트 확장 초안,
+  Agentforce 활용 아이디어 메모(구현 아님).
 - **누구와 협업해야 하는가**: Sara.
-- **먼저 읽어야 하는 문서**: `05_DECISIONS.md` Decision 005.
+- **먼저 읽어야 하는 문서**: `05_DECISIONS.md` Decision 005, 008.
 - **추천 구현 순서**: Sara·아론의 시나리오 논의에 참여 후 필요한 이벤트만 추가.
 
 ### Week 4 — Polish
@@ -131,7 +153,8 @@ Object를 직접 구축하지는 않지만(승우 담당), 아래 Object에 **�
 # Related Documents
 
 - `00_STORY.md` §5 — Fan App이 재현해야 할 Customer Journey.
-- `03_SYSTEM.md` §2 — 이벤트가 들어갈 Object/Field.
+- `03_SYSTEM.md` §2, §4.6 — 이벤트가 들어갈 Object/Field, 그리고 Apex 후보.
+- `05_DECISIONS.md` Decision 003, 008 — "표준 우선, 필요할 때만 개발" 판단 기준.
 - `04_DEMO.md` — Fan App 영상 파트가 필요한 Scene 목록.
 
 ---
@@ -145,16 +168,21 @@ Task와 진행 상황은 GitHub Projects에서 관리한다.
 # Learning Path
 
 1. Business 이해: `00_STORY.md`의 Customer Journey를 이벤트 목록으로 바꿔본다.
-2. Customer 360 이해: 내가 만든 이벤트가 Fan Timeline에서 어떻게 보이는지
+2. 판단 기준 이해: `05_DECISIONS.md` Decision 003·008로 "언제 표준으로 충분하고
+   언제 직접 개발해야 하는지"부터 익힌다 — LWC/Apex를 배우기 전에 먼저 잡아야
+   하는 감각이다.
+3. Customer 360 이해: 내가 만든 이벤트가 Fan Timeline에서 어떻게 보이는지
    `03_SYSTEM.md` §3(ERD)로 확인한다.
-3. Salesforce 구현: Salesforce API 연동 기초(Object에 레코드를 만드는 방법)를
+4. Salesforce 구현: Salesforce API 연동 기초(Object에 레코드를 만드는 방법)를
    승우와 함께 익힌다.
 
 ---
 
 # 🤝 협업 포인트
 
-- **승우**: Object/Field API 이름을 맞추고, 연동 테스트를 함께 진행한다.
+- **승우**: Object/Field API 이름을 맞추고, Flow와 Apex의 경계(무엇을 Flow로
+  두고 무엇을 Apex로 옮길지)를 함께 판단한다.
 - **Sara**: Fan App이 재현하는 이야기가 Demo Story와 어긋나지 않는지 확인한다.
-- **혜준**: 생성된 이벤트 데이터의 정합성(날짜 순서 등)을 함께 검증한다.
+- **혜준**: 표준 컴포넌트로 부족한 화면 요소가 있으면 LWC로 만들어 전달하고,
+  생성된 이벤트 데이터의 정합성(날짜 순서 등)을 함께 검증한다.
 - **아론**: Demo Scene에 맞는 영상 소재 요구사항을 전달받는다.

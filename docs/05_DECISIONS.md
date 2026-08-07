@@ -362,3 +362,59 @@ Analyst)은 Salesforce를 처음 접하는 Baby Team에게 "이 사람이 정확
   승우(데이터 연동 지원)"으로 바뀌었다.
 - 이후 팀원 역할이 다시 바뀌면 이 Decision처럼 배경/결정/이유/영향을 기록한 뒤
   `02_TEAM_GUIDE.md`를 먼저 고치고 `docs/members/*.md`를 맞춘다(CLAUDE.md §7).
+
+---
+
+## Decision 008 — 은영의 역할 명확화: "연동 담당"이 아니라 "커스텀 개발 전체" 담당
+
+**상태**: 확정
+**기록일**: 2026-08-07
+
+### 배경
+
+기존 은영의 역할 설명(Decision 007 이전부터)은 "Demo Fan App 개발과 Salesforce
+연동"에만 초점이 맞춰져 있었다. 하지만 실제로 Developer Lead가 필요한 이유는
+"Fan App만 만들기 위해서"가 아니라, **Salesforce 표준 기능(Flow, 표준 화면 등)만으로
+해결이 안 되는 부분을 코드로 만들기 위해서**다 — LWC, Apex, 외부 시스템 연동
+아키텍처가 전부 여기 포함된다. "연동"이라는 좁은 표현이 이 역할의 진짜 크기를
+가리고 있었다.
+
+### 결정
+
+은영의 역할을 **Developer Lead**로 명확히 하고, 책임 범위를 아래와 같이 확장한다.
+
+| 영역 | 내용 | 원칙 |
+|---|---|---|
+| Fan App | Demo MVP Fan App 개발(로그인, 티켓/굿즈 구매, QR 체크인 등) | 기존과 동일 |
+| LWC | 표준 컴포넌트로 부족할 때 커스텀 Lightning Web Component 개발 | **표준 우선** — 화면 레이아웃 조립(Lightning Page)은 혜준(Salesforce Experience Lead)이 하고, 그 안에 들어가는 개별 커스텀 부품만 은영이 코드로 만든다 |
+| Apex | Flow로 처리하기 어려운 복잡한 로직만 개발 | **Flow 우선**(Decision 003의 "Standard First, Custom When Needed"를 코드 레벨로 확장) — `03_SYSTEM.md` §4.6에 이미 후보로 기록된 항목(예: `Fan_Activity_Pattern__c` 재계산)이 실제 대상이다 |
+| Salesforce API 연동 | Fan App → Salesforce 데이터 전달 | 기존과 동일 |
+| Slack 연동 | Slack App/Webhook 설정과 메시지 Payload 형식 | 은영이 기술 아키텍처를 주도하고, Flow 안에서 이를 호출하는 것은 승우가 담당한다(`02_TEAM_GUIDE.md` §2 갱신) |
+| Agentforce | Fan Summary, Next Best Action 설명 등 | **🔵 Future Scope** — CLAUDE.md §5에 따라 이번 MVP 범위 밖이다. 은영의 장기 역할에는 포함하되, 지금 만들지 않는다 |
+
+**베이비 팀을 위한 한 줄 원칙**: "Salesforce 표준 기능을 먼저 쓰고, 표준으로 안 될
+때만 개발한다." — Fan App을 제외한 모든 영역(LWC/Apex/Agentforce)에 이 원칙을
+그대로 적용한다.
+
+### 이유
+
+- Decision 003이 Object 설계에 적용한 "표준 우선, 필요할 때만 확장" 원칙을 코드
+  레벨(LWC/Apex)까지 일관되게 확장하면, Baby Team이 "언제 Apex를 써도 되는가"를
+  매번 새로 고민하지 않고 같은 기준으로 판단할 수 있다.
+- Agentforce를 완전히 빼지 않고 "은영의 스킬셋"으로는 남겨둔 이유는, MVP 이후
+  Future Scope로 확장할 때 누가 이 작업을 맡을지 미리 명확히 해두기 위해서다 —
+  다만 CLAUDE.md §5가 이미 MVP 범위 밖으로 명시했으므로, 지금 당장의 Responsibility로
+  포함하지는 않는다.
+- Slack 연동의 소유권을 "은영 주도, 승우 보조"로 재정리한 것은, Webhook/Payload
+  설계가 Flow 로직보다 코드/API 성격이 강해 Developer Lead의 책임 범위와 더
+  자연스럽게 맞기 때문이다.
+
+### 영향
+
+- `02_TEAM_GUIDE.md` §1의 Developer Lead 책임 영역 설명과 §2의 Slack 연동 담당
+  행이 이 표를 기준으로 갱신되었다.
+- `docs/members/02_EUNYEONG.md`가 이 표를 기준으로 갱신되었다 — Owned Flows(Apex
+  후보 언급), Owned Screens(LWC와 혜준의 화면 조립 관계) 섹션이 함께 바뀌었다.
+- Agentforce 관련 작업은 이후 팀이 MVP 범위를 공식적으로 넓히기로 결정할 때
+  별도 Decision으로 다시 다룬다 — 이번 Decision은 "누가 맡을지"만 미리 정해둔
+  것이지, MVP 범위 자체를 넓히는 결정이 아니다.

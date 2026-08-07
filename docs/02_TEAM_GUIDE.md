@@ -31,7 +31,7 @@ Object/Flow/화면을 담당하는지**는 각자의 온보딩 문서(`docs/memb
 | Business Analyst / Demo Experience Lead | 고객이 정말 원하는 자동차인지, 운전 경험이 자연스러운지 설계한다 | Happy Path 설계, Business Story 보완, Business Flow 검토, Demo Story(04_DEMO.md) 작성, Demo Experience 설계, Sample/Dummy Data 기획 |
 | Salesforce Builder | 자동차의 프레임과 엔진을 만든다 | Object/Field/Relationship/Record Type/Validation Rule 설계, 핵심 Business Flow 구축, 실제 Org에 Metadata 구현 |
 | Salesforce Experience Lead / QA Lead | 운전하기 편하도록 내부를 완성하고, 품질을 확인한다 | Permission Set·Sharing·Lightning App·Navigation·Dynamic Page·Report·Dashboard 구성(Platform), QA·UAT·배포 검증(Admin 운영) |
-| Developer Lead / Team Lead | 자동차에 실제 기능을 넣는다 | Demo Fan App(`cloudalpacas-fan-app`) 개발, Salesforce-Fan App 연동, 팀 개발 일정 조율 |
+| Developer Lead / Team Lead | 자동차에 실제 기능을 넣는다 | Demo Fan App(`cloudalpacas-fan-app`) 개발, LWC/Apex 커스텀 개발(표준으로 안 될 때만), Salesforce API·Slack 연동 아키텍처, 팀 개발 일정 조율. Agentforce는 🔵 Future Scope(Decision 008) |
 
 > **왜 Business Analyst를 "검증하는 사람"으로 설명하지 않나?** 아론은 완성된 결과를
 > 검사하는 사람이 아니라, Sara·전체 팀과 함께 Customer Journey를 설계하고 Business
@@ -44,6 +44,15 @@ Object/Flow/화면을 담당하는지**는 각자의 온보딩 문서(`docs/memb
 > 같은 실제 직원이 편하게 쓸 수 있도록 만드는 사람**이다. 혜준은 Salesforce Admin
 > 자격증을 보유하고 있어, 화면·권한 설계(Platform)뿐 아니라 QA·배포 같은 운영(Admin)
 > 영역도 함께 담당한다.
+
+> **왜 은영을 "연동 담당"이 아니라 "Developer Lead"로 다시 설명하나?** 은영의 역할을
+> "Fan App 개발과 Salesforce 연동"으로만 설명하면, Developer Lead가 필요한 진짜 이유
+> (표준 기능만으로 안 되는 부분을 코드로 만드는 것)가 가려진다. LWC·Apex·연동
+> 아키텍처까지가 은영의 책임 범위다 — 다만 원칙은 항상 같다: **"Salesforce 표준
+> 기능을 먼저 쓰고, 표준으로 안 될 때만 개발한다."** Decision 003이 Object에 적용한
+> 원칙을 코드 레벨까지 확장한 것뿐이다(Decision 008). Agentforce는 CLAUDE.md §5에
+> 따라 이번 MVP 범위 밖(🔵 Future Scope)이라, 은영의 장기 역할에는 포함하되 지금
+> 만들지는 않는다.
 
 ---
 
@@ -102,7 +111,9 @@ flowchart TD
 | `Fan_Segment_History__c`, `Recommendation__c` | 승우 (구축) | 아론 (추천 로직·문구 기획) |
 | Flow 전체(Welcome Campaign, VIP 후보 감지 등 — 03_SYSTEM.md §4) | 승우 | Sara (로직 설계), 아론 (NBA 문구) |
 | Fan 360 Dashboard, Fan Profile, Fan Timeline, Recommendation Panel (화면) | Sara (UX 설계) | 혜준 (Lightning Page/Dynamic Page 구현 · QA), 승우 (Object/Field 데이터 연동 지원) |
-| Slack 알림 연동 | 승우 | 은영 |
+| Slack 연동 아키텍처(App/Webhook/Payload) | 은영 (Decision 008) | 승우 (Flow에서 호출) |
+| LWC(표준 컴포넌트로 부족할 때만) | 은영 (구현) | 혜준 (화면 레이아웃에 조립) |
+| Apex(Flow로 안 될 때만 — 03_SYSTEM.md §4.6) | 은영 (구현) | 승우 (Flow와의 경계 판단) |
 | Demo Fan App (`cloudalpacas-fan-app`) | 은영 | 아론 (Demo 시나리오 요구사항 전달) |
 | Sample/Dummy Data (`docs/data/`) | 아론 | 혜준 (데이터 검증) |
 | Sandbox/배포 환경 관리, QA | 혜준 | 승우 |
