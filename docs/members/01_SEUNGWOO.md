@@ -1,0 +1,164 @@
+# Mission
+
+> **"설계된 Object와 Flow를 실제로 동작하는 Salesforce Org로 만든다."**
+
+승우는 Cloud Alpacas의 Salesforce Admin Lead다. Sara가 설계한 Object/Field/Flow를
+실제 Org에 구축하고, 팀이 "이 화면이 진짜 동작하네"라고 믿을 수 있게 만드는 역할이다.
+
+---
+
+# Quick Start
+
+1. `CLAUDE.md` — Baby Rule과 MVP 범위부터 확인한다.
+2. `00_STORY.md` — 내가 만드는 Object가 어떤 Business 문제를 푸는지 감을 잡는다.
+3. `03_SYSTEM.md` — **가장 많이 보게 될 문서.** Object/Field/ERD/Flow 설계가 모두 여기
+   있다.
+4. `05_DECISIONS.md` — Object를 왜 이렇게 설계했는지(특히 Decision 003~006)를 반드시
+   읽는다 — "왜 Custom Object를 안 만들었지?" 같은 질문의 답이 여기 있다.
+
+---
+
+# Role
+
+Salesforce Admin Lead. Object/Field/권한/Flow를 실제로 구축하고 운영한다.
+
+---
+
+# Responsibility
+
+- `03_SYSTEM.md`에 정의된 모든 Object/Field를 Salesforce Org에 구축
+- Price Book/Price Book Entry로 Ticket Policy·Membership Tier 가격 설정
+- Flow 구축 — Welcome Campaign Flow, VIP 후보 감지 Flow 등(03_SYSTEM.md §4)
+- Slack 연동(Flow → Slack 알림 발송) 구축
+- Person Account, Marketing Consent 필드 등 데이터 모델의 정확성 유지
+
+---
+
+# Deliverables
+
+- 실제로 동작하는 Salesforce Org (`force-app/` 하위 Metadata)
+- `03_SYSTEM.md` §4에 정의된 Flow 전체
+- Fan 360 Dashboard 등 4개 화면의 Lightning Page 구현
+
+---
+
+# Owned Objects
+
+- 표준: Person Account(Fan), Contact(Player), Product2, PricebookEntry, Order/
+  OrderItem, Case
+- Custom: `Game__c`, `Admission__c`, `Benefit__c`, `Notification_Log__c`,
+  `Engagement_Signal__c`, `Attendance_Record__c`, `Fan_Activity_Pattern__c`,
+  `Fan_Segment_History__c`, `Recommendation__c`
+
+(`02_TEAM_GUIDE.md` §2 참고 — 이 배정은 제안 상태다.)
+
+---
+
+# Owned Flows
+
+- Welcome Campaign Flow (03_SYSTEM.md §4.4)
+- VIP 후보 감지 Flow (03_SYSTEM.md §4.5)
+- §4.2 Trigger → Action 표의 나머지 Flow(First Ticket Campaign, First Visit Guide,
+  First Merchandise Campaign, Favorite Player Campaign 등)
+
+---
+
+# Owned Screens
+
+- Fan 360 Dashboard, Fan Profile, Fan Timeline, Recommendation Panel — **구현** 담당
+  (UX 설계는 Sara, QA는 혜준)
+
+---
+
+# Weekly Guide
+
+### Week 1 — Foundation
+
+- **이번 주 목표**: Org 기본 설정과 핵심 Object(Person Account, Product2, Order)를
+  먼저 구축한다.
+- **왜 이 작업을 하는가**: 나머지 모든 Custom Object(Admission, Recommendation 등)가
+  이 세 Object를 참조한다 — 순서가 중요하다.
+- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: Person Account 활성화, Product2 +
+  Price Book 기본 데이터, Order/OrderItem 커스텀 필드.
+- **누구와 협업해야 하는가**: Sara(설계 확인), 혜준(Sandbox 환경 준비).
+- **먼저 읽어야 하는 문서**: `03_SYSTEM.md` §2.1~2.4.
+- **추천 구현 순서**: Person Account 활성화 → Product2/PricebookEntry → Order/
+  OrderItem 커스텀 필드.
+
+### Week 2 — MVP Completion
+
+- **이번 주 목표**: 나머지 Custom Object와 Flow를 모두 구축한다(목표: 2026-08-14).
+- **왜 이 작업을 하는가**: `02_TEAM_GUIDE.md` Phase 1 마감 — Demo가 실제로 동작해야
+  한다.
+- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: `03_SYSTEM.md` §1.2의 Custom
+  Object 9개, §4의 Flow 전체, 4개 화면의 Lightning Page.
+- **누구와 협업해야 하는가**: 은영(Fan App 연동 테스트), 혜준(QA), 아론(Sample Data
+  적재).
+- **먼저 읽어야 하는 문서**: `03_SYSTEM.md` §3(ERD), §4(Flow).
+- **추천 구현 순서**: Custom Object 구축 → Flow 구축 → Slack 연동 → 화면 구성 →
+  Sample Data로 End-to-End 테스트.
+
+### Week 3 — Future Scope
+
+- **이번 주 목표**: Sara·아론이 설계한 확장 시나리오(예: Sponsorship)의 구현
+  가능성을 검토한다.
+- **왜 이 작업을 하는가**: MVP가 끝난 뒤에도 Object 구조가 확장 가능한지 확인해야
+  한다.
+- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: 확장 Object에 대한 기술 검토
+  의견.
+- **누구와 협업해야 하는가**: Sara.
+- **먼저 읽어야 하는 문서**: `05_DECISIONS.md` Decision 005.
+- **추천 구현 순서**: 확장 시나리오 검토 → 필요 시 프로토타입 Object 구성.
+
+### Week 4 — Polish
+
+- **이번 주 목표**: 혜준의 QA 피드백을 반영해 Flow/Object를 다듬는다.
+- **왜 이 작업을 하는가**: 발표 전 오류·엣지 케이스를 줄여야 한다.
+- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: QA 이슈가 반영된 안정적인 Org.
+- **누구와 협업해야 하는가**: 혜준.
+- **먼저 읽어야 하는 문서**: 없음(QA 이슈 기반).
+- **추천 구현 순서**: QA 이슈 목록 확인 → 우선순위대로 수정 → 재검증.
+
+### Week 5 — Presentation
+
+- **이번 주 목표**: Demo 리허설을 함께 진행하고, 라이브 클릭 시나리오를 안정화한다.
+- **왜 이 작업을 하는가**: Demo 당일 실수 없이 진행되어야 한다.
+- **이번 주가 끝났을 때 완성되어 있어야 하는 것**: 안정적으로 재현 가능한 라이브
+  클릭 시나리오, 백업 녹화 영상 지원.
+- **누구와 협업해야 하는가**: 아론(Demo 리허설), 혜준(백업 환경 점검).
+- **먼저 읽어야 하는 문서**: `04_DEMO.md`.
+- **추천 구현 순서**: 리허설 참여 → 발견된 이슈 즉시 수정.
+
+---
+
+# Related Documents
+
+- `03_SYSTEM.md` — 매일 참고하는 핵심 문서.
+- `05_DECISIONS.md` — Object 설계 근거.
+- `02_TEAM_GUIDE.md` §2 — Object/Flow/Screen 담당 배정.
+
+---
+
+# GitHub Projects
+
+Task와 진행 상황은 GitHub Projects에서 관리한다.
+
+---
+
+# Learning Path
+
+1. Business 이해: `00_STORY.md`로 "왜 이 Object가 필요한지" 감을 먼저 잡는다.
+2. Customer 360 이해: `01_PROJECT.md` §5(Entity 관계)로 Object들이 서로 어떻게
+   연결되는지 이해한다.
+3. Salesforce 구현: `03_SYSTEM.md`를 Object 하나씩 순서대로 구축하며 익힌다 — Person
+   Account부터 시작해 Custom Object로 넘어가는 순서를 권장한다.
+
+---
+
+# 🤝 협업 포인트
+
+- **Sara**: 새 Object/Field가 필요할 때 먼저 "왜 필요한가"를 확인한다.
+- **은영**: Fan App이 만드는 이벤트(Admission, Engagement Signal 등)가 Salesforce에
+  정확히 들어오는지 함께 테스트한다.
+- **혜준**: Sandbox 환경과 QA 이슈를 주기적으로 공유받는다.
+- **아론**: Sample Data를 언제, 어떤 형식으로 적재하면 되는지 미리 조율한다.
