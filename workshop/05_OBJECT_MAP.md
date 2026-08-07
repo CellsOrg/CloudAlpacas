@@ -254,3 +254,52 @@ FanSegment --> Recommendation
 | Recommendation | Campaign | 추천이 어떤 캠페인으로 이어지는지 알아야 한다 |
 | Fan Activity Pattern | Recommendation | 활동 패턴이 추천의 근거가 된다 |
 | Fan Segment History | Recommendation | 팬 상태 변화가 추천의 근거가 된다 |
+
+---
+
+## 🤔 자주 묻는 질문 (FAQ)
+
+> 아래는 그림만 보고 헷갈리기 쉬운 4가지를 빠르게 짚은 것이다. **"왜 이렇게
+> 설계했는지" 전체 이유(대안 비교 포함)**는 [`06_RELATIONSHIP_GUIDE.md`](./06_RELATIONSHIP_GUIDE.md)에
+> 모아뒀다.
+
+### Fan Activity Pattern은 왜 Order Item과 연결되어 있지 않나요?
+
+Fan Activity Pattern은 거래 기록이 아니라, 여러 팬 활동을 모아 집계한
+**분석 결과**다.
+
+```mermaid
+flowchart TD
+    O[Order] --> FAP["Fan Activity Pattern<br/>(분석 결과)"]
+    A[Attendance] --> FAP
+    M[Membership] --> FAP
+    N[Notification] --> FAP
+    FAP --> REC[Recommendation]
+```
+
+### Product2와 Order Item은 뭐가 다른가요?
+
+| | Product2 | Order Item |
+|---|---|---|
+| 질문 | "우리가 팔 수 있는 게 뭔가?" | "이 팬이 실제로 뭘 샀나?" |
+| 존재 조건 | 구매 여부와 무관하게 존재 | **구매가 일어난 뒤에만** 존재 |
+
+### Recommendation은 왜 Notification과 연결되어 있나요?
+
+Recommendation은 **내부 판단**이고, Notification은 **팬에게 실제로 나가는
+메시지**다.
+
+```mermaid
+flowchart LR
+    REC["Recommendation<br/>(내부 판단)<br/>'멤버십을 제안하자'"] --> NOTI["Notification<br/>(팬에게 발송)<br/>'오늘 가입하면 특별 혜택!'"]
+```
+
+### Admission은 왜 Order와 분리되어 있나요?
+
+Order는 "구매했다"는 뜻이고, Admission은 "실제로 왔다"는 뜻이다 — 팬은 티켓을
+사고도 경기장에 오지 않을 수 있다.
+
+| | Order | Admission |
+|---|---|---|
+| 뜻 | 구매함 | 실제로 옴(게이트 통과) |
+| 항상 같이 일어나나? | 아니오 — 사고 안 올 수도 있다 | |
