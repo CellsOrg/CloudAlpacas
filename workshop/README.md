@@ -17,7 +17,7 @@
   `docs/`에 있다. 오늘 결정이 아키텍처를 바꾸면, 그 다음에 `docs/`를 고친다
   (CLAUDE.md §7).
 
-## 오늘 다루는 4장
+## 오늘 다루는 5장
 
 | 페이지 | 질문 |
 |---|---|
@@ -25,6 +25,7 @@
 | [`02_Objects.md`](./02_Objects.md) | 우리에게 어떤 Object가 필요한가요? |
 | [`03_ERD.md`](./03_ERD.md) | Object들이 서로 어떻게 연결되나요? (오늘 가장 중요한 페이지) |
 | [`04_Tabs.md`](./04_Tabs.md) | 김매니저가 실제로 무엇을 보게 되나요? |
+| [`05_OBJECT_MAP.md`](./05_OBJECT_MAP.md) | 전체 Object가 도메인별로 어떻게 연결되나요? (5분 오리엔테이션용, ERD 아님) |
 
 Salesforce Mapping, Automation(Flow/Apex/연동/Trigger), 필드 설계 같은 구현
 주제는 오늘 워크숍 범위가 아니라서 `docs/03_SYSTEM.md`로 옮겼다 — 궁금하면
