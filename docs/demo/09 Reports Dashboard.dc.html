@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #EFEFEF; }
+  * { box-sizing: border-box; font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+  a { color: #FC4E00; text-decoration: none; }
+  a:hover { color: #D84200; text-decoration: underline; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; background:#EFEFEF; color:#07111F; font-size:12.5px; letter-spacing:-0.1px;">
+  <div style="height:46px; background:#07111F; display:flex; align-items:center; padding:0 14px; gap:14px; flex-shrink:0;">
+    <div style="width:22px; height:22px; border-radius:4px; background:#FC4E00; flex-shrink:0;"></div>
+    <div style="display:flex; align-items:baseline; gap:6px; white-space:nowrap;">
+      <span style="font-weight:800; font-size:14px; color:#FFFFFF;">Cloud Alpacas</span>
+      <span style="font-weight:400; font-size:11px; color:#9AA3AE;">고객 360</span>
+    </div>
+    <div style="flex:1; display:flex; justify-content:center;">
+      <div style="width:400px; max-width:100%; height:28px; background:#131E2E; border:1px solid #263141; border-radius:4px; display:flex; align-items:center; padding:0 10px; color:#8992A0; font-size:12px;">팬, 케이스, 캠페인 검색</div>
+    </div>
+    <div style="width:26px; height:26px; border-radius:50%; background:#FC4E00; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:10.5px; font-weight:700;">김민</div>
+  </div>
+
+    <div style="height:38px; background:#FFFFFF; border-bottom:1px solid #D9D9D9; display:flex; align-items:stretch; padding:0 14px; flex-shrink:0;">
+    <a href="01 Fan 360 Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">대시보드</a>
+    <a href="02 Fan List.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">팬</a>
+    <a href="05 Recommendation Panel.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">추천</a>
+    <a href="06 Game Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">경기</a>
+    <a href="07 Campaign Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">캠페인</a>
+    <a href="08 Case Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">문의</a>
+    <a href="09 Reports Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#07111F; font-weight:700; border-bottom:2.5px solid #FC4E00; cursor:pointer;">리포트</a>
+  </div>
+
+  <div style="background:#FFFFFF; border-bottom:1px solid #D9D9D9; padding:14px 22px; flex-shrink:0;">
+    <h1 style="margin:0; font-size:17px; font-weight:800; letter-spacing:-0.3px;">리포트 대시보드</h1>
+    <div style="font-size:11px; color:#8992A0; margin-top:2px;">팬 성장, 세그먼트, 멤버십, 굿즈 매출 지표</div>
+  </div>
+
+  <div style="flex:1; padding:14px 22px 30px;">
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:14px;">
+
+      <!-- Fan Growth -->
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <div style="width:4px; height:16px; border-radius:2px; background:#FC4E00;"></div>
+          <span style="font-size:14px; font-weight:800;">Fan Growth</span>
+        </div>
+        <div style="display:flex; align-items:flex-end; gap:8px; height:120px; padding:0 4px;">
+          <div style="flex:1; background:#FDE7DC; height:40%; border-radius:3px 3px 0 0;"></div>
+          <div style="flex:1; background:#FDE7DC; height:55%; border-radius:3px 3px 0 0;"></div>
+          <div style="flex:1; background:#FDE7DC; height:50%; border-radius:3px 3px 0 0;"></div>
+          <div style="flex:1; background:#FDE7DC; height:68%; border-radius:3px 3px 0 0;"></div>
+          <div style="flex:1; background:#FDE7DC; height:78%; border-radius:3px 3px 0 0;"></div>
+          <div style="flex:1; background:#FC4E00; height:100%; border-radius:3px 3px 0 0;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:#8992A0; margin-top:6px;">
+          <span>3월</span><span>4월</span><span>5월</span><span>6월</span><span>7월</span><span>8월</span>
+        </div>
+        <div style="margin-top:12px; font-size:12px;">누적 팬 수 <b>8,664명</b> · <span style="color:#1E8A5F; font-weight:700;">▲ 전월 대비 12%</span></div>
+      </div>
+
+      <!-- Segment Distribution -->
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <div style="width:4px; height:16px; border-radius:2px; background:#07111F;"></div>
+          <span style="font-size:14px; font-weight:800;">Segment Distribution</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span>VIP</span><span style="color:#8992A0;">14%</span></div>
+            <div style="height:8px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:14%; height:100%; background:#FC4E00;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span>충성</span><span style="color:#8992A0;">39%</span></div>
+            <div style="height:8px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:39%; height:100%; background:#FC4E00;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span>신규</span><span style="color:#8992A0;">22%</span></div>
+            <div style="height:8px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:22%; height:100%; background:#FC4E00;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span>휴면</span><span style="color:#8992A0;">18%</span></div>
+            <div style="height:8px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:18%; height:100%; background:#B0ADAB;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span>이탈 위험</span><span style="color:#B8360A;">7%</span></div>
+            <div style="height:8px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:7%; height:100%; background:#B8360A;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Membership Conversion -->
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <div style="width:4px; height:16px; border-radius:2px; background:#1E8A5F;"></div>
+          <span style="font-size:14px; font-weight:800;">Membership Conversion</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span>방문</span><span style="color:#8992A0;">10,200명</span></div>
+            <div style="height:14px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:100%; height:100%; background:#0176D3;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span>회원 가입</span><span style="color:#8992A0;">6,120명</span></div>
+            <div style="height:14px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:60%; height:100%; background:#0176D3;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span>멤버십 전환</span><span style="color:#8992A0;">2,850명</span></div>
+            <div style="height:14px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:28%; height:100%; background:#1E8A5F;"></div></div>
+          </div>
+        </div>
+        <div style="margin-top:12px; font-size:12px;">전환율 <b style="color:#1E8A5F;">28%</b></div>
+      </div>
+
+      <!-- Merchandise Sales -->
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <div style="width:4px; height:16px; border-radius:2px; background:#FC4E00;"></div>
+          <span style="font-size:14px; font-weight:800;">Merchandise Sales</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:70px; font-size:11.5px;">유니폼</span>
+            <div style="flex:1; height:10px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:82%; height:100%; background:#FC4E00;"></div></div>
+            <span style="font-size:11.5px; font-weight:700; width:70px; text-align:right;">₩42.1M</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:70px; font-size:11.5px;">모자</span>
+            <div style="flex:1; height:10px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:54%; height:100%; background:#FC4E00;"></div></div>
+            <span style="font-size:11.5px; font-weight:700; width:70px; text-align:right;">₩18.4M</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:70px; font-size:11.5px;">응원수건</span>
+            <div style="flex:1; height:10px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:38%; height:100%; background:#FC4E00;"></div></div>
+            <span style="font-size:11.5px; font-weight:700; width:70px; text-align:right;">₩9.7M</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:70px; font-size:11.5px;">기타 굿즈</span>
+            <div style="flex:1; height:10px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="width:24%; height:100%; background:#FC4E00;"></div></div>
+            <span style="font-size:11.5px; font-weight:700; width:70px; text-align:right;">₩5.2M</span>
+          </div>
+        </div>
+        <div style="margin-top:12px; font-size:12px;">총 매출 <b>₩75.4M</b> · <span style="color:#1E8A5F; font-weight:700;">▲ 전분기 대비 9%</span></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>

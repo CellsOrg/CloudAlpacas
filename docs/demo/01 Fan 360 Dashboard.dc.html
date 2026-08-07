@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #EFEFEF; }
+  * { box-sizing: border-box; font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+  a { color: #FC4E00; text-decoration: none; }
+  a:hover { color: #D84200; text-decoration: underline; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; background:#EFEFEF; color:#07111F; font-size:12.5px; padding-bottom:30px; letter-spacing:-0.1px;">
+
+  <!-- Global Header -->
+  <div style="height:46px; background:#07111F; display:flex; align-items:center; padding:0 14px; gap:14px; flex-shrink:0;">
+    <div style="width:22px; height:22px; border-radius:4px; background:#FC4E00; flex-shrink:0;"></div>
+    <div style="display:flex; align-items:baseline; gap:6px; white-space:nowrap;">
+      <span style="font-weight:800; font-size:14px; color:#FFFFFF;">Cloud Alpacas</span>
+      <span style="font-weight:400; font-size:11px; color:#9AA3AE;">고객 360</span>
+    </div>
+    <div style="flex:1; display:flex; justify-content:center;">
+      <div style="width:400px; max-width:100%; height:28px; background:#131E2E; border:1px solid #263141; border-radius:4px; display:flex; align-items:center; padding:0 10px; color:#8992A0; font-size:12px;">팬, 케이스, 캠페인 검색</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div style="width:26px; height:26px; border-radius:4px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;">
+        <div style="width:14px; height:14px; border:1.5px solid #9AA3AE; border-radius:2px;"></div>
+        <div style="position:absolute; top:4px; right:4px; width:6px; height:6px; border-radius:50%; background:#FC4E00; border:1.5px solid #07111F;"></div>
+      </div>
+      <div style="width:26px; height:26px; border-radius:50%; background:#FC4E00; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:10.5px; font-weight:700;">김민</div>
+    </div>
+  </div>
+
+  <!-- App Nav Bar -->
+    <div style="height:38px; background:#FFFFFF; border-bottom:1px solid #D9D9D9; display:flex; align-items:stretch; padding:0 14px; flex-shrink:0;">
+    <a href="01 Fan 360 Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#07111F; font-weight:700; border-bottom:2.5px solid #FC4E00; cursor:pointer;">대시보드</a>
+    <a href="02 Fan List.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">팬</a>
+    <a href="05 Recommendation Panel.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">추천</a>
+    <a href="06 Game Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">경기</a>
+    <a href="07 Campaign Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">캠페인</a>
+    <a href="08 Case Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">문의</a>
+    <a href="09 Reports Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">리포트</a>
+  </div>
+
+  <!-- Page Header -->
+  <div style="background:#FFFFFF; border-bottom:1px solid #D9D9D9; padding:10px 22px; flex-shrink:0;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:30px; height:30px; border-radius:6px; background:#FC4E00; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <div style="width:11px; height:11px; background:#FFFFFF; border-radius:2px;"></div>
+        </div>
+        <div>
+          <div style="font-size:10.5px; color:#8992A0; line-height:1.2;">대시보드 · Dashboard</div>
+          <h1 style="margin:0; font-size:17px; font-weight:800; line-height:1.3; letter-spacing:-0.2px;">FRM 매니저 대시보드</h1>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:11.5px; color:#8992A0; margin-right:6px;">2026. 8. 7. (목)</span>
+        <button style="height:28px; padding:0 12px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:12.5px; font-weight:600; color:#07111F; cursor:pointer;">새로고침</button>
+        <button style="height:28px; padding:0 14px; background:#FC4E00; border:1px solid #FC4E00; border-radius:4px; font-size:12.5px; font-weight:700; color:#FFFFFF; cursor:pointer;">페이지 편집</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div style="flex:1; padding:14px 22px;">
+
+    <!-- ===== KPI SUMMARY ===== -->
+    <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; margin-bottom:14px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-bottom:1px solid #EFEFEF;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="width:4px; height:16px; border-radius:2px; background:#FC4E00; flex-shrink:0;"></div>
+          <h2 style="margin:0; font-size:14px; font-weight:800;">핵심 지표 요약</h2>
+          <span style="font-size:11px; color:#8992A0; font-weight:400;">KPI Summary</span>
+          <span style="background:#07111F; color:#FFFFFF; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:3px; letter-spacing:0.3px;">P0 · 필수 확인</span>
+        </div>
+        <button onClick="{{ toggleKpi }}" style="border:1px solid #D9D9D9; background:#FFFFFF; width:20px; height:20px; border-radius:50%; font-size:10.5px; font-weight:700; color:#59616B; cursor:pointer; line-height:1;">i</button>
+      </div>
+      <sc-if value="{{ rationaleOpen.kpi }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FFF4EF; padding:9px 16px; font-size:11.5px; color:#3D3226; line-height:1.6; border-bottom:1px solid #D9D9D9; border-left:3px solid #FC4E00;">
+          <div><b>목적:</b> 페이지 진입 즉시 팬 건강도와 업무량을 한눈에 파악하게 한다.</div>
+          <div><b>우선순위:</b> P0 — 대시보드에서 가장 먼저 읽히며 이후 행동(추천/케이스 확인)을 결정한다.</div>
+          <div><b>배치 이유:</b> 전체 폭 카드로 최상단 배치 — Salesforce 요약 지표의 표준 위치.</div>
+        </div>
+      </sc-if>
+      <div style="display:grid; grid-template-columns:repeat(5, 1fr); padding:14px 16px;">
+        <div style="padding:0 14px 0 0; border-right:1px solid #EFEFEF;">
+          <div style="font-size:11px; color:#59616B; margin-bottom:5px;">오늘 조치 필요 팬</div>
+          <div style="font-size:25px; font-weight:800; color:#FC4E00;">23</div>
+          <div style="font-size:11px; color:#FC4E00; margin-top:3px; font-weight:600;">▲ 전일 대비 6명</div>
+        </div>
+        <div style="padding:0 14px; border-right:1px solid #EFEFEF;">
+          <div style="font-size:11px; color:#59616B; margin-bottom:5px;">이탈 위험 팬</div>
+          <div style="font-size:25px; font-weight:800; color:#B8551F;">8</div>
+          <div style="font-size:11px; color:#B8551F; margin-top:3px; font-weight:600;">▲ 금주 2명</div>
+        </div>
+        <div style="padding:0 14px; border-right:1px solid #EFEFEF;">
+          <div style="font-size:11px; color:#59616B; margin-bottom:5px;">신규 팬 (7일)</div>
+          <div style="font-size:25px; font-weight:800; color:#07111F;">142</div>
+          <div style="font-size:11px; color:#1E8A5F; margin-top:3px; font-weight:600;">▲ 전주 대비 18%</div>
+        </div>
+        <div style="padding:0 14px; border-right:1px solid #EFEFEF;">
+          <div style="font-size:11px; color:#59616B; margin-bottom:5px;">진행 중 지원 케이스</div>
+          <div style="font-size:25px; font-weight:800; color:#07111F;">15</div>
+          <div style="font-size:11px; color:#59616B; margin-top:3px;">3건 SLA 임박</div>
+        </div>
+        <div style="padding:0 0 0 14px;">
+          <div style="font-size:11px; color:#59616B; margin-bottom:5px;">평균 최초 응답</div>
+          <div style="font-size:25px; font-weight:800; color:#1E8A5F;">3.2h</div>
+          <div style="font-size:11px; color:#1E8A5F; margin-top:3px; font-weight:600;">▼ 목표 대비 0.4h</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TWO COLUMN LAYOUT ===== -->
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:14px; align-items:start;">
+
+      <!-- LEFT COLUMN -->
+      <div style="display:flex; flex-direction:column; gap:14px;">
+
+        <!-- Today's Recommendations -->
+        <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-bottom:1px solid #EFEFEF;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:4px; height:16px; border-radius:2px; background:#FC4E00; flex-shrink:0;"></div>
+              <h2 style="margin:0; font-size:14px; font-weight:800;">오늘의 추천 조치</h2>
+              <span style="font-size:11px; color:#8992A0; font-weight:400;">Today's Recommendations</span>
+              <span style="background:#EFEFEF; color:#07111F; font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:999px;">23</span>
+              <span style="background:#07111F; color:#FFFFFF; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:3px; letter-spacing:0.3px;">P0 · 필수 확인</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <a href="#" style="font-size:12px; font-weight:600;">전체보기</a>
+              <button onClick="{{ toggleReco }}" style="border:1px solid #D9D9D9; background:#FFFFFF; width:20px; height:20px; border-radius:50%; font-size:10.5px; font-weight:700; color:#59616B; cursor:pointer; line-height:1;">i</button>
+            </div>
+          </div>
+          <sc-if value="{{ rationaleOpen.reco }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#FFF4EF; padding:9px 16px; font-size:11.5px; color:#3D3226; line-height:1.6; border-bottom:1px solid #D9D9D9; border-left:3px solid #FC4E00;">
+              <div><b>목적:</b> 개별 팬 단위의 다음 행동을 제시해 리포트 탐색 없이 바로 실행하게 한다.</div>
+              <div><b>우선순위:</b> P0 — KPI가 알려준 문제에 대한 실행 큐, 매니저의 핵심 업무.</div>
+              <div><b>배치 이유:</b> 넓은 좌측 컬럼(정보 탐색 1순위 영역)에 KPI 바로 아래 배치해 원인과 조치를 붙여 보여준다.</div>
+            </div>
+          </sc-if>
+          <div style="padding:0 16px 10px;">
+            <div style="display:grid; grid-template-columns:1.3fr 0.8fr 1.9fr 0.7fr 0.7fr 0.6fr; gap:8px; padding:9px 4px; font-size:10.5px; font-weight:700; color:#8992A0; border-bottom:1px solid #D9D9D9; letter-spacing:0.2px;">
+              <div>팬</div><div>세그먼트</div><div>사유</div><div>긴급도</div><div>기한</div><div>조치</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1.3fr 0.8fr 1.9fr 0.7fr 0.7fr 0.6fr; gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #EFEFEF;">
+              <div><a href="#" style="font-weight:600;">이루키</a></div>
+              <div style="font-size:11.5px; color:#3D3226;">VIP</div>
+              <div style="font-size:11.5px;">갱신 만료 3일 전</div>
+              <div><span style="background:#FDE7DC; color:#B8360A; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;">높음</span></div>
+              <div style="font-size:11.5px; color:#3D3226;">오늘</div>
+              <div><button style="height:24px; padding:0 9px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:10.5px; font-weight:700; color:#07111F; cursor:pointer;">전화</button></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1.3fr 0.8fr 1.9fr 0.7fr 0.7fr 0.6fr; gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #EFEFEF;">
+              <div><a href="#" style="font-weight:600;">한서연</a></div>
+              <div style="font-size:11.5px; color:#3D3226;">이탈 위험</div>
+              <div style="font-size:11.5px;">30일간 참여도 40% 하락</div>
+              <div><span style="background:#FDE7DC; color:#B8360A; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;">높음</span></div>
+              <div style="font-size:11.5px; color:#3D3226;">오늘</div>
+              <div><button style="height:24px; padding:0 9px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:10.5px; font-weight:700; color:#07111F; cursor:pointer;">이메일</button></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1.3fr 0.8fr 1.9fr 0.7fr 0.7fr 0.6fr; gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #EFEFEF;">
+              <div><a href="#" style="font-weight:600;">이도윤</a></div>
+              <div style="font-size:11.5px; color:#3D3226;">충성</div>
+              <div style="font-size:11.5px;">케이스 #4521 회신 2일 대기</div>
+              <div><span style="background:#FCEBCB; color:#8C5A00; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;">중간</span></div>
+              <div style="font-size:11.5px; color:#3D3226;">오늘</div>
+              <div><button style="height:24px; padding:0 9px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:10.5px; font-weight:700; color:#07111F; cursor:pointer;">검토</button></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1.3fr 0.8fr 1.9fr 0.7fr 0.7fr 0.6fr; gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #EFEFEF;">
+              <div><a href="#" style="font-weight:600;">박서준</a></div>
+              <div style="font-size:11.5px; color:#3D3226;">신규</div>
+              <div style="font-size:11.5px;">웰컴 시퀀스 미완료</div>
+              <div><span style="background:#FCEBCB; color:#8C5A00; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;">중간</span></div>
+              <div style="font-size:11.5px; color:#3D3226;">내일</div>
+              <div><button style="height:24px; padding:0 9px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:10.5px; font-weight:700; color:#07111F; cursor:pointer;">이메일</button></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1.3fr 0.8fr 1.9fr 0.7fr 0.7fr 0.6fr; gap:8px; align-items:center; padding:9px 4px;">
+              <div><a href="#" style="font-weight:600;">최유진</a></div>
+              <div style="font-size:11.5px; color:#3D3226;">VIP</div>
+              <div style="font-size:11.5px;">이번 주 생일 — 혜택 발송</div>
+              <div><span style="background:#EFEFEF; color:#59616B; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;">낮음</span></div>
+              <div style="font-size:11.5px; color:#3D3226;">금요일</div>
+              <div><button style="height:24px; padding:0 9px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:10.5px; font-weight:700; color:#07111F; cursor:pointer;">발송</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-bottom:1px solid #EFEFEF;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:4px; height:16px; border-radius:2px; background:#59616B; flex-shrink:0;"></div>
+              <h2 style="margin:0; font-size:14px; font-weight:800;">최근 활동</h2>
+              <span style="font-size:11px; color:#8992A0; font-weight:400;">Recent Activities</span>
+              <span style="background:#EFEFEF; color:#59616B; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:3px; letter-spacing:0.3px;">P2 · 참고</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <a href="#" style="font-size:12px; font-weight:600;">전체보기</a>
+              <button onClick="{{ toggleActivities }}" style="border:1px solid #D9D9D9; background:#FFFFFF; width:20px; height:20px; border-radius:50%; font-size:10.5px; font-weight:700; color:#59616B; cursor:pointer; line-height:1;">i</button>
+            </div>
+          </div>
+          <sc-if value="{{ rationaleOpen.activities }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#F4F4F4; padding:9px 16px; font-size:11.5px; color:#3D3226; line-height:1.6; border-bottom:1px solid #D9D9D9; border-left:3px solid #59616B;">
+              <div><b>목적:</b> 이미 처리된 업무를 시간순으로 기록해 중복 응대를 방지한다.</div>
+              <div><b>우선순위:</b> P2 — 참고용 이력, 조치 필요 콘텐츠 다음에 확인.</div>
+              <div><b>배치 이유:</b> 추천 조치 바로 아래 — "무엇을 할지" 다음 "무엇을 했는지" 순서.</div>
+            </div>
+          </sc-if>
+          <div style="padding:6px 16px 10px;">
+            <div style="display:flex; gap:9px; padding:8px 4px; border-bottom:1px solid #EFEFEF;">
+              <div style="width:6px; height:6px; border-radius:50%; background:#1E8A5F; margin-top:5px; flex-shrink:0;"></div>
+              <div style="flex:1; font-size:11.5px;"><a href="#">이루키</a>에게 갱신 안내 이메일 발송</div>
+              <div style="font-size:10.5px; color:#8992A0; white-space:nowrap;">10분 전 · 김안나</div>
+            </div>
+            <div style="display:flex; gap:9px; padding:8px 4px; border-bottom:1px solid #EFEFEF;">
+              <div style="width:6px; height:6px; border-radius:50%; background:#07111F; margin-top:5px; flex-shrink:0;"></div>
+              <div style="flex:1; font-size:11.5px;">케이스 #4498 종료 — 굿즈 환불</div>
+              <div style="font-size:10.5px; color:#8992A0; white-space:nowrap;">42분 전 · 정태윤</div>
+            </div>
+            <div style="display:flex; gap:9px; padding:8px 4px; border-bottom:1px solid #EFEFEF;">
+              <div style="width:6px; height:6px; border-radius:50%; background:#1E8A5F; margin-top:5px; flex-shrink:0;"></div>
+              <div style="flex:1; font-size:11.5px;">VIP 팬 <a href="#">최유진</a> 미팅 기록 등록</div>
+              <div style="font-size:10.5px; color:#8992A0; white-space:nowrap;">1시간 전 · 문지호</div>
+            </div>
+            <div style="display:flex; gap:9px; padding:8px 4px;">
+              <div style="width:6px; height:6px; border-radius:50%; background:#B8551F; margin-top:5px; flex-shrink:0;"></div>
+              <div style="flex:1; font-size:11.5px;">세그먼트 변경: <a href="#">한서연</a> → 이탈 위험</div>
+              <div style="font-size:10.5px; color:#8992A0; white-space:nowrap;">2시간 전 · 시스템</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="display:flex; flex-direction:column; gap:14px;">
+
+        <!-- Fan Segment Distribution -->
+        <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-bottom:1px solid #EFEFEF;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:4px; height:16px; border-radius:2px; background:#FC4E00; flex-shrink:0;"></div>
+              <div>
+                <h2 style="margin:0; font-size:13.5px; font-weight:800;">팬 세그먼트 분포</h2>
+              </div>
+              <span style="background:#EFEFEF; color:#59616B; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:3px;">P1</span>
+            </div>
+            <button onClick="{{ toggleSegment }}" style="border:1px solid #D9D9D9; background:#FFFFFF; width:20px; height:20px; border-radius:50%; font-size:10.5px; font-weight:700; color:#59616B; cursor:pointer; line-height:1;">i</button>
+          </div>
+          <sc-if value="{{ rationaleOpen.segment }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#F4F4F4; padding:9px 16px; font-size:11.5px; color:#3D3226; line-height:1.6; border-bottom:1px solid #D9D9D9; border-left:3px solid #FC4E00;">
+              <div><b>목적:</b> 전체 팬 구성 비율을 보여줘 오늘의 조치가 적절한 규모인지 판단하게 한다.</div>
+              <div><b>우선순위:</b> P1 — 배경 맥락, 그 자체로 조치가 필요하지 않음.</div>
+              <div><b>배치 이유:</b> 우측 사이드, 상단 — 스크롤 없이 보이되 핵심 업무 큐와 경쟁하지 않는 위치.</div>
+            </div>
+          </sc-if>
+          <div style="padding:12px 16px; display:flex; flex-direction:column; gap:9px;">
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span style="font-weight:600;">VIP</span><span style="color:#8992A0;">1,204명 · 14%</span></div>
+              <div style="height:6px; background:#EFEFEF; border-radius:3px; overflow:hidden;"><div style="width:14%; height:100%; background:#FC4E00;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span style="font-weight:600;">충성</span><span style="color:#8992A0;">3,410명 · 39%</span></div>
+              <div style="height:6px; background:#EFEFEF; border-radius:3px; overflow:hidden;"><div style="width:39%; height:100%; background:#FC4E00;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span style="font-weight:600;">신규</span><span style="color:#8992A0;">1,890명 · 22%</span></div>
+              <div style="height:6px; background:#EFEFEF; border-radius:3px; overflow:hidden;"><div style="width:22%; height:100%; background:#FC4E00;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span style="font-weight:600;">휴면</span><span style="color:#8992A0;">1,540명 · 18%</span></div>
+              <div style="height:6px; background:#EFEFEF; border-radius:3px; overflow:hidden;"><div style="width:18%; height:100%; background:#B0ADAB;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;"><span style="font-weight:600;">이탈 위험</span><span style="color:#B8360A;">620명 · 7%</span></div>
+              <div style="height:6px; background:#EFEFEF; border-radius:3px; overflow:hidden;"><div style="width:7%; height:100%; background:#B8360A;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Notifications -->
+        <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-bottom:1px solid #EFEFEF;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:4px; height:16px; border-radius:2px; background:#B8551F; flex-shrink:0;"></div>
+              <h2 style="margin:0; font-size:13.5px; font-weight:800;">최근 알림</h2>
+              <span style="background:#EFEFEF; color:#59616B; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:3px;">P1</span>
+            </div>
+            <button onClick="{{ toggleNotif }}" style="border:1px solid #D9D9D9; background:#FFFFFF; width:20px; height:20px; border-radius:50%; font-size:10.5px; font-weight:700; color:#59616B; cursor:pointer; line-height:1;">i</button>
+          </div>
+          <sc-if value="{{ rationaleOpen.notif }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#F4F4F4; padding:9px 16px; font-size:11.5px; color:#3D3226; line-height:1.6; border-bottom:1px solid #D9D9D9; border-left:3px solid #B8551F;">
+              <div><b>목적:</b> 임계값 초과, SLA 경고 등 시스템 알림을 매니저가 놓치지 않게 한다.</div>
+              <div><b>우선순위:</b> P1 — 시간에 민감하지만 시스템 발신이므로 추천 큐보다 하위.</div>
+              <div><b>배치 이유:</b> 우측 사이드 상단부, 세그먼트 분포 아래 — 알림 누락 방지.</div>
+            </div>
+          </sc-if>
+          <div style="padding:5px 16px 10px;">
+            <div style="display:flex; gap:8px; padding:8px 4px; border-bottom:1px solid #EFEFEF;">
+              <div style="width:7px; height:7px; border-radius:50%; background:#B8360A; margin-top:5px; flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-size:11.5px;">이탈 위험 임계값 초과 팬 3명 발생</div><div style="font-size:10.5px; color:#8992A0;">15분 전</div></div>
+            </div>
+            <div style="display:flex; gap:8px; padding:8px 4px; border-bottom:1px solid #EFEFEF;">
+              <div style="width:7px; height:7px; border-radius:50%; background:#B8551F; margin-top:5px; flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-size:11.5px;">케이스 #4521 SLA 위반 2시간 전</div><div style="font-size:10.5px; color:#8992A0;">38분 전</div></div>
+            </div>
+            <div style="display:flex; gap:8px; padding:8px 4px;">
+              <div style="width:7px; height:7px; border-radius:50%; background:#FC4E00; margin-top:5px; flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-size:11.5px;">신규 VIP 등급 팬 등록: 배지훈</div><div style="font-size:10.5px; color:#8992A0;">1시간 전</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-bottom:1px solid #EFEFEF;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:4px; height:16px; border-radius:2px; background:#07111F; flex-shrink:0;"></div>
+              <h2 style="margin:0; font-size:13.5px; font-weight:800;">빠른 실행</h2>
+              <span style="background:#EFEFEF; color:#59616B; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:3px;">P2</span>
+            </div>
+            <button onClick="{{ toggleQuick }}" style="border:1px solid #D9D9D9; background:#FFFFFF; width:20px; height:20px; border-radius:50%; font-size:10.5px; font-weight:700; color:#59616B; cursor:pointer; line-height:1;">i</button>
+          </div>
+          <sc-if value="{{ rationaleOpen.quick }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#F4F4F4; padding:9px 16px; font-size:11.5px; color:#3D3226; line-height:1.6; border-bottom:1px solid #D9D9D9; border-left:3px solid #07111F;">
+              <div><b>목적:</b> 대시보드를 벗어나지 않고 자주 쓰는 생성/기록 작업을 시작하게 한다.</div>
+              <div><b>우선순위:</b> P2 — 순수 효율 기능, 오늘의 팬 데이터와 무관.</div>
+              <div><b>배치 이유:</b> 우측 사이드 최하단 — 시급성이 가장 낮은 블록.</div>
+            </div>
+          </sc-if>
+          <div style="padding:12px 16px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button style="height:32px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:11.5px; font-weight:700; color:#07111F; cursor:pointer;">통화 기록</button>
+            <button style="height:32px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:11.5px; font-weight:700; color:#07111F; cursor:pointer;">케이스 생성</button>
+            <button style="height:32px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:11.5px; font-weight:700; color:#07111F; cursor:pointer;">캠페인 발송</button>
+            <button style="height:32px; background:#FC4E00; border:1px solid #FC4E00; border-radius:4px; font-size:11.5px; font-weight:700; color:#FFFFFF; cursor:pointer;">할 일 추가</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    rationaleOpen: { kpi: false, reco: false, segment: false, activities: false, notif: false, quick: false }
+  };
+  toggle(key) {
+    this.setState(s => ({ rationaleOpen: { ...s.rationaleOpen, [key]: !s.rationaleOpen[key] } }));
+  }
+  renderVals() {
+    return {
+      rationaleOpen: this.state.rationaleOpen,
+      toggleKpi: () => this.toggle('kpi'),
+      toggleReco: () => this.toggle('reco'),
+      toggleSegment: () => this.toggle('segment'),
+      toggleActivities: () => this.toggle('activities'),
+      toggleNotif: () => this.toggle('notif'),
+      toggleQuick: () => this.toggle('quick')
+    };
+  }
+}
+</script>
+</body>
+</html>

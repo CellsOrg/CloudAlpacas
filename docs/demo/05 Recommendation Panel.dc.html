@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #EFEFEF; }
+  * { box-sizing: border-box; font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+  a { color: #FC4E00; text-decoration: none; }
+  a:hover { color: #D84200; text-decoration: underline; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; background:#EFEFEF; color:#07111F; font-size:12.5px; letter-spacing:-0.1px;">
+
+  <!-- Global Header -->
+  <div style="height:46px; background:#07111F; display:flex; align-items:center; padding:0 14px; gap:14px; flex-shrink:0;">
+    <div style="width:22px; height:22px; border-radius:4px; background:#FC4E00; flex-shrink:0;"></div>
+    <div style="display:flex; align-items:baseline; gap:6px; white-space:nowrap;">
+      <span style="font-weight:800; font-size:14px; color:#FFFFFF;">Cloud Alpacas</span>
+      <span style="font-weight:400; font-size:11px; color:#9AA3AE;">고객 360</span>
+    </div>
+    <div style="flex:1; display:flex; justify-content:center;">
+      <div style="width:400px; max-width:100%; height:28px; background:#131E2E; border:1px solid #263141; border-radius:4px; display:flex; align-items:center; padding:0 10px; color:#8992A0; font-size:12px;">팬, 케이스, 캠페인 검색</div>
+    </div>
+    <div style="width:26px; height:26px; border-radius:50%; background:#FC4E00; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:10.5px; font-weight:700;">김민</div>
+  </div>
+
+  <div style="height:38px; background:#FFFFFF; border-bottom:1px solid #D9D9D9; display:flex; align-items:stretch; padding:0 14px; flex-shrink:0;">
+    <a href="01 Fan 360 Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">대시보드</a>
+    <a href="02 Fan List.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">팬</a>
+    <a href="05 Recommendation Panel.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#07111F; font-weight:700; border-bottom:2.5px solid #FC4E00; cursor:pointer;">추천</a>
+    <a href="06 Game Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">경기</a>
+    <a href="07 Campaign Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">캠페인</a>
+    <a href="08 Case Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">문의</a>
+    <a href="09 Reports Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">리포트</a>
+  </div>
+
+  <!-- Breadcrumb -->
+  <div style="height:32px; background:#FFFFFF; border-bottom:1px solid #D9D9D9; display:flex; align-items:center; padding:0 22px; font-size:11.5px; color:#8992A0; flex-shrink:0;">
+    <span>FRM 대시보드 &nbsp;›&nbsp;</span><span style="color:#07111F; font-weight:600; margin-left:4px;">추천 조치 패널</span>
+  </div>
+
+  <!-- Page header -->
+  <div style="background:#FFFFFF; border-bottom:1px solid #D9D9D9; padding:14px 22px; flex-shrink:0;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <h1 style="margin:0; font-size:17px; font-weight:800; letter-spacing:-0.3px;">추천 조치 패널</h1>
+        <div style="font-size:11px; color:#8992A0; margin-top:2px;">오늘 처리해야 할 팬별 다음 행동을 확인하고 즉시 실행하세요</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="background:#07111F; color:#FFFFFF; font-size:11px; font-weight:700; padding:4px 10px; border-radius:3px;">미처리 {{ openCount }}건</span>
+        <button style="height:28px; padding:0 12px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:12px; font-weight:600; color:#07111F; cursor:pointer;">새로고침</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main: list + detail -->
+  <div style="flex:1; padding:14px 22px 30px;">
+    <div style="display:grid; grid-template-columns:1.15fr 1.4fr; gap:14px; align-items:start;">
+
+      <!-- LEFT: filters + list -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+
+        <!-- Quick filters -->
+        <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:12px 14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+            <div style="width:4px; height:14px; border-radius:2px; background:#07111F;"></div>
+            <span style="font-size:12.5px; font-weight:800;">빠른 필터</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            <sc-for list="{{ priorityFilters }}" as="f" hint-placeholder-count="5">
+              <button onClick="{{ f.onClick }}" style="{{ f.chipStyle }}">{{ f.label }}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+            <sc-for list="{{ typeFilters }}" as="f" hint-placeholder-count="4">
+              <button onClick="{{ f.onClick }}" style="{{ f.chipStyle }}">{{ f.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- List -->
+        <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:1px solid #EFEFEF;">
+            <span style="font-size:12.5px; font-weight:800;">추천 목록</span>
+            <span style="font-size:11px; color:#8992A0;">{{ filteredCount }}건 표시 중</span>
+          </div>
+          <div style="max-height:640px; overflow-y:auto;">
+            <sc-for list="{{ cards }}" as="c" hint-placeholder-count="6">
+              <div onClick="{{ c.onClick }}" style="{{ c.cardStyle }}">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:7px;">
+                    <span style="font-size:13px; font-weight:800;">{{ c.fanName }}</span>
+                    <span style="{{ c.segmentBadgeStyle }}">{{ c.segment }}</span>
+                  </div>
+                  <span style="{{ c.priorityBadgeStyle }}">{{ c.priorityLabel }}</span>
+                </div>
+                <div style="font-size:12.5px; font-weight:700; margin-bottom:3px;">{{ c.action }}</div>
+                <div style="font-size:11.5px; color:#59616B; margin-bottom:6px;">{{ c.reason }}</div>
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                  <span style="font-size:11px; color:#1E8A5F; font-weight:600;">{{ c.impact }}</span>
+                  <span style="font-size:10.5px; color:#8992A0;">신뢰도 {{ c.confidence }}%</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: detail panel -->
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; position:sticky; top:14px;">
+
+        <!-- detail header -->
+        <div style="padding:16px 18px; border-bottom:1px solid #EFEFEF; display:flex; align-items:flex-start; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:44px; height:44px; border-radius:50%; background:#07111F; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:14px; font-weight:800; flex-shrink:0;">{{ detail.avatar }}</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:7px; margin-bottom:3px;">
+                <span style="font-size:15px; font-weight:800;">{{ detail.fanName }}</span>
+                <span style="{{ detail.segmentBadgeStyle }}">{{ detail.segment }}</span>
+                <span style="{{ detail.priorityBadgeStyle }}">{{ detail.priorityLabel }}</span>
+              </div>
+              <div style="font-size:11px; color:#8992A0;">회원번호 {{ detail.memberId }} · 담당 {{ detail.manager }}</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button style="height:28px; padding:0 10px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:11.5px; font-weight:600; color:#07111F; cursor:pointer;">프로필 보기</button>
+            <button style="height:28px; padding:0 10px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:11.5px; font-weight:600; color:#07111F; cursor:pointer;">타임라인 보기</button>
+          </div>
+        </div>
+
+        <!-- recommended action strip -->
+        <div style="margin:16px 18px 0; background:#FFF6F1; border:1px solid #F7D9C8; border-radius:6px; padding:12px 14px;">
+          <div style="font-size:10.5px; color:#B8360A; font-weight:700; margin-bottom:4px;">추천 조치</div>
+          <div style="font-size:14px; font-weight:800; margin-bottom:4px;">{{ detail.action }}</div>
+          <div style="font-size:11.5px; color:#59616B;">{{ detail.reason }}</div>
+        </div>
+
+        <!-- AI explanation -->
+        <div style="margin:12px 18px 0; background:#F9F9F9; border-radius:6px; padding:12px 14px;">
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:5px;">
+            <div style="width:14px; height:14px; border-radius:3px; background:#07111F; flex-shrink:0;"></div>
+            <span style="font-size:11.5px; font-weight:800;">AI 추천 설명</span>
+          </div>
+          <div style="font-size:11.5px; color:#3D3226; line-height:1.6;">{{ detail.aiExplanation }}</div>
+        </div>
+
+        <!-- impact + confidence -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 18px 0;">
+          <div style="border:1px solid #EFEFEF; border-radius:6px; padding:11px 13px;">
+            <div style="font-size:10.5px; color:#8992A0; margin-bottom:4px;">예상 비즈니스 효과</div>
+            <div style="font-size:12.5px; font-weight:700; color:#1E8A5F;">{{ detail.impact }}</div>
+          </div>
+          <div style="border:1px solid #EFEFEF; border-radius:6px; padding:11px 13px;">
+            <div style="font-size:10.5px; color:#8992A0; margin-bottom:4px;">신뢰도 점수</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="flex:1; height:6px; background:#EFEFEF; border-radius:3px; overflow:hidden;"><div style="{{ detail.confidenceBarStyle }}"></div></div>
+              <span style="font-size:12.5px; font-weight:700;">{{ detail.confidence }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fan summary + timeline summary -->
+        <div style="margin:14px 18px 0;">
+          <div style="font-size:11.5px; font-weight:800; margin-bottom:8px;">팬 요약</div>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;">
+            <div><div style="font-size:10px; color:#8992A0; margin-bottom:3px;">참여도</div><div style="font-size:12px; font-weight:700;">{{ detail.engagement }}</div></div>
+            <div><div style="font-size:10px; color:#8992A0; margin-bottom:3px;">LTV</div><div style="font-size:12px; font-weight:700;">{{ detail.ltv }}</div></div>
+            <div><div style="font-size:10px; color:#8992A0; margin-bottom:3px;">최근 방문</div><div style="font-size:12px; font-weight:700;">{{ detail.lastVisit }}</div></div>
+            <div><div style="font-size:10px; color:#8992A0; margin-bottom:3px;">이탈 위험도</div><div style="font-size:12px; font-weight:700; color:#B8360A;">{{ detail.risk }}</div></div>
+          </div>
+
+          <div style="font-size:11.5px; font-weight:800; margin-bottom:8px;">최근 활동 (타임라인 요약)</div>
+          <div style="display:flex; flex-direction:column; gap:7px; margin-bottom:14px;">
+            <sc-for list="{{ detail.recentActivities }}" as="a" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; gap:8px; padding:7px 10px; background:#F9F9F9; border-radius:5px;">
+                <span style="{{ a.badgeStyle }}">{{ a.type }}</span>
+                <span style="font-size:11.5px; flex:1;">{{ a.text }}</span>
+                <span style="font-size:10.5px; color:#8992A0;">{{ a.when }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="font-size:11.5px; font-weight:800; margin-bottom:8px;">구매 이력</div>
+          <div style="display:flex; flex-direction:column; gap:0; margin-bottom:4px; border:1px solid #EFEFEF; border-radius:6px; overflow:hidden;">
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; padding:8px 12px; font-size:10px; font-weight:700; color:#8992A0; background:#F9F9F9;">
+              <div>내역</div><div>금액</div><div>상태</div>
+            </div>
+            <sc-for list="{{ detail.purchases }}" as="p" hint-placeholder-count="3">
+              <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; padding:9px 12px; border-top:1px solid #EFEFEF; align-items:center;">
+                <div style="font-size:11.5px; font-weight:600;">{{ p.name }}</div>
+                <div style="font-size:11.5px;">{{ p.amount }}</div>
+                <div><span style="{{ p.statusStyle }}">{{ p.status }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; flex-wrap:wrap; gap:8px; padding:16px 18px; border-top:1px solid #EFEFEF; margin-top:14px;">
+          <button style="height:32px; padding:0 14px; background:#FC4E00; border:1px solid #FC4E00; border-radius:4px; font-size:12px; font-weight:700; color:#FFFFFF; cursor:pointer;">캠페인 발송</button>
+          <button style="height:32px; padding:0 14px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:12px; font-weight:600; color:#07111F; cursor:pointer;">작업 생성</button>
+          <button style="height:32px; padding:0 14px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:12px; font-weight:600; color:#07111F; cursor:pointer;">프로필 보기</button>
+          <button style="height:32px; padding:0 14px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:12px; font-weight:600; color:#07111F; cursor:pointer;">타임라인 보기</button>
+          <button style="height:32px; padding:0 14px; background:#DCF3E8; border:1px solid #B7E4CC; border-radius:4px; font-size:12px; font-weight:700; color:#1E8A5F; cursor:pointer;">완료 처리</button>
+          <button style="height:32px; padding:0 14px; background:#FFFFFF; border:1px solid #D9D9D9; border-radius:4px; font-size:12px; font-weight:600; color:#8992A0; cursor:pointer;">추천 무시</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { priority: 'all', type: 'all', selectedId: 'r1' };
+
+  recos = [
+    { id:'r1', fanName:'이루키', segment:'VIP', priority:'critical', type:'membership', action:'멤버십 갱신 콜 진행', reason:'멤버십 만료 3일 전, 최근 30일 참여도 40% 하락', impact:'LTV 유지 ₩1,200,000', confidence:91,
+      avatar:'이루', memberId:'CA-102384', manager:'김민준', engagement:'74점 (하락세)', ltv:'₩4,820,000', lastVisit:'2026.07.29', risk:'중간 (62/100)',
+      aiExplanation:'최근 30일간 경기 참여도가 40% 하락했고 멤버십이 3일 후 만료됩니다. 과거 유사 패턴을 가진 VIP 팬의 68%가 갱신 콜 이후 재가입했습니다.',
+      recentActivities:[{type:'굿즈',text:'유니폼(문태양 #21) 구매',when:'3일 전'},{type:'경기장',text:'홈경기 체크인',when:'3일 전'},{type:'캠페인',text:'여름 프로모션 이메일 미클릭',when:'2주 전'}],
+      purchases:[{name:'시즌권 갱신',amount:'₩890,000',status:'처리 중',statusColor:'#8C5A00',statusBg:'#FCEBCB'},{name:'유니폼(문태양 #21)',amount:'₩129,000',status:'완료',statusColor:'#1E8A5F',statusBg:'#DCF3E8'},{name:'홈경기 VIP석 2매',amount:'₩240,000',status:'완료',statusColor:'#1E8A5F',statusBg:'#DCF3E8'}]
+    },
+    { id:'r2', fanName:'한서연', segment:'이탈 위험', priority:'critical', type:'winback', action:'윈백 캠페인 발송', reason:'60일간 방문 없음, 참여도 급락', impact:'이탈 방지, LTV 보존', confidence:84,
+      avatar:'한서', memberId:'CA-110221', manager:'정태윤', engagement:'31점 (급락)', ltv:'₩2,140,000', lastVisit:'2026.06.05', risk:'높음 (81/100)',
+      aiExplanation:'60일 이상 경기장 방문 및 구매 이력이 없습니다. 유사 세그먼트 대상 윈백 캠페인의 평균 재활성화율은 22%입니다.',
+      recentActivities:[{type:'캠페인',text:'재입장 할인 캠페인 미열람',when:'1주 전'},{type:'세그먼트',text:'충성 → 이탈 위험 변경',when:'2주 전'},{type:'경기장',text:'마지막 방문',when:'60일 전'}],
+      purchases:[{name:'유니폼 세트',amount:'₩98,000',status:'완료',statusColor:'#1E8A5F',statusBg:'#DCF3E8'},{name:'원정 티켓',amount:'₩60,000',status:'완료',statusColor:'#1E8A5F',statusBg:'#DCF3E8'}]
+    },
+    { id:'r3', fanName:'박서준', segment:'신규', priority:'high', type:'welcome', action:'웰컴 캠페인 발송', reason:'가입 후 7일간 활동 없음', impact:'초기 이탈 방지', confidence:77,
+      avatar:'박서', memberId:'CA-118830', manager:'김민준', engagement:'12점', ltv:'₩0', lastVisit:'-', risk:'낮음 (제한 데이터)',
+      aiExplanation:'가입 후 7일이 지났지만 앱 활동 및 구매 이력이 없습니다. 웰컴 시퀀스를 받은 신규 팬은 4주 내 첫 구매 확률이 3배 높습니다.',
+      recentActivities:[{type:'등록',text:'회원 최초 가입',when:'7일 전'}],
+      purchases:[]
+    },
+    { id:'r4', fanName:'이도윤', segment:'충성', priority:'medium', type:'merchandise', action:'첫 굿즈 캠페인 발송', reason:'티켓 구매 2회, 굿즈 구매 이력 없음', impact:'굿즈 매출 증가', confidence:69,
+      avatar:'이도', memberId:'CA-104512', manager:'문지호', engagement:'58점', ltv:'₩640,000', lastVisit:'2026.07.20', risk:'낮음 (24/100)',
+      aiExplanation:'최근 60일 내 티켓을 2회 구매했지만 굿즈 구매 이력이 전혀 없습니다. 동일 패턴의 팬 중 34%가 맞춤 굿즈 추천 이후 첫 구매를 완료했습니다.',
+      recentActivities:[{type:'티켓',text:'원정 경기 티켓 구매',when:'5일 전'},{type:'경기장',text:'홈경기 방문',when:'3주 전'}],
+      purchases:[{name:'원정 티켓 1매',amount:'₩45,000',status:'완료',statusColor:'#1E8A5F',statusBg:'#DCF3E8'},{name:'홈경기 티켓 1매',amount:'₩38,000',status:'완료',statusColor:'#1E8A5F',statusBg:'#DCF3E8'}]
+    },
+    { id:'r5', fanName:'최유진', segment:'VIP', priority:'low', type:'favorite_player', action:'최애 선수 캠페인 발송', reason:'문태양 관련 신상품 출시, 과거 관련 구매 이력 있음', impact:'구매 전환율 +18%', confidence:73,
+      avatar:'최유', memberId:'CA-099021', manager:'정태윤', engagement:'88점', ltv:'₩6,120,000', lastVisit:'2026.08.02', risk:'매우 낮음 (8/100)',
+      aiExplanation:'과거 최애 선수 관련 굿즈 구매 비율이 상위 10%입니다. 신상품 출시 시점에 맞춘 개인화 캠페인이 효과적입니다.',
+      recentActivities:[{type:'굿즈',text:'유니폼 구매',when:'5일 전'},{type:'경기장',text:'홈경기 방문',when:'5일 전'}],
+      purchases:[{name:'유니폼 (문태양 #21)',amount:'₩129,000',status:'완료',statusColor:'#1E8A5F',statusBg:'#DCF3E8'}]
+    },
+    { id:'r6', fanName:'배지훈', segment:'신규', priority:'medium', type:'ticket', action:'첫 티켓 캠페인 발송', reason:'회원 등록 후 첫 티켓 미구매', impact:'첫 경기장 방문 유도', confidence:65,
+      avatar:'배지', memberId:'CA-120044', manager:'김민준', engagement:'20점', ltv:'₩0', lastVisit:'-', risk:'낮음 (제한 데이터)',
+      aiExplanation:'신규 가입 후 앱 탐색 활동은 있으나 티켓 구매로 이어지지 않았습니다. 첫 티켓 할인 캠페인이 전환에 효과적입니다.',
+      recentActivities:[{type:'등록',text:'회원 최초 가입',when:'3일 전'}],
+      purchases:[]
+    }
+  ];
+
+  priorityMeta = {
+    critical:{ label:'긴급', color:'#B8360A', bg:'#FDE7DC' },
+    high:{ label:'높음', color:'#B8360A', bg:'#FDE7DC' },
+    medium:{ label:'중간', color:'#8C5A00', bg:'#FCEBCB' },
+    low:{ label:'낮음', color:'#59616B', bg:'#EFEFEF' }
+  };
+  segmentMeta = {
+    'VIP':{ color:'#FFFFFF', bg:'#FC4E00' },
+    '이탈 위험':{ color:'#B8360A', bg:'#FDE7DC' },
+    '충성':{ color:'#07111F', bg:'#EFEFEF' },
+    '신규':{ color:'#1E8A5F', bg:'#DCF3E8' }
+  };
+
+  setPriority(p) { this.setState({ priority: p }); }
+  setType(t) { this.setState({ type: t }); }
+  select(id) { this.setState({ selectedId: id }); }
+
+  badge(text, color, bg, extra) {
+    return `background:${bg}; color:${color}; font-size:10px; font-weight:700; padding:2px 8px; border-radius:3px; ${extra||''}`;
+  }
+
+  renderVals() {
+    const { priority, type, selectedId } = this.state;
+    const priorityOpts = [
+      { key:'all', label:'전체 우선순위' }, { key:'critical', label:'긴급' }, { key:'high', label:'높음' }, { key:'medium', label:'중간' }, { key:'low', label:'낮음' }
+    ];
+    const typeOpts = [
+      { key:'all', label:'전체 유형' }, { key:'membership', label:'멤버십' }, { key:'merchandise', label:'굿즈' }, { key:'ticket', label:'티켓' }, { key:'winback', label:'윈백' }, { key:'welcome', label:'웰컴' }, { key:'favorite_player', label:'최애 선수' }
+    ];
+
+    const priorityFilters = priorityOpts.map(o => ({
+      label:o.label, onClick:()=>this.setPriority(o.key),
+      chipStyle:`height:26px; padding:0 10px; border-radius:999px; font-size:11px; font-weight:600; cursor:pointer; border:1px solid ${priority===o.key?'#FC4E00':'#D9D9D9'}; background:${priority===o.key?'#FC4E00':'#FFFFFF'}; color:${priority===o.key?'#FFFFFF':'#07111F'};`
+    }));
+    const typeFilters = typeOpts.map(o => ({
+      label:o.label, onClick:()=>this.setType(o.key),
+      chipStyle:`height:26px; padding:0 10px; border-radius:999px; font-size:11px; font-weight:600; cursor:pointer; border:1px solid ${type===o.key?'#07111F':'#D9D9D9'}; background:${type===o.key?'#07111F':'#FFFFFF'}; color:${type===o.key?'#FFFFFF':'#07111F'};`
+    }));
+
+    const filtered = this.recos.filter(r => (priority==='all'||r.priority===priority) && (type==='all'||r.type===type));
+
+    const cards = filtered.map(r => {
+      const pm = this.priorityMeta[r.priority];
+      const sm = this.segmentMeta[r.segment] || { color:'#07111F', bg:'#EFEFEF' };
+      const isSel = r.id === selectedId;
+      return {
+        fanName: r.fanName, segment: r.segment, action: r.action, reason: r.reason, impact: r.impact, confidence: r.confidence,
+        priorityLabel: pm.label,
+        priorityBadgeStyle: this.badge(pm.label, pm.color, pm.bg),
+        segmentBadgeStyle: this.badge(r.segment, sm.color, sm.bg),
+        onClick: () => this.select(r.id),
+        cardStyle: `padding:13px 14px; border-bottom:1px solid #EFEFEF; cursor:pointer; background:${isSel?'#FFF6F1':'#FFFFFF'}; border-left:3px solid ${isSel?'#FC4E00':'transparent'};`
+      };
+    });
+
+    const d = this.recos.find(r => r.id === selectedId) || this.recos[0];
+    const pm = this.priorityMeta[d.priority];
+    const sm = this.segmentMeta[d.segment] || { color:'#07111F', bg:'#EFEFEF' };
+    const activityColors = { '티켓':['#FC4E00','#FDE7DC'], '경기장':['#0176D3','#DDEBFB'], '굿즈':['#1E8A5F','#DCF3E8'], '캠페인':['#8C6300','#FCEBCB'], '세그먼트':['#59616B','#EFEFEF'], '등록':['#59616B','#EFEFEF'] };
+
+    const detail = {
+      avatar: d.avatar, fanName: d.fanName, memberId: d.memberId, manager: d.manager,
+      segment: d.segment, segmentBadgeStyle: this.badge(d.segment, sm.color, sm.bg),
+      priorityLabel: pm.label, priorityBadgeStyle: this.badge(pm.label, pm.color, pm.bg),
+      action: d.action, reason: d.reason, aiExplanation: d.aiExplanation,
+      impact: d.impact, confidence: d.confidence,
+      confidenceBarStyle: `width:${d.confidence}%; height:100%; background:#FC4E00;`,
+      engagement: d.engagement, ltv: d.ltv, lastVisit: d.lastVisit, risk: d.risk,
+      recentActivities: d.recentActivities.map(a => {
+        const c = activityColors[a.type] || ['#59616B','#EFEFEF'];
+        return { type: a.type, text: a.text, when: a.when, badgeStyle: this.badge(a.type, c[0], c[1]) };
+      }),
+      purchases: d.purchases.map(p => ({ name:p.name, amount:p.amount, status:p.status, statusStyle: this.badge(p.status, p.statusColor, p.statusBg, 'border-radius:999px;') }))
+    };
+
+    return { priorityFilters, typeFilters, cards, filteredCount: cards.length, openCount: this.recos.length, detail };
+  }
+}
+</script>
+</body>
+</html>

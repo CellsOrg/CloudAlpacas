@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #EFEFEF; }
+  * { box-sizing: border-box; font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+  a { color: #FC4E00; text-decoration: none; }
+  a:hover { color: #D84200; text-decoration: underline; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; background:#EFEFEF; color:#07111F; font-size:12.5px; letter-spacing:-0.1px;">
+  <div style="height:46px; background:#07111F; display:flex; align-items:center; padding:0 14px; gap:14px; flex-shrink:0;">
+    <div style="width:22px; height:22px; border-radius:4px; background:#FC4E00; flex-shrink:0;"></div>
+    <div style="display:flex; align-items:baseline; gap:6px; white-space:nowrap;">
+      <span style="font-weight:800; font-size:14px; color:#FFFFFF;">Cloud Alpacas</span>
+      <span style="font-weight:400; font-size:11px; color:#9AA3AE;">고객 360</span>
+    </div>
+    <div style="flex:1; display:flex; justify-content:center;">
+      <div style="width:400px; max-width:100%; height:28px; background:#131E2E; border:1px solid #263141; border-radius:4px; display:flex; align-items:center; padding:0 10px; color:#8992A0; font-size:12px;">팬, 케이스, 캠페인 검색</div>
+    </div>
+    <div style="width:26px; height:26px; border-radius:50%; background:#FC4E00; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:10.5px; font-weight:700;">김민</div>
+  </div>
+
+  <div style="height:38px; background:#FFFFFF; border-bottom:1px solid #D9D9D9; display:flex; align-items:stretch; padding:0 14px; flex-shrink:0;">
+    <a href="01 Fan 360 Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">대시보드</a>
+    <a href="02 Fan List.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#07111F; font-weight:700; border-bottom:2.5px solid #FC4E00; cursor:pointer;">팬</a>
+    <a href="05 Recommendation Panel.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">추천</a>
+    <a href="06 Game Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">경기</a>
+    <a href="07 Campaign Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">캠페인</a>
+    <a href="08 Case Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">문의</a>
+    <a href="09 Reports Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">리포트</a>
+  </div>
+
+  <div style="background:#FFFFFF; border-bottom:1px solid #D9D9D9; padding:14px 22px; flex-shrink:0;">
+    <h1 style="margin:0; font-size:17px; font-weight:800; letter-spacing:-0.3px;">팬 목록</h1>
+    <div style="font-size:11px; color:#8992A0; margin-top:2px;">전체 팬을 검색하고 개별 팬 프로필로 이동합니다</div>
+  </div>
+
+  <div style="flex:1; padding:14px 22px 30px;">
+
+    <!-- Summary cards -->
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:14px;">
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:14px 16px;">
+        <div style="font-size:11px; color:#8992A0; margin-bottom:6px;">전체 팬</div>
+        <div style="font-size:22px; font-weight:800;">8,664</div>
+      </div>
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:14px 16px;">
+        <div style="font-size:11px; color:#8992A0; margin-bottom:6px;">활성 팬</div>
+        <div style="font-size:22px; font-weight:800; color:#1E8A5F;">6,204</div>
+      </div>
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:14px 16px;">
+        <div style="font-size:11px; color:#8992A0; margin-bottom:6px;">신규 팬 (7일)</div>
+        <div style="font-size:22px; font-weight:800; color:#FC4E00;">142</div>
+      </div>
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px; padding:14px 16px;">
+        <div style="font-size:11px; color:#8992A0; margin-bottom:6px;">이탈 위험 팬</div>
+        <div style="font-size:22px; font-weight:800; color:#B8360A;">620</div>
+      </div>
+    </div>
+
+    <!-- Search + filters + table -->
+    <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+      <div style="padding:12px 16px; border-bottom:1px solid #EFEFEF;">
+        <div style="height:32px; background:#F9F9F9; border:1px solid #D9D9D9; border-radius:4px; display:flex; align-items:center; padding:0 12px; color:#8992A0; font-size:12px; margin-bottom:10px;">팬 이름, 전화번호, 최애 선수로 검색</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+            <button onClick="{{ f.onClick }}" style="{{ f.chipStyle }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 10px;">
+        <div style="display:grid; grid-template-columns:1fr 0.75fr 0.95fr 0.8fr 0.85fr 1.2fr 0.8fr 1.3fr; gap:8px; padding:10px 4px; font-size:10.5px; font-weight:700; color:#8992A0; border-bottom:1px solid #D9D9D9;">
+          <div>팬 이름</div><div>세그먼트</div><div>최애 선수</div><div>멤버십</div><div>최근 방문</div><div>추천</div><div>상태</div><div>빠른 작업</div>
+        </div>
+        <sc-for list="{{ fans }}" as="f" hint-placeholder-count="4">
+          <div style="display:grid; grid-template-columns:1fr 0.75fr 0.95fr 0.8fr 0.85fr 1.2fr 0.8fr 1.3fr; gap:8px; align-items:center; padding:11px 4px; border-bottom:1px solid #EFEFEF;">
+            <div><a href="03 Fan Profile.dc.html" style="font-weight:700;">{{ f.name }}</a></div>
+            <div><span style="{{ f.segmentStyle }}">{{ f.segment }}</span></div>
+            <div style="font-size:12px;">{{ f.favPlayer }}</div>
+            <div style="font-size:12px; color:{{ f.membershipColor }};">{{ f.membership }}</div>
+            <div style="font-size:12px; color:#59616B;">{{ f.lastVisit }}</div>
+            <div style="font-size:11.5px;">{{ f.recommendation }}</div>
+            <div><span style="{{ f.statusStyle }}">{{ f.status }}</span></div>
+            <div style="display:flex; gap:6px;">
+              <a href="03 Fan Profile.dc.html" style="font-size:11px; font-weight:600;">프로필</a>
+              <a href="04 Fan Timeline.dc.html" style="font-size:11px; font-weight:600;">타임라인</a>
+              <a href="05 Recommendation Panel.dc.html" style="font-size:11px; font-weight:600;">추천</a>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { filter: 'all' };
+
+  fanData = [
+    { name:'이루키', segment:'VIP', segColor:'#FFFFFF', segBg:'#FC4E00', favPlayer:'문태양 #21', membership:'활성', membershipColor:'#1E8A5F', lastVisit:'2026.07.29', recommendation:'멤버십 갱신 콜 진행', status:'처리 중', statusColor:'#8C5A00', statusBg:'#FCEBCB' },
+    { name:'박서연', segment:'충성', segColor:'#07111F', segBg:'#EFEFEF', favPlayer:'강도윤 #7', membership:'활성', membershipColor:'#1E8A5F', lastVisit:'2026.07.20', recommendation:'첫 굿즈 캠페인 발송', status:'대기 중', statusColor:'#59616B', statusBg:'#EFEFEF' },
+    { name:'김도현', segment:'신규', segColor:'#1E8A5F', segBg:'#DCF3E8', favPlayer:'서준혁 #30', membership:'미가입', membershipColor:'#8992A0', lastVisit:'2026.08.01', recommendation:'웰컴 캠페인 발송', status:'대기 중', statusColor:'#59616B', statusBg:'#EFEFEF' },
+    { name:'최민재', segment:'이탈 위험', segColor:'#B8360A', segBg:'#FDE7DC', favPlayer:'이하늘 #2', membership:'만료 임박', membershipColor:'#B8360A', lastVisit:'2026.06.05', recommendation:'윈백 캠페인 발송', status:'완료', statusColor:'#1E8A5F', statusBg:'#DCF3E8' }
+  ];
+
+  filterDefs = [
+    { key:'all', label:'전체' }, { key:'segment', label:'세그먼트' }, { key:'membership', label:'멤버십' }, { key:'consent', label:'마케팅 수신 동의' }, { key:'recovisit', label:'최근 방문' }, { key:'recostatus', label:'추천 상태' }
+  ];
+
+  setFilter(k) { this.setState({ filter: k }); }
+
+  renderVals() {
+    const active = this.state.filter;
+    const filters = this.filterDefs.map(f => ({
+      label: f.label, onClick: () => this.setFilter(f.key),
+      chipStyle: `height:28px; padding:0 12px; border-radius:999px; font-size:11.5px; font-weight:600; cursor:pointer; border:1px solid ${active===f.key?'#FC4E00':'#D9D9D9'}; background:${active===f.key?'#FC4E00':'#FFFFFF'}; color:${active===f.key?'#FFFFFF':'#07111F'};`
+    }));
+    const fans = this.fanData.map(f => ({
+      name:f.name, segment:f.segment, favPlayer:f.favPlayer, membership:f.membership, membershipColor:f.membershipColor, lastVisit:f.lastVisit, recommendation:f.recommendation, status:f.status,
+      segmentStyle: `background:${f.segBg}; color:${f.segColor}; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px;`,
+      statusStyle: `background:${f.statusBg}; color:${f.statusColor}; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px;`
+    }));
+    return { filters, fans };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #EFEFEF; }
+  * { box-sizing: border-box; font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+  a { color: #FC4E00; text-decoration: none; }
+  a:hover { color: #D84200; text-decoration: underline; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; background:#EFEFEF; color:#07111F; font-size:12.5px; letter-spacing:-0.1px;">
+  <div style="height:46px; background:#07111F; display:flex; align-items:center; padding:0 14px; gap:14px; flex-shrink:0;">
+    <div style="width:22px; height:22px; border-radius:4px; background:#FC4E00; flex-shrink:0;"></div>
+    <div style="display:flex; align-items:baseline; gap:6px; white-space:nowrap;">
+      <span style="font-weight:800; font-size:14px; color:#FFFFFF;">Cloud Alpacas</span>
+      <span style="font-weight:400; font-size:11px; color:#9AA3AE;">고객 360</span>
+    </div>
+    <div style="flex:1; display:flex; justify-content:center;">
+      <div style="width:400px; max-width:100%; height:28px; background:#131E2E; border:1px solid #263141; border-radius:4px; display:flex; align-items:center; padding:0 10px; color:#8992A0; font-size:12px;">팬, 케이스, 캠페인 검색</div>
+    </div>
+    <div style="width:26px; height:26px; border-radius:50%; background:#FC4E00; display:flex; align-items:center; justify-content:center; color:#FFFFFF; font-size:10.5px; font-weight:700;">김민</div>
+  </div>
+
+    <div style="height:38px; background:#FFFFFF; border-bottom:1px solid #D9D9D9; display:flex; align-items:stretch; padding:0 14px; flex-shrink:0;">
+    <a href="01 Fan 360 Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">대시보드</a>
+    <a href="02 Fan List.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">팬</a>
+    <a href="05 Recommendation Panel.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">추천</a>
+    <a href="06 Game Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#07111F; font-weight:700; border-bottom:2.5px solid #FC4E00; cursor:pointer;">경기</a>
+    <a href="07 Campaign Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">캠페인</a>
+    <a href="08 Case Management.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">문의</a>
+    <a href="09 Reports Dashboard.dc.html" style="display:flex; align-items:center; padding:0 14px; font-size:12.5px; text-decoration:none; color:#59616B; font-weight:400; border-bottom:2.5px solid transparent; cursor:pointer;">리포트</a>
+  </div>
+
+  <div style="background:#FFFFFF; border-bottom:1px solid #D9D9D9; padding:14px 22px; flex-shrink:0;">
+    <h1 style="margin:0; font-size:17px; font-weight:800; letter-spacing:-0.3px;">경기 관리</h1>
+    <div style="font-size:11px; color:#8992A0; margin-top:2px;">경기 일정, 티켓 판매, 좌석 현황을 확인합니다</div>
+  </div>
+
+  <div style="flex:1; padding:14px 22px 30px;">
+    <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:14px; align-items:start;">
+
+      <!-- Game list -->
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+        <div style="display:flex; align-items:center; gap:8px; padding:11px 16px; border-bottom:1px solid #EFEFEF;">
+          <div style="width:4px; height:16px; border-radius:2px; background:#FC4E00; flex-shrink:0;"></div>
+          <h2 style="margin:0; font-size:14px; font-weight:800;">경기 목록</h2>
+        </div>
+        <div style="padding:0 16px 12px;">
+          <div style="display:grid; grid-template-columns:0.8fr 1fr 1.1fr 0.8fr; gap:8px; padding:9px 4px; font-size:10.5px; font-weight:700; color:#8992A0; border-bottom:1px solid #D9D9D9;">
+            <div>경기일</div><div>상대팀</div><div>구장</div><div>상태</div>
+          </div>
+          <sc-for list="{{ games }}" as="g" hint-placeholder-count="3">
+            <div onClick="{{ g.onClick }}" style="{{ g.rowStyle }}">
+              <div style="font-size:12px; font-weight:700;">{{ g.date }}</div>
+              <div style="font-size:12px;">{{ g.opponent }}</div>
+              <div style="font-size:12px; color:#59616B;">{{ g.venue }}</div>
+              <div><span style="background:#EFEFEF; color:#59616B; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px;">{{ g.status }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- Game detail -->
+      <div style="background:#FFFFFF; border:1px solid #D9D9D9; border-radius:6px;">
+        <div style="display:flex; align-items:center; gap:8px; padding:11px 16px; border-bottom:1px solid #EFEFEF;">
+          <div style="width:4px; height:16px; border-radius:2px; background:#07111F; flex-shrink:0;"></div>
+          <h2 style="margin:0; font-size:14px; font-weight:800;">Cloud Alpacas vs {{ detail.opponent }}</h2>
+        </div>
+        <div style="padding:14px 16px;">
+          <div style="font-size:11px; color:#8992A0; margin-bottom:14px;">{{ detail.date }} · {{ detail.venue }}</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+            <div style="border:1px solid #EFEFEF; border-radius:6px; padding:11px 13px;">
+              <div style="font-size:10.5px; color:#8992A0; margin-bottom:4px;">참석 팬</div>
+              <div style="font-size:18px; font-weight:800;">{{ detail.attendance }}</div>
+            </div>
+            <div style="border:1px solid #EFEFEF; border-radius:6px; padding:11px 13px;">
+              <div style="font-size:10.5px; color:#8992A0; margin-bottom:4px;">티켓 판매</div>
+              <div style="font-size:18px; font-weight:800; color:#FC4E00;">{{ detail.ticketsSold }}</div>
+            </div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:5px;"><span>좌석 현황</span><span style="color:#8992A0;">{{ detail.seatPct }}% 판매</span></div>
+            <div style="height:8px; background:#EFEFEF; border-radius:4px; overflow:hidden;"><div style="{{ detail.seatBarStyle }}"></div></div>
+          </div>
+          <div style="background:#FFF6F1; border:1px solid #F7D9C8; border-radius:6px; padding:11px 13px;">
+            <div style="font-size:10.5px; color:#B8360A; font-weight:700; margin-bottom:4px;">추천</div>
+            <div style="font-size:12px; font-weight:700;">{{ detail.recommendation }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { selected: 0 };
+
+  data = [
+    { date:'8/14', opponent:'Blue Whales', venue:'Cloud Stadium', status:'예정', attendance:'8,240명 (예상)', ticketsSold:'6,120매', seatPct:74, recommendation:'VIP 좌석 잔여 12석 — 시즌권 팬 대상 우선 안내 발송' },
+    { date:'8/28', opponent:'Thunderbirds', venue:'Cloud Stadium', status:'예정', attendance:'6,800명 (예상)', ticketsSold:'4,050매', seatPct:49, recommendation:'평일 경기 판매 저조 — 신규 팬 대상 할인 캠페인 검토' },
+    { date:'9/3', opponent:'Red Foxes', venue:'Away', status:'예정', attendance:'-', ticketsSold:'원정 응원 패키지 320매', seatPct:32, recommendation:'원정 응원 투어 패키지 잔여 좌석 안내' }
+  ];
+
+  select(i) { this.setState({ selected: i }); }
+
+  renderVals() {
+    const sel = this.state.selected;
+    const games = this.data.map((g, i) => ({
+      date:g.date, opponent:g.opponent, venue:g.venue, status:g.status,
+      onClick:()=>this.select(i),
+      rowStyle:`display:grid; grid-template-columns:0.8fr 1fr 1.1fr 0.8fr; gap:8px; align-items:center; padding:11px 4px; border-bottom:1px solid #EFEFEF; cursor:pointer; background:${i===sel?'#FFF6F1':'#FFFFFF'}; border-left:3px solid ${i===sel?'#FC4E00':'transparent'};`
+    }));
+    const d = this.data[sel];
+    return {
+      games,
+      detail: { opponent:d.opponent, date:d.date, venue:d.venue, attendance:d.attendance, ticketsSold:d.ticketsSold, seatPct:d.seatPct,
+        seatBarStyle:`width:${d.seatPct}%; height:100%; background:#FC4E00;`, recommendation:d.recommendation }
+    };
+  }
+}
+</script>
+</body>
+</html>
