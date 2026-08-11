@@ -179,6 +179,14 @@ flowchart LR
 | Entity | 어느 Workflow에서 나왔나 | 추가 이유 |
 |---|---|---|
 | Fan Segment | 마케팅 (대상 세분화) | "발송 대상을 어떤 기준으로 묶었는가"는 캠페인마다 재사용되는 독립된 개념이다. Fan 개인에 귀속된 속성이 아니라, 여러 Fan을 묶는 **그룹 자체**가 실체를 가진다. |
+
+> **구현 현황(`05_DECISIONS.md` Decision 009)**: 여기서 제안한 "Fan Segment"는 마케팅
+> 발송 대상을 묶는 **그룹**(세분화) 개념이었다. 실제로는 `03_SYSTEM.md`에서 **Current
+> Segment(Life Cycle)** — "지금 이 팬이 활동 주기의 어디에 있는가" — 쪽으로만 구현됐다
+> (`Fan_Segment_History__c` + Person Account.`Current_Segment__c`). 여기서 제안한
+> "발송 대상 그룹"이라는 원래 의미는 별도 Object로 만들어지지 않았다 — 필요해지면
+> §6.10에서 비교한 List View/Report 기반(비저장) 대안으로 다룬다. 이 분석 자체(왜
+> Fan Segment가 독립된 개념으로 보였는지)는 여전히 유효하므로 표는 그대로 둔다.
 | Marketing Consent | 마케팅 (발송 대상 확정) | "수신 가능 여부"는 단순 참고 정보가 아니라, 발송 전 반드시 확인해야 하는 **법적/운영적 필수 조건**이다. 채널별(SMS/이메일/앱푸시)로 따로 관리될 수 있어 Fan의 단순 속성보다 별도 추적이 안전하다. |
 | Benefit | 마케팅·멤버십·굿즈·스폰서십 4개 팀 공통 | 쿠폰, 할인, 선예매권, 멤버십 데이 참여권이 4개 워크플로우에 반복 등장한다. 각 팀마다 따로 정의하면 "이 팬이 받은 혜택을 다 합치면 뭐가 있는지" 한눈에 볼 수 없다 — 하나의 상위 개념으로 통합했다. |
 | Benefit Redemption | 멤버십·굿즈·스폰서십 | "혜택을 받은 것"과 "혜택을 실제로 쓴 것"은 다른 시점의 다른 사실이다(멤버십 할인권을 받았지만 안 쓸 수도 있다). Workflow가 "혜택 사용을 검증한다"고 명시하므로 별도 기록이 필요하다. |
@@ -326,7 +334,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | Attendance Record | 팬의 누적 관람 이력 (여러 Admission의 분석 결과) | Fan |
 | Engagement Signal | SNS 반응 등 관심 신호 | Fan / Marketing |
 | Fan Activity Pattern | 팬의 시즌별 활동 패턴 | Fan |
-| **Fan Segment** `신규` | 특정 기준으로 묶인 팬 그룹 | Marketing |
+| **Fan Segment** `신규` | 특정 기준으로 묶인 팬 그룹(제안 당시 개념 — 실제 구현은 Current Segment/Life Cycle, §3.1 구현 현황 참고) | Marketing |
 | **Recommendation** `신규` | 팬에게 제안할 개인화 Action | Marketing / Operations |
 | Campaign Performance | 캠페인 성과 | Marketing / Partnership |
 | Sponsor Performance | 스폰서십 성과 | Partnership |

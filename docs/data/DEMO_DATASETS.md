@@ -17,6 +17,9 @@
 | `Acquisition_Channel__c` | SNS |
 | `Favorite_Player__c` | 문태양 (SAMPLE_DATA.md §1) |
 | `Current_Segment__c` | Scene이 진행되며 New Fan → Active Fan으로 바뀐다(§2 참고) |
+| `Engagement_Level__c` | 계산 로직 미확정(TBD, `03_SYSTEM.md` §5) — Demo에서는 값을 채우지 않는다 |
+| `Engagement_Score__c` | 계산 공식·자동 계산 방식 모두 미확정(TBD, `03_SYSTEM.md` §5) — Demo에서는 값을 채우지 않는다. 채워야 한다면 임의 예시 값일 뿐 실제 운영 공식이 아님을 이 문서에 함께 표기한다. |
+| `Fan_Value_Tier__c` | 일반 (Scene 7에서 VIP "후보"로 감지되지만, `Fan_Value_Tier__c`가 자동으로 VIP로 바뀌지는 않는다 — 김매니저 확인 후 수동 변경. `05_DECISIONS.md` Decision 009·010) |
 | Email/SMS/Push Opt-In | 모두 체크(가입 시 동의) |
 
 ---
@@ -48,7 +51,7 @@
 
 | Object | Field | 값 |
 |---|---|---|
-| Order | `Order_Type__c` / `Game__c` | Ticket Purchase / 2026-05-02 vs 레드폭스 |
+| Order | `Order_Type__c` / `Purchase_Channel__c` / `Game__c` | Ticket Purchase / 온라인 / 2026-05-02 vs 레드폭스 |
 | OrderItem | Product2 / `Section__c` / `Row__c` / `Seat_Number__c` | 티켓 - 외야석 / 외야 C구역 / 15열 / 15 |
 
 ---
@@ -66,7 +69,7 @@
 
 | Object | Field | 값 |
 |---|---|---|
-| Order | `Order_Type__c` | Goods Purchase, 2026-05-16 (문태양 유니폼(홈), SAMPLE_DATA.md §2.4) |
+| Order | `Order_Type__c` / `Purchase_Channel__c` | Goods Purchase / 온라인, 2026-05-16 (문태양 유니폼(홈), SAMPLE_DATA.md §2.4) |
 | `Recommendation__c` | `Recommended_Action__c` / `Reason__c` / `Status__c` | Favorite Player Campaign / "문태양 관련 굿즈 첫 구매" / Executed |
 | `Benefit__c` | `Benefit_Type__c` / `Status__c` / `Issued_Date__c` | Discount(다음 구매 10%) / Issued / 2026-05-16 |
 
@@ -103,11 +106,11 @@ VIP 후보 조건(03_SYSTEM.md §4.5): **재방문 3회 이상 AND 총 지출 �
 
 | Object | Field | 값 |
 |---|---|---|
-| Order | `Order_Type__c` / Product2 / `Membership_Status__c` / `Membership_End_Date__c` | Membership Enrollment / 멤버십 - Standard / Active / 2027-06-01 |
+| Order | `Order_Type__c` / `Purchase_Channel__c` / Product2 / `Membership_Status__c` / `Membership_End_Date__c` | Membership Enrollment / 온라인 / 멤버십 - Standard / Active / 2027-06-01 |
 | `Recommendation__c` (§7) | `Status__c` | Pending → **Executed**로 갱신 |
-| Person Account | `Current_Segment__c` | Active Fan 유지 (00_STORY.md §6 Segment 값에는 "충성 팬"이라는
-  별도 값이 없다 — 충성도는 Segment가 아니라 Membership 가입 여부 + 누적 활동 패턴의
-  조합으로 표현한다) |
+| Person Account | `Current_Segment__c` | Active Fan 유지 (`00_STORY.md` §6 Current Segment/Life Cycle 값에는 "충성 팬"이라는
+  별도 값이 없다) |
+| Person Account | `Engagement_Level__c` | 개념적으로는 "충성"·"멤버십" 단계에 해당하지만, 계산 로직이 아직 TBD(`03_SYSTEM.md` §5)이므로 이 Demo에서는 값을 확정해 채우지 않는다 |
 
 ---
 

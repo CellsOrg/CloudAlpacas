@@ -119,7 +119,7 @@ Decision 003~006), 여기서는 "왜 그렇게 정했는지"를 반복하지 않
 | Attendance Record | ✅ | Custom Object — `Attendance_Record__c` | Admission 여러 건을 집계한 분석 결과, 자동화 트리거로 필요(Decision 003) |
 | Engagement Signal | ✅ | Custom Object — `Engagement_Signal__c` | 구매 이전 관심 신호를 기록(Decision 003) |
 | Fan Activity Pattern | ✅ | Custom Object — `Fan_Activity_Pattern__c` | VIP 후보 감지 Flow의 트리거 근거(Decision 003) |
-| Fan Segment | ✅ | Custom Object — `Fan_Segment_History__c` + Field(`Current_Segment__c` 캐시) | "언제 상태가 바뀌었는지"가 자동화의 근거(Decision 003) |
+| Fan Segment (Current Segment/Life Cycle 축만 — Decision 009) | ✅ | Custom Object — `Fan_Segment_History__c` + Field(`Current_Segment__c` 캐시). Engagement Level/Fan Value 두 축은 §2.1의 `Engagement_Level__c`/`Engagement_Score__c`/`Fan_Value_Tier__c` Field로 별도 관리 | "언제 상태가 바뀌었는지"가 자동화의 근거(Decision 003) |
 | Recommendation | ✅ | Custom Object — `Recommendation__c` | 시스템이 생성한 Next Best Action 결과물(01_PROJECT.md §3.1) |
 | Campaign Performance | ✅ | Report/Dashboard (Object 없음) | Marketing 관점 집계만 필요, 별도 저장 불필요(01_PROJECT.md §6.1) |
 | Sponsor Performance | ⛔ | Future Scope | Partnership Domain 제외(Decision 005) |
@@ -174,8 +174,11 @@ Fan은 표준 Person Account 필드(이름, 이메일, 휴대폰 등)에 아래 
 |---|---|---|
 | `Favorite_Player__c` | Lookup(Contact) | 최애 선수. Favorite Player Campaign, 개인화 굿즈 추천에 사용. |
 | `Acquisition_Channel__c` | Picklist (SNS/지인 추천/검색/오프라인 등) | 이루키처럼 "SNS에서 처음 알게 됨"을 기록 — Pain Point 1(팬 정보 흩어짐) 해결. |
-| `Current_Segment__c` | Picklist (New Fan/Active Fan/At-Risk Fan/Dormant Fan/Churned Fan/Unreachable Fan) | 00_STORY.md §6 Fan Segment. `Fan_Segment_History__c`의 최신 값을 캐시. |
-| `Segment_Updated_Date__c` | Date | 현재 Segment로 바뀐 날짜. |
+| `Current_Segment__c` | Picklist (New Fan/Active Fan/At-Risk Fan/Dormant Fan/Churned Fan/Unreachable Fan) | 00_STORY.md §6 Current Segment(Life Cycle) — "지금 이 팬이 활동 주기의 어디에 있는가". `Fan_Segment_History__c`의 최신 값을 캐시. |
+| `Segment_Updated_Date__c` | Date | 현재 Segment(Life Cycle)로 바뀐 날짜. |
+| `Engagement_Level__c` | Picklist (가입 팬/관심 팬/활동 팬/충성 팬/멤버십 팬/핵심 팬) | "이 팬이 우리와 얼마나 깊게 관계를 맺고 있는가" — Current Segment와는 다른 축(Decision 009·010). |
+| `Engagement_Score__c` | Number | Engagement Level을 산출하는 근거 점수. **필드는 이번 MVP에 포함하되, 점수 계산 공식과 자동 계산 방식(Flow/Apex 등)은 아직 미확정(TBD)** — 임의의 배점(예: 관람 30점 + 구매 40점 + 활동 30점)을 지금 확정하지 않는다. §5 Future Scope 참고(Decision 010). |
+| `Fan_Value_Tier__c` | Picklist (일반/우수/VIP) | "이 팬이 우리에게 얼마나 가치 있는 고객인가" — Current Segment·Engagement Level과는 다른 축(Decision 009·010). **VIP는 이 필드의 값이며, Product2.`Tier__c`의 "VIP" 멤버십 등급과는 다른 개념**이다. Flow/Demo의 "VIP 후보"는 이 필드가 VIP로 바뀔 가능성이 높다는 뜻이지, 자동으로 VIP를 확정하는 것이 아니다(§4.5 참고). |
 | `Email_Opt_In__c` / `SMS_Opt_In__c` / `Push_Opt_In__c` / `Kakao_Opt_In__c` | Checkbox | 채널별 마케팅 수신 동의(Decision 004 — Marketing Consent를 필드로 관리). |
 | `Consent_Updated_Date__c` | Date | 동의 값이 마지막으로 바뀐 날짜. |
 
@@ -183,6 +186,24 @@ Fan은 표준 Person Account 필드(이름, 이메일, 휴대폰 등)에 아래 
 > 매번 "이 팬의 최신 상태"를 계산하면 느리다. 그래서 최신 값은 Fan 레코드에 캐시해두고
 > (`Current_Segment__c`), "언제 어떻게 바뀌었는지"는 별도 이력 Object에 남긴다. 냉장고
 > 문에 "오늘 할 일"을 붙여두고, 지난 할 일들은 수첩에 기록해두는 것과 같다.
+>
+> **`Engagement_Level__c`/`Engagement_Score__c`/`Fan_Value_Tier__c`에는 왜 이력
+> Object가 없나?** Fan 분류 3축(Decision 009) 중 Current Segment만
+> `Fan_Segment_History__c`라는 이력 Object를 갖고, 나머지 두 축(Engagement Level·Fan
+> Value)은 이번 MVP에서 Person Account의 캐시 필드로만 관리한다 — Object 개수를 필요한
+> 만큼만 늘리는 원칙(Decision 006) 때문이다. **`Fan_Segment_History__c`는 Current
+> Segment(Life Cycle) 변경 이력 전용이며, Engagement Level이나 Fan Value 변경까지 이
+> Object 하나로 함께 기록하도록 확장하지 않는다(Decision 010)** — 세 축을 혼용하지
+> 않는다는 원칙을 이력 Object 구조에도 그대로 적용한 것이다. "언제 Engagement
+> Level/Fan Value가 바뀌었는지"를 자동화 트리거 근거로 남겨야 할 정도로 중요해지면,
+> `Fan_Segment_History__c`와 같은 패턴의 별도 이력 Object를 추가한다(§5 Future Scope).
+
+> **Owner(표준 `OwnerId`)는 이 3축과 완전히 별개다(Decision 009)**. `OwnerId`(담당
+> 직원)는 표준 필드로 자동 존재하며 별도 설계가 필요 없다 — 예를 들어 김매니저가
+> `OwnerId`인 Fan이 동시에 `Fan_Value_Tier__c` = VIP이면서 `Current_Segment__c` =
+> At-Risk Fan일 수 있다. 현재는 김매니저 1명뿐이라 OWD/Sharing Rule/Role 기반 접근
+> 제한은 구현하지 않는다(OWD를 Private으로 바꾸거나 VIP 담당자별 Sharing Rule을
+> 새로 만들지 않는다) — Staff가 늘어나면 §5 Future Scope에서 다시 결정한다.
 
 ### 2.2 Contact — Player
 
@@ -213,6 +234,7 @@ RecordType으로 4종을 구분한다. 공통 필드(Name, ProductCode, IsActive
 | Field (API Name) | Object | 타입 | 설명 |
 |---|---|---|---|
 | `Order_Type__c` | Order | Picklist (Ticket Purchase/Goods Purchase/Membership Enrollment) | 세 가지 거래를 구분. |
+| `Purchase_Channel__c` | Order | Picklist (온라인/구장 굿즈샵) | 온라인 구매인지 구장 현장(굿즈샵) 구매인지 구분. Fan Journey/Fan Profile/Dashboard/Recommendation에서 채널별로 활용(Decision 009). |
 | `Game__c` | Order | Lookup(`Game__c`) | Ticket Purchase 전용 — 어느 경기 티켓인지. |
 | `Membership_Status__c` | Order | Picklist (Active/Expired/Cancelled) | Membership Enrollment 전용. Renewal은 이 값의 상태 전이로 처리(Decision 004). |
 | `Membership_End_Date__c` | Order | Date | Membership Enrollment 전용. 갱신 임박 판단 기준. |
@@ -304,8 +326,8 @@ Subject/Description/Status/Origin 등은 표준 필드를 그대로 쓴다.
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
 | `Fan__c` | Lookup(Person Account) | 누구의 이력인가. |
-| `Segment__c` | Picklist (00_STORY.md §6과 동일한 6개 값) | 그 시점의 Segment. |
-| `Changed_Date__c` | DateTime | Segment가 바뀐 시각. |
+| `Segment__c` | Picklist (00_STORY.md §6과 동일한 6개 값) | 그 시점의 Current Segment(Life Cycle). |
+| `Changed_Date__c` | DateTime | Current Segment(Life Cycle)가 바뀐 시각. |
 | `Reason__c` | Text | 예: "최초 가입", "90일 무활동". |
 
 ### 2.14 Recommendation__c
@@ -488,6 +510,17 @@ flowchart TD
 
 ### 4.5 대표 Flow 예시 ② — VIP 후보 감지 Flow
 
+> **용어 확인(Decision 009·010)**: 이 Flow가 감지하는 "VIP 후보"는 **Fan Value가
+> VIP로 바뀔 가능성이 높은 팬**(Recommendation/판단 대상)을 뜻하며, `Fan_Value_Tier__c`
+> 값 자체가 아니다. 흐름은 항상 다음 순서를 따른다:
+>
+> `Fan_Activity_Pattern__c`(행동 데이터) 기준 VIP 조건 충족 감지 → `Recommendation__c`
+> 생성 → 김매니저(담당자)에게 Slack 알림 → **김매니저가 확인** → 필요 시 김매니저가
+> 직접 Person Account.`Fan_Value_Tier__c`를 VIP로 변경(수동).
+>
+> 이 Flow는 `Recommendation__c`를 만들고 김매니저에게 알릴 뿐, `Fan_Value_Tier__c`를
+> 자동으로 VIP로 확정하지 않는다 — "VIP 후보 감지" ≠ "Fan Value = VIP 자동 변경".
+
 ```mermaid
 flowchart TD
     A["Trigger:<br/>Fan_Activity_Pattern__c 갱신"] --> B{"재방문 3회 이상 AND<br/>총 지출 ≥ 임계값?"}
@@ -535,3 +568,8 @@ flowchart TD
 | Sponsor/Partner 전체 Object군 | 스폰서십·파트너십 관리 기능 확장 | Decision 005 |
 | Apex (Batch/Scheduled) | `Fan_Activity_Pattern__c` 재계산 등이 Flow로 감당하기 느려질 만큼 팬 수가 늘어날 때 | §4.6 |
 | Apex (Recommendation 우선순위 로직) | 여러 NBA 조건이 동시에 겹쳐 Flow Decision으로는 정리가 안 될 때 | §4.6 |
+| `Engagement_Score__c` 계산 공식 확정 | 어떤 활동에 몇 점을 주고, 어느 점수 구간이 어느 `Engagement_Level__c`인지 확정되면 — 필드/값 목록은 이미 있음(§2.1), 공식은 미확정(TBD) | Decision 009, 010 |
+| `Engagement_Score__c` 자동 계산 방식(Flow/Apex 등) | 계산 공식이 확정된 뒤, 무엇을 근거로 언제 재계산할지 결정되면 | Decision 010 |
+| `Engagement_Level__c`/`Fan_Value_Tier__c` 이력 Object(`Engagement_Level_History__c` 등) | 두 축의 변경 시점을 자동화 트리거 근거로 남겨야 할 만큼 중요해지면 | Decision 009 |
+| OWD/Sharing Rule/Role Hierarchy/Queue 기반 접근 제한 | Staff(담당 직원)가 김매니저 1명에서 여러 명으로 늘어날 때 | Decision 009 |
+| Marketing Cloud Next 확장 파이프라인(Sales Cloud Fan Data → Data Cloud → Segment Builder → Marketing Cloud Next → Campaign/Journey/Personalization → 성과 분석) | 실제 Org 구현 이후 고도화 필요성이 확인되면 — 현재 MVP Object를 Marketing Cloud 전용 구조로 미리 재설계하지 않음 | Decision 009, CLAUDE.md §5 |

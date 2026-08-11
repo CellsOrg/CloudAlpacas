@@ -130,8 +130,8 @@ Demo에서 실제로 열어 보여줄 화면. 근거 Object는 `03_SYSTEM.md`를
 
 | 화면 | 등장 Scene | 보여주는 것 |
 |---|---|---|
-| Fan 360 Dashboard | 2, 4, 8 | Fan 목록, Segment 현황, 오늘의 Recommendation |
-| Fan Profile | 2, 5, 8 | 이루키 개인 정보, Favorite_Player__c, Consent 필드 |
+| Fan 360 Dashboard | 2, 4, 8 | Fan 목록, Current Segment(Life Cycle) 현황, 오늘의 Recommendation |
+| Fan Profile | 2, 5, 8 | 이루키 개인 정보(`Favorite_Player__c`, `Acquisition_Channel__c`, Consent 필드) + Fan을 이해하기 위한 핵심 현재값/요약값(`05_DECISIONS.md` Decision 009·010) — **원본은 각 Object에서 조회/집계하고, Person Account에 중복 저장하지 않는다**: 최근 관람일·총 관람 횟수(`Attendance_Record__c` 집계), 총 구매금액/구매 빈도(Order/OrderItem 집계), 최근 활동일(Engagement Signal/Order/Admission 중 최신 — Fan Timeline 최상단), Membership 가입 여부(Order, `Order_Type__c` = Membership Enrollment), Engagement Level(`Engagement_Level__c`), Engagement Score(`Engagement_Score__c` — 계산 공식 TBD), Fan Value(`Fan_Value_Tier__c`), Current Segment(`Current_Segment__c`) |
 | Fan Timeline | 2, 3, 4, 8 | Admission·Order·Notification Log 등 이력을 시간순으로 |
 | Recommendation Panel | 5, 7 | `Recommendation__c` 목록과 상태(Pending/Executed) |
 | Slack 채널 | 7 | Flow가 보낸 내부 업무 알림 |

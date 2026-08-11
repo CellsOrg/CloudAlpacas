@@ -87,11 +87,15 @@ SNS → 회원가입 → 첫 티켓 구매 → 첫 직관 → 첫 굿즈 구매 
 
 ---
 
-## 6. Fan Segment — 팬의 상태 정의
+## 6. Current Segment (Life Cycle) — 팬의 현재 상태 정의
 
-> Segment는 곧 팬의 Customer Status다.
+> Fan을 분류하는 축은 3개다 — **Current Segment(Life Cycle)**, **Engagement Level**,
+> **Fan Value**(05_DECISIONS.md Decision 009). 이 표는 그중 **Current Segment(Life
+> Cycle)** — "지금 이 팬이 활동 주기의 어디에 있는가" — 만 다룬다. "Segment"라는 단어를
+> Engagement Level이나 Fan Value(VIP 포함)와 혼용하지 않는다. 나머지 두 축의 필드
+> 정의는 `03_SYSTEM.md` §2.1에서 다룬다.
 
-| Segment | 정의 | 주요 Action |
+| Segment(Life Cycle) | 정의 | 주요 Action |
 |---|---|---|
 | New Fan (미활성) | 가입만 하고 아직 행동 없음 | 첫 티켓 구매 유도 |
 | Active Fan | 최근 90일 활동 | 개인화 추천 |

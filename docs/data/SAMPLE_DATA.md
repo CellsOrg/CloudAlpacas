@@ -26,6 +26,11 @@
 
 ## 2. Product2
 
+> **"VIP" 용어 구분(`05_DECISIONS.md` Decision 009)**: 아래 §2.2/§2.3의 "VIP"는
+> 시즌권·멤버십 **상품 등급**(Product2.`Tier__c` 값)이다. Fan Profile에 표시되는
+> Fan Value(`Fan_Value_Tier__c`)의 "VIP"(일반/우수/VIP)와는 다른 개념이다 — VIP 멤버십을
+> 아직 안 산 팬도 Fan Value가 VIP일 수 있고, 반대일 수도 있다.
+
 ### 2.1 Ticket (RecordType = Ticket)
 
 | Name | 가격(PricebookEntry) | 비고 |
@@ -82,8 +87,9 @@
 
 ## 4. 배경 Fan (이루키 외 다른 팬)
 
-Fan 360 Dashboard의 목록 화면이 이루키 한 명만 있으면 어색하다 — 대시보드/세그먼트
-화면이 "여러 팬 중 하나"라는 맥락을 보여줄 수 있도록 배경 인물을 최소한으로 둔다.
+Fan 360 Dashboard의 목록 화면이 이루키 한 명만 있으면 어색하다 — 대시보드의 Current
+Segment(Life Cycle) 현황이 "여러 팬 중 하나"라는 맥락을 보여줄 수 있도록 배경 인물을
+최소한으로 둔다.
 
 | Name | Current_Segment__c | 비고 |
 |---|---|---|
@@ -92,7 +98,8 @@ Fan 360 Dashboard의 목록 화면이 이루키 한 명만 있으면 어색하�
 | 최민재 | New Fan | 최근 가입 팬 예시 |
 
 > 이 3명의 상세 이력(Admission, Order 등)은 최소한으로만 채운다 — Demo의 주인공은
-> 이루키다. 대시보드 화면에서 "여러 Segment가 섞여 있다"는 것만 보여주면 충분하다.
+> 이루키다. 대시보드 화면에서 "여러 Current Segment(Life Cycle)가 섞여 있다"는 것만
+> 보여주면 충분하다.
 
 ---
 

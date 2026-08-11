@@ -418,3 +418,213 @@ Analyst)은 Salesforce를 처음 접하는 Baby Team에게 "이 사람이 정확
 - Agentforce 관련 작업은 이후 팀이 MVP 범위를 공식적으로 넓히기로 결정할 때
   별도 Decision으로 다시 다룬다 — 이번 Decision은 "누가 맡을지"만 미리 정해둔
   것이지, MVP 범위 자체를 넓히는 결정이 아니다.
+
+---
+
+## Decision 009 — Fan 분류 체계 3축 분리, Owner 독립, Purchase Channel, Engagement 필드/로직 분리
+
+**상태**: 확정
+**기록일**: 2026-08-11
+
+### 배경
+
+Fan Profile 화면에 무엇을 보여줄지("최근 관람일, 총 관람 횟수, 구매 금액/빈도, 최근 활동,
+Engagement, Fan Value, Current Segment") 정리하는 과정에서, 그동안 문서 곳곳에서
+**"Segment"라는 단어가 서로 다른 세 가지 의미로 혼용**되어 왔다는 것이 드러났다.
+
+- `00_STORY.md` §6 "Fan Segment"는 **팬의 현재 상태(Life Cycle)** — New Fan/Active
+  Fan/At-Risk Fan 등 — 를 가리킨다.
+- `01_PROJECT.md` §2.1(마케팅 Workflow)·§3.1의 "Fan Segment"는 원래 **캠페인 발송
+  대상을 묶은 그룹**(마케팅 세분화)을 가리키는 다른 개념으로 제안됐다.
+- `Fan_Segment_History__c`(03_SYSTEM.md)는 실제로는 위 둘 중 **Life Cycle 쪽으로만**
+  구현됐다 — 마케팅 대상 그룹이라는 원래 의미는 Object로 만들어지지 않았다.
+- Flow와 Demo Scene 곳곳의 "VIP 후보"(00_STORY.md §2, 03_SYSTEM.md §4.5,
+  04_DEMO.md Scene 7)는 Membership Tier의 `VIP`(Product2.`Tier__c`) 값과도, 아직
+  존재하지 않는 "이 팬이 얼마나 가치있는 고객인가"라는 판단과도 뒤섞여 쓰이고 있었다.
+- Owner(담당 직원)가 Fan 분류와 같은 축인지 다른 축인지도 문서에 명시된 적이 없었다.
+
+이 혼용을 그대로 두면 다가오는 Org 구현 단계에서 "Segment"라는 이름의 필드/Object를
+무엇으로 만들지 팀마다 다르게 이해할 위험이 있다.
+
+### 결정
+
+**1. Fan 분류는 반드시 서로 독립된 3개의 축으로 관리한다.**
+
+| 축 | 값 | 의미 |
+|---|---|---|
+| **Current Segment / Life Cycle** | New / Active / Dormant / At-Risk / Churned / Unreachable | 지금 이 팬이 활동 주기의 어디에 있는가(`00_STORY.md` §6과 동일 — 값 목록 변경 없음) |
+| **Engagement Level** | 가입 → 관심 → 활동 → 충성 → 멤버십 → 핵심 | 이 팬이 우리와 얼마나 깊게 관계를 맺고 있는가 |
+| **Fan Value** | 일반 / 우수 / VIP | 이 팬이 우리에게 얼마나 가치 있는 고객인가 |
+
+앞으로 어떤 문서에서도 "Segment"라는 단어 하나로 이 세 가지를 혼용하지 않는다.
+**VIP는 Fan Value 값이다** — Membership Tier(Product2.`Tier__c`)의 "VIP" 상품 등급과는
+다른 개념이며, "VIP 후보"라는 기존 Flow/Demo 표현은 Fan Value가 VIP로 바뀔 가능성이
+높은 후보를 가리키는 것이지, 자동으로 `Fan_Value__c`를 VIP로 확정하는 것이 아니다.
+
+**2. Owner(담당 직원)는 Fan 분류와 완전히 별개의 축이다.**
+
+Owner = 담당 직원, Fan Value = 고객 가치, Current Segment = 현재 고객 상태는 서로
+독립적으로 조합될 수 있다 — 예를 들어 김매니저가 담당하는 VIP이면서 동시에 At-Risk인
+Fan이 존재할 수 있다. 현재는 김매니저 1명뿐이므로 OWD/Sharing Rule/Role 기반 접근
+제한은 구현하지 않는다. Owner(표준 `OwnerId`) 구조 자체는 유지하고, Staff가 늘어나면
+접근 권한/Sharing 전략을 Future Scope에서 별도로 결정한다.
+
+**3. Order의 Purchase Channel(온라인/구장 굿즈샵)을 관리한다.**
+
+Fan Journey, Fan Profile, Dashboard, Recommendation에서 온라인 구매와 구장 현장 구매를
+구분해 활용하기로 했으므로, `Purchase_Channel__c` 필드로 관리한다.
+
+**4. Engagement Score/Level은 "필드 정의"와 "계산 로직"을 구분해 문서화한다.**
+
+계산 공식(어떤 활동에 몇 점을 주고 어느 점수 구간이 어느 Level인지)은 아직 확정되지
+않았다. 공식이 없다고 해서 이번 MVP에서 필요한 Fan 데이터 자체를 Marketing Cloud
+도입 이후로 미루지 않는다 — 필드와 값 목록은 지금 정의하고, 계산 로직은 미확정(TBD)
+상태로 명시해 둔다.
+
+**5. Sales Cloud MVP를 우선 구현하며, 지금까지의 Object/Fan 360 설계를 뒤집지 않는다.**
+
+Marketing Cloud Next / Data Cloud / Tableau 등은 CLAUDE.md §5에서 이미 Future Scope로
+분류된 원칙을 재확인한다. 이 확장 경로(Sales Cloud Fan Data → Data Cloud → Segment
+Builder → Marketing Cloud Next → Campaign/Journey/Personalization → 성과 분석)는
+`03_SYSTEM.md` §5 Future Scope에 참조용으로 한 줄만 남기고, 현재 MVP Object를
+Marketing Cloud 전용 구조로 미리 재설계하지 않는다. 실제 Org 구현 이후 고도화 여부를
+다시 결정한다.
+
+### 이유
+
+- Fan Profile처럼 실제 화면을 설계하는 순간 "Segment 하나"로는 "이 팬이 지금 뭘 하고
+  있는가"(Life Cycle), "얼마나 깊이 관여하는가"(Engagement), "얼마나 가치 있는가"(Value)를
+  동시에 표현할 수 없다는 것이 드러났다 — 세 질문은 서로 다른 답을 가질 수 있다(예:
+  Dormant지만 과거 누적 가치가 높아 여전히 VIP인 팬).
+- VIP를 Membership Tier와 뒤섞으면 "VIP 멤버십 상품을 산 사람"과 "우리가 VIP로 판단한
+  사람"이 항상 같다고 잘못 가정하게 된다 — 실제로는 다를 수 있다(VIP 멤버십을 아직 안
+  샀어도 Fan Value가 VIP인 팬이 있을 수 있다).
+- Owner와 Fan 분류를 분리해야, 나중에 Staff가 늘어나 담당자를 배정하더라도 "그 담당자가
+  맡은 팬이 자동으로 특정 Segment/Value가 된다"는 잘못된 결합을 방지할 수 있다.
+- CLAUDE.md §5 MVP 원칙("고도화 여부는 실제 Org 구현 이후 결정한다")과 §7 원칙(전체에
+  영향을 주는 변경은 Decision으로 기록)을 그대로 따른 것이다 — 이 Decision은 새 기능을
+  추가하는 것이 아니라, 이미 여러 문서에 흩어져 암묵적으로 쓰이던 개념을 하나의 기준으로
+  정리한 것이다.
+
+### 영향
+
+- `00_STORY.md` §6: "Fan Segment" 표가 3축 중 **Current Segment(Life Cycle)** 만
+  다룬다는 점을 명시한다. 표의 값 자체는 바뀌지 않는다.
+- `01_PROJECT.md` §3.1·§4: "Fan Segment" Entity가 Life Cycle 쪽으로 구현되었고,
+  마케팅 대상 그룹이라는 원래 개념은 별도 Entity 없이 필요해지면 §6.10의 List
+  View/Report 대안으로 다룬다는 주석을 추가한다. 기존 분석 내용(왜 그렇게 추론했는지)은
+  삭제하지 않는다.
+- `03_SYSTEM.md` §2.1(Person Account): `Engagement_Level__c`, `Fan_Value__c` 필드를
+  추가한다. `Current_Segment__c`와 함께 3축이 모두 Person Account에 캐시되고,
+  원본 이력은 각각 별도 Object(`Fan_Segment_History__c` 등)가 담당하는 기존 원칙(§2.1
+  캐시/이력 분리 설명)을 그대로 따른다.
+- `03_SYSTEM.md` §2.4(Order): `Purchase_Channel__c` 필드를 추가한다.
+- `03_SYSTEM.md` §5(Future Scope): Engagement Score 계산 공식 확정, OWD/Sharing Rule
+  확장, Marketing Cloud Next 확장 파이프라인을 항목으로 추가한다.
+- `04_DEMO.md` §4 화면 목록: Fan Profile이 보여주는 항목을 이 Decision의 3축 + 관람/구매
+  요약 기준으로 구체화한다.
+- `docs/data/DEMO_DATASETS.md`: Order 레코드에 `Purchase_Channel__c` 값을 채운다.
+
+---
+
+## Decision 010 — Org 구현 착수 전 최종 확정: 필드명(`Fan_Value_Tier__c`), `Engagement_Score__c` 신설, VIP 후보 흐름/이력 범위 재확인
+
+**상태**: 확정
+**기록일**: 2026-08-11
+
+### 배경
+
+Decision 009로 Fan 분류 3축의 **개념**은 정리됐지만, Org에서 실제로 Object/Field를
+만들기 하루 전 시점에 두 가지가 더 필요했다.
+
+- Decision 009는 Fan Value 축의 필드명을 `Fan_Value__c`로 임시 표기했다. 그런데 이
+  필드가 담는 값은 "일반/우수/VIP"라는 **등급(Tier)**이지, "가치가 얼마인지"를 나타내는
+  숫자(LTV 등)가 아니다 — `Fan_Value__c`라는 이름만 보면 나중에 숫자 필드로 오해하거나,
+  누군가 별도로 LTV 숫자 필드를 또 만들어버릴 위험이 있었다.
+- Fan Profile에 "Engagement" 하나만 표시하기로 했던 초기 논의와 달리, 실제로는
+  **Engagement Level(범주 — 가입/관심/활동/충성/멤버십/핵심)**과 **Engagement Score
+  (그 범주를 산출하는 근거 점수)**가 서로 다른 목적의 값이라는 것이 Fan Profile 요구사항
+  ("Engagement Score, Engagement Level"을 나란히 요구)에서 드러났다. `Engagement_Level__c`
+  하나로는 이 둘을 구분할 수 없었다.
+- VIP 후보 감지 Flow의 "감지 → Recommendation → 담당자 확인 → (필요 시) Action"이라는
+  4단계 흐름이 03_SYSTEM.md §4.5에 암묵적으로만 존재했고, "VIP 후보 감지 ≠ Fan Value
+  자동 변경"이라는 등식이 문서에 명시적으로 박혀 있지 않았다.
+- `Fan_Segment_History__c`가 Current Segment(Life Cycle) 전용인지, 3축 전체의 이력을
+  다 받는 Object로 확장될 수도 있는지가 Decision 009에는 여지로 남아 있었다.
+
+### 결정
+
+**1. Fan Value 축의 필드명을 `Fan_Value_Tier__c`로 확정한다.** (Decision 009의
+`Fan_Value__c`를 대체 — 값은 그대로 일반/우수/VIP)
+
+**2. `Engagement_Score__c`(Number) 필드를 신설한다.** `Engagement_Level__c`(범주값)와는
+별개의 필드다 — Score는 Level을 산출하는 근거 점수라는 관계다. **필드 자체는 이번 MVP에
+포함해 확정하지만, 점수 계산 공식과 자동 계산 방식(Flow/Apex 등)은 이번에 확정하지
+않는다(TBD)** — "관람 30점 + 구매 40점 + 활동 30점" 같은 임의의 배점을 지금 만들어
+확정하지 않는다.
+
+**3. `Engagement_Level__c`의 값 레이블을 "가입 팬/관심 팬/활동 팬/충성 팬/멤버십
+팬/핵심 팬"으로 통일한다.** Current Segment가 "New Fan/Active Fan/..."처럼 "Fan"을
+붙이는 표기 스타일과 일치시킨 것이며, Decision 009가 정의한 6단계(가입→관심→활동→충성→
+멤버십→핵심) 자체는 바뀌지 않는다.
+
+**4. VIP 후보 감지 Flow의 4단계 흐름을 명문화한다.**
+`Fan_Activity_Pattern__c`(행동 데이터) 기준 VIP 조건 충족 감지 → `Recommendation__c`
+생성 → 담당자(김매니저)에게 Slack 알림 → **담당자 확인** → 필요 시 담당자가 직접
+`Fan_Value_Tier__c`를 VIP로 변경(수동). **"VIP 후보 감지" ≠ "Fan Value = VIP 자동
+변경"**이며, 이 Flow는 어떤 경우에도 `Fan_Value_Tier__c`를 자동으로 쓰지 않는다.
+
+**5. `Fan_Segment_History__c`는 Current Segment(Life Cycle) 변경 이력 전용임을
+재확인한다.** Engagement Level/Fan Value 변경 이력까지 이 Object 하나로 통합하지
+않는다 — 두 축이 이력 추적이 필요할 만큼 중요해지면 각각 별도 이력 Object를 새로
+만든다(Future Scope, Decision 009와 동일한 "Object는 필요한 만큼만" 원칙).
+
+**6. 아래 항목은 Decision 009에서 이미 정한 대로 변경 없이 재확인만 한다** — 이번
+결정으로 다시 논의하거나 확장하지 않는다.
+- `Purchase_Channel__c`(Order, 값: 온라인/구장 굿즈샵)는 Marketing Cloud 때문이 아니라
+  현재 Sales Cloud MVP의 Fan Journey/Fan Profile/Dashboard/Recommendation에서 바로
+  쓰이므로 **MVP 확정 항목**이다 — Future Scope로 재분류하지 않는다.
+- Owner(표준 `OwnerId`)는 Fan 분류 3축과 완전히 별개이며, 김매니저 1명뿐인 현재는
+  OWD/Sharing Rule/Role Hierarchy/Queue를 추가 구현하지 않는다. OWD를 Private으로
+  바꾸거나 VIP 담당자별 Sharing Rule을 새로 만들지 않는다.
+- Marketing Cloud Next/Data Cloud 확장 파이프라인은 참조용 한 줄(Sales Cloud Fan Data
+  → Data Cloud → Segment Builder → Marketing Cloud Next → Campaign/Journey/
+  Personalization → 성과 분석)로만 Future Scope에 남기고, 현재 MVP Object를 Marketing
+  Cloud 전용 구조로 미리 재설계하지 않는다.
+
+### 이유
+
+- `Fan_Value_Tier__c`로 이름을 바꾼 이유는 필드명만 보고도 "이건 등급 Picklist"임을
+  알 수 있게 하기 위해서다 — Baby Team이 내일 Org에서 Object를 만들 때, 필드명이
+  값의 성격(등급 vs 숫자)을 스스로 설명해야 매번 이 문서를 다시 찾아보지 않아도 된다.
+- `Engagement_Score__c`를 `Engagement_Level__c`와 분리한 이유는 Fan Profile 요구사항이
+  둘을 나란히 요구했고, 실제로도 "지금 몇 단계인가"(Level)와 "그 판단의 근거 수치가
+  얼마인가"(Score)는 화면에서 다른 자리에 다른 목적으로 쓰이기 때문이다 — 다만 계산
+  공식을 지금 정하면 나중에 실제 운영 데이터로 검증하기도 전에 잘못된 배점이 굳어질
+  위험이 있어, 필드만 만들고 공식은 TBD로 남긴다(CLAUDE.md §5 MVP 원칙 — 고도화는
+  실제 Org 구현 이후 결정).
+- VIP 후보 흐름을 4단계로 명문화한 이유는, "감지"와 "확정"을 같은 것으로 오해하면
+  Flow가 사람의 판단 없이 VIP 등급을 함부로 확정해버리는 것으로 잘못 구현될 위험이
+  있기 때문이다 — 담당자의 최종 확인이라는 단계를 문서에 고정해두면 Flow 설계자(승우)와
+  QA(혜준) 모두 같은 기준으로 검증할 수 있다.
+- 나머지 항목(Purchase Channel, Owner/OWD, Marketing Cloud Next)을 "재확인"으로 명시한
+  이유는, Decision 009에서 이미 내린 결정을 다시 논쟁거리로 되돌리지 않기 위해서다 —
+  이 Decision의 목적은 새로 정하는 것이 아니라 Org 구현 직전에 흔들리지 않을 단일
+  기준을 남기는 것이다(CLAUDE.md §7).
+
+### 영향
+
+- `03_SYSTEM.md` §2.1(Person Account): `Fan_Value__c` → `Fan_Value_Tier__c`로 필드명을
+  바꾸고, `Engagement_Score__c`(Number, 계산 공식/자동화 TBD) 필드를 추가한다.
+  `Engagement_Level__c`의 값 레이블을 "가입 팬/관심 팬/활동 팬/충성 팬/멤버십 팬/핵심
+  팬"으로 갱신한다. Owner가 3축과 별개라는 설명, 이력 Object가 Current Segment 전용이라는
+  설명을 보강한다.
+- `03_SYSTEM.md` §4.5(VIP 후보 감지 Flow): 4단계 흐름과 "감지 ≠ 자동 변경" 문구를
+  명시한다.
+- `03_SYSTEM.md` §5(Future Scope): `Engagement_Score__c` 계산 공식/자동 계산 방식을
+  구분해 항목을 추가하고, OWD 관련 표현에 Role Hierarchy/Queue를 포함한다.
+- `04_DEMO.md` §4 Fan Profile 화면 설명에 Engagement Score, Membership 가입 여부를
+  추가하고 필드명을 `Fan_Value_Tier__c`로 갱신한다.
+- `docs/data/DEMO_DATASETS.md`, `docs/data/SAMPLE_DATA.md`: `Fan_Value__c` 표기를
+  `Fan_Value_Tier__c`로 갱신하고, `Engagement_Score__c`를 TBD로 표기한다(임의의 예시
+  점수를 확정 공식처럼 기록하지 않는다).
