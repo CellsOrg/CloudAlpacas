@@ -78,6 +78,7 @@ Decision 003~006), 여기서는 "왜 그렇게 정했는지"를 반복하지 않
 
 | Business Entity | MVP | 구현 방식 | Why |
 |---|---|---|---|
+| Season | ✅ | Custom Object — `Season__c` | 시즌별 경기 수·관람률 집계 기준, Game__c의 부모(Master)로 필요(Decision 011) |
 | Game | ✅ | Custom Object — `Game__c` | 표준 Object 없음(03_SYSTEM.md §1.2) |
 | Campaign | ✅ | 표준 Object — Campaign/CampaignMember | Marketing 관점에서 그대로 재사용(01_PROJECT.md §6.1) |
 | Fan Meeting | ✅ | 표준 Object — Campaign 재사용 (별도 구현 없음) | 01_PROJECT.md §6.1 제안대로 Campaign으로 흡수. **주의**: 04_DEMO.md에 아직 별도 Scene이 없다 — 실제로 쓰일지 팀 확인 필요 |
@@ -92,7 +93,7 @@ Decision 003~006), 여기서는 "왜 그렇게 정했는지"를 반복하지 않
 | Shipment | ⛔ | Future Scope | 이 프로젝트의 목적은 물류가 아니라 Customer 360(Decision 006) |
 | Return | ⛔ | Future Scope | Decision 006 |
 | Benefit Redemption | ⛔ | Future Scope (Field로 대체) | `Benefit__c.Status__c`(Issued/Used/Expired)로 충분(Decision 006) |
-| Renewal | ⛔ | Future Scope (Field로 대체) | Order.`Membership_Status__c`/`Membership_End_Date__c` 상태 전이로 충분(Decision 004) |
+| Renewal | ⛔ | Future Scope (Field로 대체) | Order.`Membership_Status__c`/`Coverage_End_Date__c` 상태 전이로 충분(Decision 004, 필드명은 Decision 013으로 갱신) |
 | Proposal / Sponsor Contract / Settlement | ⛔ | Future Scope | Sponsorship/Partnership Domain 제외(Decision 005) |
 
 ### 📍 Location
@@ -116,7 +117,7 @@ Decision 003~006), 여기서는 "왜 그렇게 정했는지"를 반복하지 않
 
 | Business Entity | MVP | 구현 방식 | Why |
 |---|---|---|---|
-| Attendance Record | ✅ | Custom Object — `Attendance_Record__c` | Admission 여러 건을 집계한 분석 결과, 자동화 트리거로 필요(Decision 003) |
+| Attendance Record | ✅ | Custom Object — `Attendance_Record__c` | Admission 여러 건을 집계한 분석 결과, 자동화 트리거로 필요(Decision 003). Admission과 Master-Detail로 연결해 Roll-Up Summary로 자동 집계한다(Decision 012) |
 | Engagement Signal | ✅ | Custom Object — `Engagement_Signal__c` | 구매 이전 관심 신호를 기록(Decision 003) |
 | Fan Activity Pattern | ✅ | Custom Object — `Fan_Activity_Pattern__c` | VIP 후보 감지 Flow의 트리거 근거(Decision 003) |
 | Fan Segment (Current Segment/Life Cycle 축만 — Decision 009) | ✅ | Custom Object — `Fan_Segment_History__c` + Field(`Current_Segment__c` 캐시). Engagement Level/Fan Value 두 축은 §2.1의 `Engagement_Level__c`/`Engagement_Score__c`/`Fan_Value_Tier__c` Field로 별도 관리 | "언제 상태가 바뀌었는지"가 자동화의 근거(Decision 003) |
@@ -145,6 +146,7 @@ Decision 003~006), 여기서는 "왜 그렇게 정했는지"를 반복하지 않
 
 | Object (API Name) | 표현하는 것 | 왜 Custom Object가 필요한가 |
 |---|---|---|
+| `Season__c` | 시즌 | 시즌 전체 경기 수·실제 진행 경기 수를 집계하는 기준. `Game__c`의 Master-Detail 부모(Decision 011). |
 | `Game__c` | 경기 | 표준 Object가 없다. |
 | `Admission__c` | 게이트 통과 1건(개별 입장 사건) | "몇 번 왔는가"와 "언제 왔는가"를 구분해야 한다(01_PROJECT.md §3.1). |
 | `Benefit__c` | 팬이 받은 쿠폰·할인·선예매권 | Recommendation의 결과로 발급되는 혜택. 사용 여부는 Status 필드로 관리(Decision 006). |
@@ -222,7 +224,7 @@ RecordType으로 4종을 구분한다. 공통 필드(Name, ProductCode, IsActive
 | Field (API Name) | 타입 | 어느 RecordType에서 쓰나 | 설명 |
 |---|---|---|---|
 | `Tier__c` | Picklist (Standard/Premium/VIP 등) | Membership | Membership Tier. 등급마다 별도 Product2 레코드로 만들고, 가격은 Price Book Entry로 매긴다. |
-| `Category__c` | Picklist (Uniform/Cheering Item/Accessory) | Goods | 굿즈 카테고리(01_PROJECT.md §3.4 — 지금은 필드, 나중에 분석이 중요해지면 Object 승격 가능). |
+| `Category__c` | Picklist (Uniform/Cheering Item/Plush/Photo Card/Living Goods/Accessory/Other) | Goods | 굿즈 카테고리(01_PROJECT.md §3.4 — 지금은 필드, 나중에 분석이 중요해지면 Object 승격 가능). 값 목록은 팀 논의로 확장됨(2026-08). |
 | `Related_Player__c` | Lookup(Contact) | Goods | 이 굿즈가 특정 선수 관련 상품인지(예: "문선수 유니폼"). Favorite Player Campaign 추천 근거. |
 
 가격(Ticket Policy/Membership Tier의 가격)은 **Price Book Entry**로 관리한다 — 좌석 등급별
@@ -237,24 +239,49 @@ RecordType으로 4종을 구분한다. 공통 필드(Name, ProductCode, IsActive
 | `Purchase_Channel__c` | Order | Picklist (온라인/구장 굿즈샵) | 온라인 구매인지 구장 현장(굿즈샵) 구매인지 구분. Fan Journey/Fan Profile/Dashboard/Recommendation에서 채널별로 활용(Decision 009). |
 | `Game__c` | Order | Lookup(`Game__c`) | Ticket Purchase 전용 — 어느 경기 티켓인지. |
 | `Membership_Status__c` | Order | Picklist (Active/Expired/Cancelled) | Membership Enrollment 전용. Renewal은 이 값의 상태 전이로 처리(Decision 004). |
-| `Membership_End_Date__c` | Order | Date | Membership Enrollment 전용. 갱신 임박 판단 기준. |
+| `Coverage_Start_Date__c` / `Coverage_End_Date__c` | Order | Date | Membership Enrollment/Season Pass 공통 — 적용 기간. 기존 `Membership_End_Date__c`를 대체·통합(Decision 013). |
+| `Payment_Status__c` | Order | Picklist (Paid/Cancelled/Refunded) | 결제/환불 상태. 표준 `Status`(Draft/Activated)와는 **다른 축**이다(Decision 013). |
+| `Refund_Date__c` | Order | Date | 환불 처리일. |
+| `Refund_Reason__c` | Order | Picklist (단순변심/상품불량/경기취소/일정변경) | 환불 사유. MVP는 Order 전체 단위 환불만 지원하며, 부분 환불(OrderItem 단위)은 Future Scope다(Decision 013, §5). |
 | `Section__c` / `Row__c` / `Seat_Number__c` | OrderItem | Picklist/Text/Text | Ticket Purchase 전용 — 구매 시점에 정해지는 좌석 정보(Decision 006). |
 | `Current_Owner__c` | OrderItem | Lookup(Person Account) | 기본값은 구매자. 선물·양도 시 실제 입장자로 변경(Ticket Transfer, Decision 004). |
 | `Transfer_Status__c` | OrderItem | Picklist (Not Transferred/Transferred) | 양도 여부. |
+
+> **환불 문의는 어떻게 연결하나?** `Case.Related_Order__c`(§2.9)가 이미 있으므로 새
+> 필드를 만들지 않는다 — 환불 문의 Case를 이 필드로 Order와 연결하면, 담당자가 그
+> Order의 `Payment_Status__c`를 바로 확인할 수 있다(Decision 013).
 
 > **왜 좌석 정보는 OrderItem에, 게이트 정보는 Admission에 있나?** 좌석은 "표를 살 때"
 > 정해지고, 게이트는 "실제로 입장할 때" 결정된다 — 서로 다른 시점의 정보라 다른
 > Object에 둔다(05_DECISIONS.md Decision 006 영향 참고).
 
-### 2.5 Game__c
+### 2.5 Season__c
+
+시즌별 경기 수·관람률 집계 기준이다(Decision 011).
+
+| Field (API Name) | 타입 | 설명 |
+|---|---|---|
+| Name | Text | 예: "2026 시즌". |
+| `Total_Games__c` | Number | 시즌 전체 경기 수(취소 포함, 수동 입력). |
+| `Played_Games__c` | Roll-Up Summary (COUNT, `Game__c.Status__c = Played`) | 실제 진행 경기 수 — 관람률 계산의 분모. `Game__c`가 Master-Detail 자식이라 자동 집계된다. |
+
+### 2.6 Game__c
+
+`Season__c`의 Master-Detail 자식이다(Decision 011) — Master-Detail로 설계해야
+`Season__c.Played_Games__c`를 Roll-Up으로 자동 집계할 수 있다.
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
 | `Game_Date__c` | DateTime | 경기 일시. |
 | `Opponent__c` | Text | 상대팀. |
 | `Result__c` | Picklist (Win/Loss/Draw) | 경기 결과(선택). |
+| `Season__c` | Master-Detail(`Season__c`) | 어느 시즌 소속 경기인가(Decision 011). |
+| `Home_Away__c` | Picklist (Home/Away) | 홈/원정 구분. |
+| `Status__c` | Picklist (Scheduled/Played/Cancelled) | 경기 상태. 관람률 계산 시 `Cancelled`는 분모에서 제외한다(Decision 011). |
 
-### 2.6 Admission__c
+### 2.7 Admission__c
+
+`Attendance_Record__c`의 Master-Detail 자식이다(Decision 012).
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
@@ -263,8 +290,9 @@ RecordType으로 4종을 구분한다. 공통 필드(Name, ProductCode, IsActive
 | `Order_Item__c` | Lookup(OrderItem) | 어떤 티켓으로 입장했나. |
 | `Admission_Time__c` | DateTime | 입장 시각. |
 | `Gate__c` | Picklist (Gate 1~4) | 통과한 게이트(Decision 006). |
+| `Attendance_Record__c` | Master-Detail(`Attendance_Record__c`) | 이 입장 기록이 어느 팬의 누적 관람 이력에 집계되는가. Master(`Attendance_Record__c`)가 먼저 있어야 이 레코드를 만들 수 있다(Decision 012, §4.4 참고). |
 
-### 2.7 Benefit__c
+### 2.8 Benefit__c
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
@@ -274,15 +302,15 @@ RecordType으로 4종을 구분한다. 공통 필드(Name, ProductCode, IsActive
 | `Status__c` | Picklist (Issued/Used/Expired) | 발급/사용/만료(Decision 006 — Redemption Object 대신 상태 필드로 관리). |
 | `Issued_Date__c` / `Used_Date__c` / `Expiration_Date__c` | Date | 발급·사용·만료 일자. |
 
-### 2.8 Case — Inquiry
+### 2.9 Case — Inquiry
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
-| `Related_Order__c` | Lookup(Order) | 이 문의가 어떤 Ticket/Goods/Membership 거래에 대한 것인지(01_PROJECT.md §5). |
+| `Related_Order__c` | Lookup(Order) | 이 문의가 어떤 Ticket/Goods/Membership 거래에 대한 것인지(01_PROJECT.md §5). 환불 문의도 이 필드로 연결한다(Decision 013). |
 
 Subject/Description/Status/Origin 등은 표준 필드를 그대로 쓴다.
 
-### 2.9 Notification_Log__c
+### 2.10 Notification_Log__c
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
@@ -292,15 +320,20 @@ Subject/Description/Status/Origin 등은 표준 필드를 그대로 쓴다.
 | `Content__c` | Long Text Area | 발송 내용. |
 | `Sent_Date__c` | DateTime | 발송 시각. |
 
-### 2.10 Attendance_Record__c
+### 2.11 Attendance_Record__c
+
+`Admission__c`의 Master-Detail 부모다(Decision 012) — 팬 1명이 입장할 때마다
+`Admission__c`가 이 레코드 아래 쌓이고, 아래 3개 필드는 Roll-Up Summary로 자동
+집계된다. **별도의 집계 Flow는 만들지 않는다.**
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
-| `Fan__c` | Lookup(Person Account), 팬당 1건 | 누구의 기록인가. |
-| `Total_Admissions__c` | Number | 누적 관람 횟수. |
-| `First_Admission_Date__c` / `Last_Admission_Date__c` | Date | 첫 관람일 / 최근 관람일. |
+| `Fan__c` | Lookup(Person Account), 팬당 1건 | 누구의 기록인가. Duplicate Rule로 팬당 1건만 허용한다(§2.17). |
+| `Total_Admissions__c` | Roll-Up Summary (COUNT, `Admission__c`) | 누적 관람 횟수. |
+| `First_Admission_Date__c` | Roll-Up Summary (MIN, `Admission__c.Admission_Time__c`) | 첫 관람일. |
+| `Last_Admission_Date__c` | Roll-Up Summary (MAX, `Admission__c.Admission_Time__c`) | 최근 관람일. |
 
-### 2.11 Engagement_Signal__c
+### 2.12 Engagement_Signal__c
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
@@ -310,18 +343,23 @@ Subject/Description/Status/Origin 등은 표준 필드를 그대로 쓴다.
 | `Player__c` | Lookup(Contact) | 어떤 선수와 관련된 신호인지(선택 — "문선수 영상"처럼). |
 | `Signal_Date__c` | DateTime | 발생 시각. |
 
-### 2.12 Fan_Activity_Pattern__c
+### 2.13 Fan_Activity_Pattern__c
+
+**한 Fan은 시즌별로 하나의 Activity Pattern을 가진다**(Fan + Season = 1 Pattern
+원칙, Decision 011). 기존 `Period__c`(Text)를 `Season__c`(Lookup)로 대체했다. 월별/
+분기별 Pattern은 Future Scope다(§5).
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
 | `Fan__c` | Lookup(Person Account) | 누구의 패턴인가. |
-| `Period__c` | Text | 분석 기간(예: "2026 시즌"). |
-| `Games_Attended__c` | Number | 이 기간 관람 횟수. |
-| `Goods_Purchases__c` | Number | 이 기간 굿즈 구매 횟수. |
-| `Total_Spend__c` | Currency | 이 기간 총 지출. |
+| `Season__c` | Lookup(`Season__c`) | 어느 시즌의 패턴인가. `Fan__c` + `Season__c` 조합으로 Duplicate Rule을 건다(§2.17). |
+| `Attendance_Rate__c` | Formula(Percent), 저장 안 함 | `Games_Attended__c ÷ Season__r.Played_Games__c × 100`. `Season__c.Played_Games__c`가 이미 `Cancelled` 경기를 제외하고 집계되므로 별도 보정이 필요 없다(Decision 011). |
+| `Games_Attended__c` | Number | 이 시즌 관람 횟수. |
+| `Goods_Purchases__c` | Number | 이 시즌 굿즈 구매 횟수. |
+| `Total_Spend__c` | Currency | 이 시즌 총 지출. `Order.Payment_Status__c` = Refunded/Cancelled인 Order는 집계에서 제외한다(Decision 013). **계산을 누가/언제(Flow 또는 Apex) 수행하는지는 아직 미정(TBD)** — §4.6 참고. |
 | `Analyzed_Date__c` | Date | 분석이 실행된 날짜. |
 
-### 2.13 Fan_Segment_History__c
+### 2.14 Fan_Segment_History__c
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
@@ -330,7 +368,7 @@ Subject/Description/Status/Origin 등은 표준 필드를 그대로 쓴다.
 | `Changed_Date__c` | DateTime | Current Segment(Life Cycle)가 바뀐 시각. |
 | `Reason__c` | Text | 예: "최초 가입", "90일 무활동". |
 
-### 2.14 Recommendation__c
+### 2.15 Recommendation__c
 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
@@ -339,9 +377,48 @@ Subject/Description/Status/Origin 등은 표준 필드를 그대로 쓴다.
 | `Reason__c` | Text | 왜 이 추천이 나왔나(예: "3경기 연속 관람, 굿즈 미구매"). |
 | `Status__c` | Picklist (Pending/Executed/Dismissed) | 김매니저가 이 추천을 실행했는지. |
 
+### 2.16 Fan Profile 설계 원칙 — 원천 데이터 비복제 (Decision 014)
+
+Fan Profile 화면은 아래 항목을 Account(Person Account) 필드로 복제하지 않는다.
+**각 항목의 원본이 이미 다른 Object에 있으므로, 화면은 그 원본을 Related
+List/Lightning Component로 그대로 참조**한다 — 원본이 바뀔 때마다 Account 필드를
+동기화하는 불필요한 자동화를 피하기 위해서다.
+
+| 표시 항목 | 원천 Object | 원천 필드 | 표시 방식 |
+|---|---|---|---|
+| 최근 관람일 / 총 관람 횟수 | `Attendance_Record__c` | `Last_Admission_Date__c` / `Total_Admissions__c` | Related List(팬당 1건이라 단순 참조 가능) |
+| 총 구매금액 | `Fan_Activity_Pattern__c` | `Total_Spend__c` | Related List / Component |
+| 구매 빈도 | `Order` | (Fan 기준 Order 건수) | Related List 건수 또는 Report |
+| 최근 활동일 | `Engagement_Signal__c` | `Signal_Date__c`(최신 1건) | Related List, `Signal_Date__c` 내림차순 정렬 |
+
+반면 `Current_Segment__c`/`Engagement_Level__c`/`Engagement_Score__c`/
+`Fan_Value_Tier__c`(§2.1)는 여러 원천을 종합한 **Fan 자체의 상태값**이므로 원본
+복제가 아니라 원래 자리인 Account에 직접 저장한다(Decision 009·010, 변경 없음).
+
+### 2.17 Duplicate Rule
+
+| Object | 기준 | 규칙 |
+|---|---|---|
+| `Attendance_Record__c` | `Fan__c` | Matching Rule(Exact) + Duplicate Rule — 팬당 1건만 허용, Action on Create = Block(Decision 012). |
+| `Fan_Activity_Pattern__c` | `Fan__c` + `Season__c` | Matching Rule(두 필드 모두 Exact) + Duplicate Rule — 팬은 시즌당 1건만 허용, Action on Create = Block(Decision 011). |
+
 ---
 
 ## 3. ERD — Object 간 관계
+
+**Visual ERD — 전체 Object 구조 (참고 이미지)**
+
+아래 이미지는 Cloud Alpacas의 전체 Object 구조와 관계를 한눈에 이해하기 위한 시각적
+참고 자료다 — Workshop(`workshop/03_ERD.md`)에서 쓰는 것과 동일한 파일이다.
+
+![Cloud Alpacas ERD](../workshop/cloud-alpacas-erd.png)
+
+> 이 이미지는 전체 구조를 빠르게 이해하기 위한 참고 자료이며, **실제 Object 관계의
+> 공식 기준은 아래 §3.1~§3.4의 Mermaid ERD**(특히 §3.4 Relationship Summary)다.
+> 관계가 바뀌면 Mermaid 코드를 먼저 고치는 것이 기준이며, 이 PNG는 정적 이미지라
+> 자동으로 갱신되지 않는다.
+
+---
 
 ### 3.1 Fan 축 — 팬이 누구고, 무엇을 하고 있는가
 
@@ -362,13 +439,15 @@ graph TD
 
 ```mermaid
 graph TD
+    S["Season__c"] -->|Master-Detail| G["Game__c"]
     PR["Product2<br/>(Ticket/Season Pass/<br/>Membership/Goods)"] --> PBE[PricebookEntry]
     PBE --> OI[OrderItem]
-    G["Game__c"] --> O[Order]
+    G --> O[Order]
     O --> OI
     OI -->|입장 시| AD[Admission__c]
-    AD --> AR2[Attendance_Record__c]
+    AR2[Attendance_Record__c] -->|Master-Detail| AD
     O -->|Fan Account| F["Person Account<br/>(Fan)"]
+    S -->|시즌별 활동 패턴| FAP2[Fan_Activity_Pattern__c]
 ```
 
 ### 3.3 Marketing/Service 축 — 알리고, 대응하는 것
@@ -390,6 +469,13 @@ graph TD
 Baby Team 워크숍(`workshop/`)에서 그림으로 먼저 논의한 뒤, 이 블록으로 옮겨 공식화한
 것이다 — 이후 관계가 바뀌면 이 코드를 고치고 아래 표도 함께 갱신한다.
 
+> 이 Mermaid `erDiagram`이 Object 관계의 공식 기준이다 — 이 문서 §3 상단의 Visual ERD
+> (참고 이미지)와 역할이 다르다는 점은 그쪽 설명을 참고한다.
+
+MVP 범위에 포함되지 않은 Object(Sponsor/Partner 계열, Ballpark/Section/Seat/Gate,
+Shipment/Return, Benefit Redemption 등 — §5 Future Scope)는 아래 `erDiagram`에 포함하지
+않는다. Future Scope Object가 확정되어 이번 MVP로 편입되면, 그때 이 다이어그램에 추가한다.
+
 ```mermaid
 erDiagram
     CONTACT ||--o{ PERSON_ACCOUNT : "선호 선수로 지정됨"
@@ -401,6 +487,7 @@ erDiagram
 
     PERSON_ACCOUNT ||--o{ ORDER : "구매"
     PERSON_ACCOUNT ||--o{ ORDERITEM : "현재 소유자(양도)"
+    SEASON__C ||--o{ GAME__C : "시즌 소속 경기(Master-Detail)"
     GAME__C ||--o{ ORDER : "티켓 판매 경기"
     ORDER ||--o{ ORDERITEM : "포함"
 
@@ -408,12 +495,14 @@ erDiagram
     GAME__C ||--o{ ADMISSION__C : "경기 입장"
     ORDERITEM ||--o{ ADMISSION__C : "티켓으로 입장"
     PERSON_ACCOUNT ||--o| ATTENDANCE_RECORD__C : "누적 집계(팬당 1건)"
+    ATTENDANCE_RECORD__C ||--o{ ADMISSION__C : "입장 기록 집계(Master-Detail)"
 
     PERSON_ACCOUNT ||--o{ RECOMMENDATION__C : "추천 대상"
     RECOMMENDATION__C ||--o{ BENEFIT__C : "추천으로 발급"
     PERSON_ACCOUNT ||--o{ BENEFIT__C : "혜택 수령"
 
     PERSON_ACCOUNT ||--o{ FAN_ACTIVITY_PATTERN__C : "활동 패턴"
+    SEASON__C ||--o{ FAN_ACTIVITY_PATTERN__C : "시즌별 활동 패턴"
     PERSON_ACCOUNT ||--o{ FAN_SEGMENT_HISTORY__C : "세그먼트 이력"
     PERSON_ACCOUNT ||--o{ ENGAGEMENT_SIGNAL__C : "관심 신호"
 
@@ -434,16 +523,19 @@ erDiagram
 | PricebookEntry | OrderItem | 1:N | 한 가격 기준이 여러 주문 항목에 적용된다 |
 | Person Account (Fan) | Order | 1:N | 한 팬은 여러 번 구매한다 |
 | Person Account (Fan) | OrderItem | 1:N | 팬은 (양도로) 다른 팬 티켓의 현재 소유자가 될 수 있다 |
+| `Season__c` | `Game__c` | 1:N | Master-Detail — 한 시즌에 여러 경기가 속한다(Decision 011) |
 | `Game__c` | Order | 1:N | 한 경기에 여러 티켓 주문이 발생한다 |
 | Order | OrderItem | 1:N | 표준 Master-Detail |
 | Person Account (Fan) | `Admission__c` | 1:N | 한 팬은 여러 번 입장한다 |
 | `Game__c` | `Admission__c` | 1:N | 한 경기에 여러 입장 기록이 쌓인다 |
 | OrderItem | `Admission__c` | 1:N | 티켓 1건으로 입장 기록이 생긴다 |
 | Person Account (Fan) | `Attendance_Record__c` | 1:1 | 팬당 누적 집계 레코드는 1건 |
+| `Attendance_Record__c` | `Admission__c` | 1:N | Master-Detail — 한 팬의 누적 집계 레코드 아래 여러 입장 기록이 쌓이고, 이 관계로 Roll-Up Summary(§2.11)를 계산한다(Decision 012) |
 | Person Account (Fan) | `Recommendation__c` | 1:N | 한 팬에게 여러 추천이 쌓인다 |
 | `Recommendation__c` | `Benefit__c` | 1:N | 추천 하나가 혜택 발급으로 이어질 수 있다 |
 | Person Account (Fan) | `Benefit__c` | 1:N | 한 팬은 여러 혜택을 받을 수 있다 |
-| Person Account (Fan) | `Fan_Activity_Pattern__c` | 1:N | 시즌/기간별로 여러 건 쌓일 수 있다 |
+| Person Account (Fan) | `Fan_Activity_Pattern__c` | 1:N | 시즌별로 여러 건 쌓일 수 있다 |
+| `Season__c` | `Fan_Activity_Pattern__c` | 1:N | 한 시즌에 여러 팬의 Activity Pattern이 쌓인다(Decision 011) |
 | Person Account (Fan) | `Fan_Segment_History__c` | 1:N | Segment가 바뀔 때마다 이력이 쌓인다 |
 | Person Account (Fan) | `Engagement_Signal__c` | 1:N | 관심 신호가 여러 번 기록된다 |
 | Campaign | CampaignMember | 1:N | 표준 발송 대상 목록 |
@@ -470,9 +562,9 @@ erDiagram
 
 | 팬의 상태 (Trigger) | Flow가 하는 일 | 김매니저에게 Slack 알림? |
 |---|---|---|
-| Person Account 신규 생성 | `Fan_Segment_History__c`(New Fan) 생성, Welcome Campaign `CampaignMember` 추가, `Notification_Log__c` 생성(Welcome 안내 발송) | 아니오 (일상적 신규가입은 자동 처리) |
+| Person Account 신규 생성 | `Fan_Segment_History__c`(New Fan) 생성, Welcome Campaign `CampaignMember` 추가, `Notification_Log__c` 생성(Welcome 안내 발송), **`Attendance_Record__c` 1건 생성**(Decision 012 — Admission의 Master-Detail 부모를 미리 만들어둠) | 아니오 (일상적 신규가입은 자동 처리) |
 | 가입 후 7일간 Ticket Purchase 없음 | First Ticket Campaign `CampaignMember` 추가, `Notification_Log__c` 생성 | 아니오 |
-| `Admission__c` 최초 1건 생성 | Segment를 Active Fan으로 변경(`Fan_Segment_History__c` 추가), First Visit Guide 발송 | 아니오 |
+| `Attendance_Record__c.Total_Admissions__c`(Roll-Up) = 1 (최초 관람) | Segment를 Active Fan으로 변경(`Fan_Segment_History__c` 추가), First Visit Guide 발송 | 아니오 |
 | 관람은 했지만 Goods Purchase 없음(Ticket Only Fan) | First Merchandise Campaign 추천(`Recommendation__c` 생성), `Benefit__c`(할인 쿠폰) 발급 | 아니오 |
 | 첫 Goods Purchase 완료 | Favorite Player Campaign 추천(`Recommendation__c` 생성) | 아니오 |
 | `Fan_Activity_Pattern__c`가 "재방문 3회 이상 + 총 지출 임계값 이상" 조건 충족 (VIP/멤버십 후보) | Membership Campaign 추천(`Recommendation__c` 생성) | **예 — "VIP 후보 발견" 알림** |
@@ -506,7 +598,14 @@ flowchart TD
     B --> C["Person Account.Current_Segment__c<br/>= New Fan로 갱신"]
     C --> D["CampaignMember 추가<br/>(Welcome Campaign)"]
     D --> E["Notification_Log__c 생성<br/>(Channel = 가입 시 등록한 선호 채널)"]
+    E --> F["Attendance_Record__c 1건 생성<br/>(Fan__c = 해당 Fan)"]
 ```
+
+> **왜 이 Flow에 `Attendance_Record__c` 생성이 포함되나?** `Admission__c`가
+> `Attendance_Record__c`의 Master-Detail 자식이 되면서(Decision 012), 부모 레코드가
+> 먼저 있어야 자식(입장 기록)을 만들 수 있다. 별도 Flow로 분리하면 같은 트리거(Account
+> 생성)에 Flow가 2개 걸려 실행 순서를 신경 써야 하므로, Welcome Campaign Flow에
+> 통합했다. `Total_Admissions__c`는 Roll-Up이라 생성 직후 자동으로 0이다.
 
 ### 4.5 대표 Flow 예시 ② — VIP 후보 감지 Flow
 
@@ -543,6 +642,7 @@ flowchart TD
 | First Merchandise Campaign (4번) | "관람했지만 굿즈 미구매" 상태를 언제 검사하는가 |
 | VIP 후보 감지 (6번) | 트리거 조건인 `Fan_Activity_Pattern__c` 자체를 **누가 갱신하는가** — 이 계산 Flow가 없다 |
 | Win-back Campaign (7번) | "무활동 90일"을 누가 매일 검사하는가 |
+| `Fan_Activity_Pattern__c.Total_Spend__c` 재계산 | Refunded/Cancelled Order를 제외하고 집계하는 로직을 Flow로 할지 Apex로 할지, 언제 재계산할지 **미정(TBD, Decision 013)** — 위 `Fan_Activity_Pattern__c` 재계산 Flow와 같은 그룹으로 함께 결정하는 것을 추천한다 |
 
 **구현 전 결정할 것**: 매일 정해진 시간에 도는 Scheduled-Triggered Flow(가칭
 "Daily Fan Analytics Refresh") 1개를 새로 설계해, `Fan_Activity_Pattern__c` 재계산과
@@ -566,6 +666,8 @@ flowchart TD
 | Marketing Consent 이력 Object | Marketing Cloud 도입, 감사 요구 | Decision 004 |
 | Renewal Object | 갱신 임박 자동 알림·캠페인 | Decision 004 |
 | Sponsor/Partner 전체 Object군 | 스폰서십·파트너십 관리 기능 확장 | Decision 005 |
+| 월별/분기별 `Fan_Activity_Pattern__c` | 시즌 단위보다 더 세밀한 기간별 분석이 필요해지면 | Decision 011 |
+| 부분 환불 (OrderItem 단위 `Payment_Status__c`) | 한 Order 안 일부 상품만 환불하는 케이스가 늘어나면 | Decision 013 |
 | Apex (Batch/Scheduled) | `Fan_Activity_Pattern__c` 재계산 등이 Flow로 감당하기 느려질 만큼 팬 수가 늘어날 때 | §4.6 |
 | Apex (Recommendation 우선순위 로직) | 여러 NBA 조건이 동시에 겹쳐 Flow Decision으로는 정리가 안 될 때 | §4.6 |
 | `Engagement_Score__c` 계산 공식 확정 | 어떤 활동에 몇 점을 주고, 어느 점수 구간이 어느 `Engagement_Level__c`인지 확정되면 — 필드/값 목록은 이미 있음(§2.1), 공식은 미확정(TBD) | Decision 009, 010 |

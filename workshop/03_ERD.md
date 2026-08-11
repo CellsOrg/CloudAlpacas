@@ -86,3 +86,14 @@ graph TD
 
     style F fill:#fff4cc,stroke:#333
 ```
+
+---
+
+## ③ 전체 Object Map (참고 이미지)
+
+![Cloud Alpacas ERD](./cloud-alpacas-erd.png)
+
+> 이 이미지는 **Workshop/팀 논의용 시각적 참고 자료**다 — Standard Object/Custom
+> Object를 한눈에 보여준다. **공식 Object 관계 정의는 `docs/03_SYSTEM.md` §3.4
+> Relationship Summary의 Mermaid `erDiagram`**이며, 관계가 바뀌면 그 문서를 먼저
+> 고친다 — 이 이미지는 정적 파일이라 자동으로 갱신되지 않는다.

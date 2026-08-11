@@ -238,6 +238,12 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | Membership Card | 활성화·발급이 별도 업무 단계 | "카드번호 + 발급일 + 상태" 정도의 정보라면 Membership Enrollment의 필드로 충분하다. 다만 카드 자체의 재발급·분실 이력을 따로 추적해야 한다면 Entity로 승격이 맞다 — §6.6에서 선택지로 다룬다. |
 | Refund / Cancellation | 티켓 "문제 처리" 단계 | 대부분 "이 Ticket Purchase의 상태가 결제완료→환불로 바뀐 것"이지, 구매와 무관한 새로운 사건이 아니다. 환불 사유·금액 등 추가 정보가 많아지면 Entity로 승격할 수 있다 — §6.7에서 선택지로 다룬다. |
 
+> **구현 현황(`05_DECISIONS.md` Decision 013)**: 여기서 예상한 대로 별도 Entity로
+> 승격하지 않고 Order의 필드(`Payment_Status__c`/`Refund_Date__c`/`Refund_Reason__c`)로
+> 확정했다. 다만 예상과 달리 필드는 Ticket Purchase 전용이 아니라 **Order 전체
+> (Ticket/Goods/Membership 공통)**에 추가했고, MVP는 Order 전체 단위 환불만 지원한다
+> — OrderItem 단위의 부분 환불은 Future Scope로 남겼다.
+
 ---
 
 ## 4. Business Entity 목록 (Workflow 기준 개정판)
@@ -288,9 +294,15 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 
 | Entity | 설명 | Domain |
 |---|---|---|
+| **Season** `05_DECISIONS.md Decision 011 추가` | 시즌. 경기 수·관람률 집계 기준이며 Game의 상위 개념 | Operations |
 | Game | 경기 | Operations |
 | Campaign | 마케팅/스폰서 캠페인 (참여 조직 수와 무관하게 하나의 개념으로 통합, §3.3) | Marketing / Partnership |
 | Fan Meeting | 팬 미팅 | Fan / Operations |
+
+> **Season은 왜 이번 Workflow 분석에는 없었나?** 이 Entity는 Workflow 분석(2026-08-06)
+> 이후, Fan Profile·Dashboard 설계 과정에서 "시즌별 관람률을 어떻게 계산할까"를
+> 고민하다 새로 확정됐다(`05_DECISIONS.md` Decision 011). `신규` 표시 대신 Decision
+> 번호를 달아 이 표의 다른 Entity와 발견 시점이 다르다는 것을 구분한다.
 
 ### 💰 Transaction
 
@@ -426,6 +438,7 @@ graph TD
 | Ticket / Season Pass / Membership / Goods / Collaboration Item / Benefit | Custom Object 또는 Standard Product2 (§6.3) |
 | Ticket Policy / Membership Tier / Sponsorship Package | Custom Object (Price Book/Price Book Entry로 대체 가능 — §6.3과 함께 검토) |
 | Eligibility Rule | Custom Object 또는 Validation Rule/Flow 로직 (§6.4) |
+| Season | Custom Object (`Season__c`, `Game__c`의 Master-Detail 부모 — `05_DECISIONS.md` Decision 011) |
 | Game | Custom Object |
 | Campaign / Fan Meeting | Standard Campaign |
 | Ticket Purchase / Goods Purchase / Membership Enrollment | Standard Order 또는 Opportunity (§6.5) |

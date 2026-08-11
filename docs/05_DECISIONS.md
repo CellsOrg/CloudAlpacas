@@ -628,3 +628,245 @@ Decision 009로 Fan 분류 3축의 **개념**은 정리됐지만, Org에서 실�
 - `docs/data/DEMO_DATASETS.md`, `docs/data/SAMPLE_DATA.md`: `Fan_Value__c` 표기를
   `Fan_Value_Tier__c`로 갱신하고, `Engagement_Score__c`를 TBD로 표기한다(임의의 예시
   점수를 확정 공식처럼 기록하지 않는다).
+
+---
+
+## Decision 011 — Season Object 도입, Game__c/Fan_Activity_Pattern__c 재설계 (Master-Detail + Roll-Up)
+
+**상태**: 확정
+**기록일**: 2026-08-11
+
+### 배경
+
+시즌별로 팬의 관람 참여도를 정량적으로 비교하고("이 팬이 2025시즌보다 2026시즌에 더
+자주 왔는가"), 관람률(%)을 계산해야 한다는 필요가 제기됐다. 기존
+`Fan_Activity_Pattern__c.Period__c`(Text)는 "2026 시즌"처럼 자유 텍스트로만 기간을
+표현해서, 시즌 전체 경기 수·진행 경기 수 같은 집계 기준이 될 수 없었다. Game도
+"예정/진행/취소" 상태나 홈/원정 구분이 없어, 취소된 경기까지 관람률 분모에 들어가는
+문제가 있었다.
+
+### 결정
+
+**1. `Season__c`를 신규 Custom Object로 만든다.**
+
+| Field (API Name) | 타입 | 설명 |
+|---|---|---|
+| Name | Text | 예: "2026 시즌" |
+| `Total_Games__c` | Number | 시즌 전체 경기 수(취소 포함, 수동 입력) |
+| `Played_Games__c` | Roll-Up Summary (COUNT, `Game__c.Status__c = Played`) | 실제 진행 경기 수 — 관람률 계산의 분모 |
+
+**2. `Game__c` → `Season__c`는 Master-Detail(Master = Season)로 연결한다.** `Home_Away__c`
+(Picklist: Home/Away), `Status__c`(Picklist: Scheduled/Played/Cancelled) 필드를
+추가한다. 관람률 계산 시 `Status__c = Cancelled`인 경기는 분모에서 제외한다.
+
+이 관계 타입은 별도로 논의하지 않고 **기존에 이미 승인된 결정의 기술적 연장**으로
+확정한다 — `Played_Games__c`를 Roll-Up으로 자동 집계하기로 이미 정했고(아래 §3),
+Admission__c↔Attendance_Record__c도 같은 이유로 Master-Detail을 확정했다(Decision
+012). Lookup으로 하면 `Played_Games__c`를 누군가 수동으로 세야 하는데, 이는 "경기
+취소/진행 여부를 자동 반영한다"는 이번 결정의 취지에 어긋난다.
+
+**3. `Fan_Activity_Pattern__c`를 Fan + Season 기준으로 재설계한다.** `Period__c`(Text)를
+삭제하고 `Season__c`(Lookup)를 추가한다 — 한 Fan은 시즌별로 하나의 Activity Pattern을
+가진다("Fan A + 2025", "Fan A + 2026"처럼). `Attendance_Rate__c`(Formula, Percent)를
+추가한다 — 별도 저장 없이 `Games_Attended__c ÷ Season__r.Played_Games__c × 100`으로
+계산한다.
+
+> 예: 시즌 예정 경기 144경기 / 취소 2경기 / 실제 진행 142경기 / 팬 관람 36경기 →
+> 관람률 25.35%
+
+**4. MVP는 시즌 단위 집계로 구현한다.** 월별/분기별 Pattern은 Future Scope로 둔다.
+
+**5. `Fan_Activity_Pattern__c`에 `Fan__c` + `Season__c` 조합 기준 Duplicate Rule을
+추가한다** — 한 팬은 한 시즌에 Activity Pattern을 1건만 가질 수 있도록 Block한다
+(Matching Rule: 두 필드 모두 Exact).
+
+### 이유
+
+- Season을 Object로 만들지 않으면 "시즌 전체 경기 수"와 "실제 진행 경기 수"를 어딘가
+  수동으로 관리해야 하고, 경기 취소가 생길 때마다 관람률 계산이 틀어진다 — Object로
+  집계 기준 자체를 자동화하는 것이 Baby Team의 운영 부담을 줄인다.
+- `Period__c`(Text)를 유지하면 "2026 시즌"과 "2026시즌"처럼 표기가 흔들려도 시스템이
+  감지하지 못한다. `Season__c`(Lookup)로 바꾸면 오타로 인한 중복/누락을 Duplicate
+  Rule로 원천 차단할 수 있다.
+- Master-Detail을 Lookup 대신 선택한 이유는 Decision 012와 동일한 원칙(Roll-Up
+  자동화가 필요한 관계는 Master-Detail로 만든다)을 일관되게 적용하기 위함이다.
+
+### 영향
+
+- `03_SYSTEM.md` §1.2: Custom Object 목록에 `Season__c` 추가.
+- `03_SYSTEM.md` §2: `Season__c` 필드 상세 섹션 신설, `Game__c`에 `Season__c`/
+  `Home_Away__c`/`Status__c` 추가, `Fan_Activity_Pattern__c`의 `Period__c` 삭제 →
+  `Season__c`/`Attendance_Rate__c` 추가.
+- `03_SYSTEM.md` §3(ERD): `Season__c`↔`Game__c`, `Season__c`↔`Fan_Activity_Pattern__c`
+  관계를 추가한다.
+- `01_PROJECT.md` §4(Business Entity 목록), §6.1(전체 매핑 표): Season Entity를
+  추가한다(이번 Workflow 분석 이후 새로 확정된 Entity로 표시).
+- `docs/data/DEMO_DATASETS.md`, `docs/data/SAMPLE_DATA.md`: Season 레코드와
+  `Fan_Activity_Pattern__c`의 `Period__c` 값을 `Season__c` 참조로 갱신해야 한다(다음
+  데이터 작업 시 반영).
+
+---
+
+## Decision 012 — Admission__c ↔ Attendance_Record__c를 Master-Detail로 전환, 집계는 Roll-Up Summary로 처리
+
+**상태**: 확정
+**기록일**: 2026-08-11
+
+### 배경
+
+`Attendance_Record__c.Total_Admissions__c`/`First_Admission_Date__c`/
+`Last_Admission_Date__c`가 실제로 "누가 언제 갱신하는지"가 문서에 명확히 정의된 적이
+없었다 — 사실상 수동 또는 별도 집계 Flow에 의존한다고 암묵적으로 가정하고 있었다.
+팬 수가 늘어나면 이런 수동/Flow 집계는 누락되거나 느려질 위험이 있다.
+
+### 결정
+
+`Admission__c.Attendance_Record__c`를 **Master-Detail**(Detail = `Admission__c`,
+Master = `Attendance_Record__c`)로 추가한다. `Total_Admissions__c`(COUNT),
+`First_Admission_Date__c`(MIN, `Admission_Time__c`), `Last_Admission_Date__c`(MAX,
+`Admission_Time__c`)를 **Roll-Up Summary**로 전환한다 — 이 3개 필드를 갱신하던
+별도의 집계 Flow는 더 이상 만들지 않는다.
+
+단, Master-Detail 관계는 **부모(`Attendance_Record__c`)가 먼저 존재해야 자식
+(`Admission__c`)을 만들 수 있다**는 제약이 있다. 이를 위해 Welcome Campaign
+Flow(Person Account 생성 트리거)에 `Attendance_Record__c` 1건 생성 단계를 추가한다
+— 별도 Flow로 분리하지 않고 같은 트리거(Account 생성)에 통합한다(Flow를 2개 두면
+실행 순서까지 신경 써야 해서 오히려 복잡해진다).
+
+`Attendance_Record__c`에는 기존과 동일하게 `Fan__c` 기준 팬당 1건 Duplicate Rule을
+유지한다(Matching Rule: `Fan__c` Exact, Action on Create = Block).
+
+### 이유
+
+- Roll-Up Summary는 Master-Detail 관계에서만 만들 수 있다 — Lookup을 유지하면서
+  "자동 집계"를 얻을 방법이 없다.
+- Master-Detail 자식은 부모의 Sharing 설정을 그대로 상속한다 — 별도 공유 규칙을
+  추가로 설계할 필요가 없어진다.
+- Attendance_Record__c 생성을 Welcome Campaign Flow에 통합한 이유는, Account
+  생성이라는 같은 트리거에 Flow를 여러 개 걸어두면 실행 순서 보장이 새로운 문제로
+  등장하기 때문이다 — 이미 있는 Flow에 단계 하나를 추가하는 편이 더 단순하다.
+
+### 영향
+
+- `03_SYSTEM.md` §2(Admission__c, Attendance_Record__c): `Attendance_Record__c`
+  Master-Detail 필드 추가, 집계 3필드를 Roll-Up Summary로 변경.
+- `03_SYSTEM.md` §3(ERD): `Admission__c` → `Attendance_Record__c` Master-Detail
+  관계를 명시적으로 추가한다.
+- `03_SYSTEM.md` §4.4(Welcome Campaign Flow): `Attendance_Record__c` 1건 생성 단계를
+  다이어그램에 추가한다.
+- `03_SYSTEM.md` §4.2(Trigger → Action 매핑): "First Visit Guide" 트리거를
+  `Attendance_Record__c` 존재 여부 확인 대신 `Total_Admissions__c`(Roll-Up) = 1로
+  판별하도록 갱신한다.
+- `03_SYSTEM.md`에 Duplicate Rule 섹션을 신설해 이 규칙을 명문화한다(기존에는 문서에
+  규칙 자체가 없었다).
+
+---
+
+## Decision 013 — Order에 Payment_Status__c/Refund 필드 추가, Membership_End_Date__c를 Coverage_Start/End_Date__c로 통합
+
+**상태**: 확정
+**기록일**: 2026-08-11
+
+### 배경
+
+Cloud Alpacas는 티켓·시즌권·멤버십·굿즈 4종을 판매하는데, 구매 이후 상태 변화(취소·
+환불)를 기록할 곳이 없었다. 또한 `Membership_End_Date__c`는 이름 그대로 Membership
+전용으로 만들어졌지만, 실제로는 Season Pass(시즌권)도 같은 성격의 "적용 기간"이
+필요해서 이름이 좁았다.
+
+### 결정
+
+**1. `Order`에 결제/환불 상태 필드를 추가한다.**
+
+| Field (API Name) | 타입 | 설명 |
+|---|---|---|
+| `Payment_Status__c` | Picklist (Paid/Cancelled/Refunded) | 표준 `Status`(Draft/Activated)와는 **다른 축** — 결제/환불 상태를 표현한다. |
+| `Refund_Date__c` | Date | 환불 처리일. |
+| `Refund_Reason__c` | Picklist (단순변심/상품불량/경기취소/일정변경) | 환불 사유. |
+
+**2. `Membership_End_Date__c`를 삭제하고, `Coverage_Start_Date__c`/
+`Coverage_End_Date__c`(Date)로 대체한다.** 멤버십과 시즌권이 공통으로 쓰는 "적용
+기간" 필드로 통합한다.
+
+**3. MVP는 Order 전체 단위 환불만 지원한다.** 부분 환불(OrderItem 단위 환불)은
+Future Scope로 남긴다.
+
+**4. 환불 문의는 기존 `Case.Related_Order__c`로 Order와 연결한다** — 이미 존재하는
+필드이므로 새 필드를 추가하지 않는다.
+
+**5. `Fan_Activity_Pattern__c.Total_Spend__c` 계산 시 `Payment_Status__c` =
+Refunded/Cancelled인 Order는 집계에서 제외한다.** 다만 이 집계를 **누가/언제**(Flow
+또는 Apex) 계산하는지는 이번에 확정하지 않는다(TBD) — `03_SYSTEM.md` §4.6에 이미
+있는 "아직 정의되지 않은 Trigger" 목록과 같은 방식으로 미정 상태를 문서화한다.
+
+### 이유
+
+- `Payment_Status__c`를 표준 `Status`와 분리한 이유는 Decision 009·010에서 이미
+  적용한 원칙("서로 다른 개념을 같은 필드/이름으로 섞지 않는다")과 같다 — Order가
+  Draft/Activated인지와, 결제가 Paid/Refunded인지는 독립된 질문이다.
+  `Order.Status`(Draft에서만 Product 추가 가능)와 `Payment_Status__c`(결제 이후의
+  상태)는 시점부터 다르다.
+- 부분 환불을 지금 지원하지 않는 이유는, 한 Order에 OrderItem이 여러 개(예: 티켓
+  2장) 있을 때 그중 1개만 환불하는 케이스까지 지원하려면 필드를 OrderItem에 둬야
+  하는데, 이는 지금 팀 규모와 Demo 범위에서 필요한 복잡도를 넘어선다(CLAUDE.md §5
+  MVP 원칙).
+- `Coverage_Start/End_Date__c`로 이름을 바꾼 이유는, 필드명만 보고도 "멤버십과
+  시즌권이 공통으로 쓴다"는 걸 알 수 있게 하기 위해서다 — Decision 010이
+  `Fan_Value_Tier__c`에 적용한 것과 같은 원칙(필드명이 스스로 용도를 설명해야 한다).
+
+### 영향
+
+- `03_SYSTEM.md` §2(Order): `Membership_End_Date__c` 삭제, `Coverage_Start_Date__c`/
+  `Coverage_End_Date__c`/`Payment_Status__c`/`Refund_Date__c`/`Refund_Reason__c` 추가.
+- `03_SYSTEM.md` §2(Fan_Activity_Pattern__c): `Total_Spend__c` 설명에 "Refunded/
+  Cancelled Order 제외" 규칙을 추가한다.
+- `03_SYSTEM.md` §4.6: `Total_Spend__c` 계산 주체(Flow/Apex 미정)를 기존 표에
+  항목으로 추가한다.
+- `03_SYSTEM.md` §5(Future Scope): 부분 환불(OrderItem 단위)을 Future Scope
+  항목으로 추가한다.
+
+---
+
+## Decision 014 — Fan Profile은 원천 데이터를 Account에 중복 저장하지 않고 Related List로 참조
+
+**상태**: 확정
+**기록일**: 2026-08-11
+
+### 배경
+
+Fan Profile 화면에 "최근 관람일, 총 관람 횟수, 총 구매금액, 구매 빈도, 최근 활동일"을
+보여줘야 하는데, 이 값들을 Account(Person Account)의 새 필드로 또 만들 것인지, 아니면
+이미 있는 원천 Object(`Attendance_Record__c`, `Fan_Activity_Pattern__c`, `Order`,
+`Engagement_Signal__c`)를 화면에서 그대로 참조할 것인지 결정이 필요했다.
+
+### 결정
+
+Fan Profile이 보여주는 아래 항목은 **Account 필드로 복제하지 않고, 원천 Object를
+Related List/Lightning Component로 그대로 참조**한다.
+
+| 표시 항목 | 원천 Object | 원천 필드 |
+|---|---|---|
+| 최근 관람일 / 총 관람 횟수 | `Attendance_Record__c` | `Last_Admission_Date__c` / `Total_Admissions__c` |
+| 총 구매금액 | `Fan_Activity_Pattern__c` | `Total_Spend__c` |
+| 구매 빈도 | `Order` | (Fan 기준 Order 건수) |
+| 최근 활동일 | `Engagement_Signal__c` | `Signal_Date__c`(최신 1건) |
+
+반면 `Current_Segment__c`/`Engagement_Level__c`/`Engagement_Score__c`/
+`Fan_Value_Tier__c`는 원천 복제가 아니라 **Fan 자체의 상태값**이므로 지금처럼
+Account에 직접 저장한다(Decision 009·010과 변경 없음).
+
+### 이유
+
+- 위 4개 항목은 각각 이미 자기 Object(Attendance Record, Fan Activity Pattern,
+  Order, Engagement Signal)에 원본이 존재한다 — Account에 또 필드를 만들면 원본이
+  바뀔 때마다 두 곳을 동기화해야 하는 불필요한 자동화가 늘어난다.
+- 반대로 Current Segment/Engagement Level/Fan Value는 여러 원천을 종합한 "판단
+  결과"이지 특정 Object의 단순 복제값이 아니다 — 이 값들은 원본이 따로 없으므로
+  Account에 두는 것이 캐시가 아니라 원래 자리다(§2.1의 "왜 캐시와 이력을 나누나"
+  설명과 같은 원칙).
+
+### 영향
+
+- `03_SYSTEM.md`에 "Fan Profile 설계 원칙" 섹션을 신설해 위 표를 그대로 반영한다.
+- `04_DEMO.md` §4 Fan Profile 화면 설명이 이 원칙(원천 참조 vs Account 직접 저장)을
+  따르는지 이후 확인이 필요하다(이번 갱신 범위 밖).
