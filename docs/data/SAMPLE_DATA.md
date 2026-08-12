@@ -1,109 +1,216 @@
-# SAMPLE_DATA.md — Cloud Alpacas 참고/마스터 데이터
+# Cloud Alpacas — Org 구축용 더미 데이터 예시
 
-> 이 문서는 Demo 시나리오와 무관하게 **Salesforce Org에 항상 존재해야 하는 기준 데이터**
-> (선수, 상품, 경기 일정, 배경이 되는 다른 Fan들)를 담는다. 이루키 한 사람의 여정을
-> 시간순으로 따라가는 시나리오 데이터는 `DEMO_DATASETS.md`를 참고한다(CLAUDE.md §7
-> 중복 방지 — 같은 값을 두 문서에 쓰지 않는다).
->
-> 담당: 아론(Business Analyst / Demo Experience Lead), 검증: 혜준(`02_TEAM_GUIDE.md` §2).
-> Object/Field 정의 근거는 `03_SYSTEM.md`를 따른다.
+> `CloudAlpacas_메타데이터_기록.xlsx` Object 시트 기준. **의존 관계(생성 순서)대로** 정렬했습니다 —
+> 위에서부터 순서대로 입력하면 Lookup/Master-Detail 참조가 끊기지 않습니다.
+> 🆕 표시는 지난 논의에서 새로 추가된 Object/Field라 기존 `SAMPLE_DATA.md`/`DEMO_DATASETS.md`엔
+> 없는 것들입니다. ⚙️는 Roll-Up Summary/Formula라 **직접 입력하면 안 되는** 필드입니다.
 
 ---
 
-## 1. Player (Contact, RecordType = Player)
+## 1. 🆕 Season__c (가장 먼저 — Game__c의 Master 부모)
 
-| Name | Position__c | Uniform_Number__c | 비고 |
-|---|---|---|---|
-| 문태양 (문선수) | 투수 | 21 | 00_STORY.md 이루키의 최애 선수 |
-| 강도윤 | 내야수 | 7 | |
-| 서준혁 | 외야수 | 30 | |
-| 이하늘 | 포수 | 2 | |
-
-> **왜 4명뿐인가?** Demo에 필요한 최소 인원이다 — 문태양(최애 선수 시나리오)과, 팀
-> 로스터가 비어 보이지 않을 정도의 배경 선수 3명. 더 필요해지면 이 표에 추가한다.
-
----
-
-## 2. Product2
-
-> **"VIP" 용어 구분(`05_DECISIONS.md` Decision 009)**: 아래 §2.2/§2.3의 "VIP"는
-> 시즌권·멤버십 **상품 등급**(Product2.`Tier__c` 값)이다. Fan Profile에 표시되는
-> Fan Value(`Fan_Value_Tier__c`)의 "VIP"(일반/우수/VIP)와는 다른 개념이다 — VIP 멤버십을
-> 아직 안 산 팬도 Fan Value가 VIP일 수 있고, 반대일 수도 있다.
-
-### 2.1 Ticket (RecordType = Ticket)
-
-| Name | 가격(PricebookEntry) | 비고 |
+| Name | Total_Games__c | Played_Games__c |
 |---|---|---|
-| 티켓 - 1루 응원석 | 15,000원 | |
-| 티켓 - 3루 응원석 | 15,000원 | |
-| 티켓 - 외야석 | 10,000원 | |
-| 티켓 - 프리미엄석 | 35,000원 | |
+| 2026 시즌 상반기 | 72 | ⚙️ 자동(Game__c.Status__c=Played 집계) |
+| 2026 시즌 하반기 | 72 | ⚙️ 자동 |
 
-### 2.2 Season Pass (RecordType = Season Pass)
+> Played_Games__c는 입력하지 마세요 — Game__c를 Status__c=Played로 만들면 자동으로 올라갑니다. 지금은 0으로 보여도 정상입니다(아직 연결된 Game이 없으니까요).
 
-| Name | 가격 |
+---
+
+## 2. Contact (Player) — RecordType=Player
+
+기존 `SAMPLE_DATA.md` §1 그대로 재사용 (신규 아님, 참고용 재게재)
+
+| Name | Position__c | Uniform_Number__c |
+|---|---|---|
+| 문태양 | 투수 | 21 |
+| 강도윤 | 내야수 | 7 |
+
+---
+
+## 3. 🆕 Game__c (Season__c 필요 — 순서상 1번 다음)
+
+| Game_Date__c | Opponent__c | Result__c | 🆕 Season__c | 🆕 Home_Away__c | 🆕 Status__c |
+|---|---|---|---|---|---|
+| 2026-05-02 | 레드폭스 | Win | 2026 시즌 상반기 | Home | Played |
+| 2026-06-20 | 선더버즈 | (비워둠) | 2026 시즌 상반기 | Away | Scheduled |
+
+> 두 번째 예시(Scheduled)를 넣어봐야 `Played_Games__c` Roll-Up이 "전체가 아니라 진행된 것만" 세는 걸 직접 확인할 수 있습니다. Status__c=Cancelled 케이스도 하나 만들어서 관람률 계산에서 실제로 빠지는지 테스트해보세요.
+
+---
+
+## 4. Person Account (Fan)
+
+기존 `DEMO_DATASETS.md`의 이루키 + 신규 필드 테스트용 샘플
+
+| Name | Acquisition_Channel__c | Favorite_Player__c | Current_Segment__c | 🆕 Fan_Value_Tier__c | 🆕 Engagement_Level__c | 🆕 Engagement_Score__c |
+|---|---|---|---|---|---|---|
+| 이루키 | SNS | 문태양 | New Fan | 일반 | (비워둠, TBD) | (비워둠, TBD) |
+| 박서연 | 지인 추천 | (없음) | Active Fan | 우수 | 활동 팬 | 65 |
+
+> 이루키는 `DEMO_DATASETS.md` 원칙대로 Engagement 필드를 비워두고, 박서연은 **필드가 실제로 동작하는지 확인하는 용도로만** 임의값(65점, "활동 팬")을 넣어보세요 — 이건 데모 공식이 아니라 순수 테스트 값입니다.
+
+---
+
+## 5. Product2 — 🆕 Category__c 확장값 테스트용
+
+기존 4개(`SAMPLE_DATA.md` §2.4)는 Uniform/Cheering Item/Accessory만 썼으니, 새로 늘어난 값 위주로 2개만 추가
+
+| Name | RecordType | Category__c | Related_Player__c | 가격 |
+|---|---|---|---|---|
+| 문태양 인형 | Goods | 🆕 Plush | 문태양 | 22,000원 |
+| 팀 포토카드 세트 | Goods | 🆕 Photo Card | (없음) | 5,000원 |
+
+---
+
+## 6. PricebookEntry
+
+위 2개 상품에 대해 Standard Price Book에 가격만 등록하면 됩니다(22,000원 / 5,000원) — 별도 예시 표 불필요.
+
+---
+
+## 7. 🆕 Attendance_Record__c (Admission__c보다 먼저! Master-Detail 부모)
+
+| Fan__c | Total_Admissions__c | First_Admission_Date__c | Last_Admission_Date__c |
+|---|---|---|---|
+| 이루키 | ⚙️ 자동 | ⚙️ 자동 | ⚙️ 자동 |
+| 박서연 | ⚙️ 자동 | ⚙️ 자동 | ⚙️ 자동 |
+
+> **레코드는 만들어야 하지만 저 3개 필드엔 아무 값도 입력하지 마세요.** Fan__c만 채우고 Save — 나머지는 Admission__c를 만들면 자동으로 채워집니다. (Welcome Campaign Flow가 완성되면 이 레코드는 Fan 가입 시 자동 생성되지만, 지금은 Flow 전이니 수동으로 먼저 만들어두는 겁니다.)
+
+---
+
+## 8. Order — 🆕 Payment_Status__c / Refund / Coverage 필드 테스트
+
+| Order_Type__c | Purchase_Channel__c | Account | 🆕 Payment_Status__c | 🆕 Refund_Date__c | 🆕 Refund_Reason__c | 🆕 Coverage_Start/End_Date__c |
+|---|---|---|---|---|---|---|
+| Ticket Purchase | 온라인 | 이루키 | Paid | (비워둠) | (비워둠) | 해당없음 |
+| Membership Enrollment | 구장 | 박서연 | Paid | (비워둠) | (비워둠) | 2026-06-01 ~ 2027-06-01 |
+
+> **환불 시나리오도 하나 따로 테스트해보세요**: 아무 Order나 하나 더 만들어서 Payment_Status__c=Refunded, Refund_Date__c=오늘, Refund_Reason__c=단순변심으로 채워보고, Fan_Activity_Pattern__c.Total_Spend__c 계산 로직이 확정되면 이 Order가 실제로 집계에서 빠지는지 나중에 확인할 수 있게 남겨두세요.
+
+---
+
+## 9. OrderItem
+
+기존 방식 그대로(`SAMPLE_DATA.md`/`DEMO_DATASETS.md` 패턴 재사용) — 좌석 정보만 채우면 됩니다.
+
+| Order | Product2 | Section__c | Row__c | Seat_Number__c |
+|---|---|---|---|---|
+| 이루키의 Ticket Purchase | 티켓 - 외야석 | 외야 C구역 | 15열 | 15 |
+| 박서연의 Membership Enrollment | 멤버십 - Standard | 해당없음 | 해당없음 | 해당없음 |
+
+---
+
+## 10. 🆕 Admission__c (Attendance_Record__c 먼저 만든 뒤에!)
+
+| Fan__c | Game__c | Order_Item__c | Admission_Time__c | Gate__c | 🆕 Attendance_Record__c |
+|---|---|---|---|---|---|
+| 이루키 | 2026-05-02 vs 레드폭스 | 위 OrderItem | 2026-05-02 17:50 | Gate 2 | 이루키의 Attendance Record |
+| 박서연 | 2026-05-02 vs 레드폭스 | (별도 OrderItem 필요) | 2026-05-02 18:10 | Gate 1 | 박서연의 Attendance Record |
+
+> 저장하고 나서 7번의 Attendance_Record__c로 돌아가 보세요 — `Total_Admissions__c`가 자동으로 1이 돼 있으면 Roll-Up이 정상 동작하는 겁니다.
+
+---
+
+## 11. Engagement_Signal__c
+
+| Fan__c | Signal_Type__c | Source__c | Player__c | Signal_Date__c |
+|---|---|---|---|---|
+| 이루키 | SNS Click | Instagram | 문태양 | 2026-04-21 |
+| 박서연 | App Open | (없음) | (없음) | 2026-05-10 |
+
+---
+
+## 12. 🆕 Fan_Activity_Pattern__c (Period__c 대신 Season__c, Fan당+Season당 1건)
+
+| Fan__c | 🆕 Season__c | Games_Attended__c | Goods_Purchases__c | Total_Spend__c | 🆕 Attendance_Rate__c | Analyzed_Date__c |
+|---|---|---|---|---|---|---|
+| 이루키 | 2026 시즌 상반기 | 3 | 1 | 124,000원 | ⚙️ 자동(Formula) | 2026-05-31 |
+| 박서연 | 2026 시즌 상반기 | 1 | 0 | 15,000원 | ⚙️ 자동(Formula) | 2026-05-31 |
+
+> `Attendance_Rate__c`는 Formula라 필드 자체가 화면에 안 보이거나 계산 불가로 나올 수 있습니다 — `Season__c.Played_Games__c`가 0이면 나누기 오류가 날 수 있으니, 3번(Game__c)에서 Status__c=Played인 레코드를 최소 1개는 먼저 만들어두세요.
+
+---
+
+## 13. Fan_Segment_History__c
+
+| Fan__c | Segment__c | Changed_Date__c | Reason__c |
+|---|---|---|---|
+| 이루키 | New Fan | 2026-04-20 | 최초 가입 |
+| 이루키 | Active Fan | 2026-05-02 | 첫 직관 완료 |
+
+---
+
+## 14. Recommendation__c
+
+| Fan__c | Recommended_Action__c | Reason__c | Status__c |
+|---|---|---|---|
+| 이루키 | Favorite Player Campaign | 문태양 관련 굿즈 첫 구매 | Executed |
+| 이루키 | Membership Campaign | 재방문 3회, 누적 지출 124,000원으로 VIP 후보 조건 충족 | Pending |
+
+---
+
+## 15. Benefit__c
+
+| Fan__c | Benefit_Type__c | Recommendation__c | Status__c | Issued_Date__c |
+|---|---|---|---|---|
+| 이루키 | Discount | 위 Favorite Player Campaign 건 | Issued | 2026-05-16 |
+| 박서연 | Coupon | (없음) | Issued | 2026-05-10 |
+
+---
+
+## 16. Notification_Log__c
+
+| Fan__c | Channel__c | Content__c | Sent_Date__c |
+|---|---|---|---|
+| 이루키 | Email | "Cloud Alpacas에 오신 것을 환영합니다, 이루키님!" | 2026-04-20 |
+| 박서연 | Push | "박서연님, 이번 주 홈경기 티켓 할인 중입니다" | 2026-05-25 |
+
+---
+
+## 17. Campaign / CampaignMember
+
+| Campaign Name | Type |
 |---|---|
-| 시즌권 - 스탠다드 | 500,000원 |
-| 시즌권 - VIP | 1,200,000원 |
+| Welcome Campaign | Email |
+| Membership Campaign | Email |
 
-### 2.3 Membership (RecordType = Membership, `Tier__c`)
+CampaignMember는 위 Campaign에 이루키/박서연을 각각 1명씩 추가하면 됩니다.
 
-| Name | Tier__c | 가격(연) |
-|---|---|---|
-| 멤버십 - Standard | Standard | 30,000원 |
-| 멤버십 - Premium | Premium | 80,000원 |
-| 멤버십 - VIP | VIP | 200,000원 |
+---
 
-### 2.4 Goods (RecordType = Goods, `Category__c`, `Related_Player__c`)
+## 18. Case — 🆕 환불 문의 시나리오 테스트
 
-| Name | Category__c | Related_Player__c | 가격 |
+| Subject | Origin | Status | Related_Order__c |
 |---|---|---|---|
-| 문태양 유니폼(홈) | Uniform | 문태양 | 89,000원 |
-| 문태양 유니폼(어웨이) | Uniform | 문태양 | 89,000원 |
-| 구단 응원타올 | Cheering Item | (없음) | 12,000원 |
-| 구단 모자 | Accessory | (없음) | 25,000원 |
+| 티켓 환불 문의 | Phone | New | 8번의 환불 테스트 Order |
+| 멤버십 결제 오류 문의 | Email | Closed | 박서연의 Membership Order |
+
+> 첫 번째 Case는 일부러 8번에서 만든 **환불 테스트 Order**와 연결해보세요 — Case 화면에서 `Related_Order__c`를 눌렀을 때 `Payment_Status__c=Refunded`가 바로 보이는지 확인하는 게 이번에 새로 생긴 연결 구조를 검증하는 핵심 포인트입니다.
 
 ---
 
-## 3. Game (`Game__c`)
+## 입력 순서 체크리스트 (요약)
 
-> Cloud Alpacas의 상대팀은 한화 이글스가 아니라 **이 프로젝트를 위해 만든 가상의
-> 팀명**을 쓴다(05_DECISIONS.md Decision 001 — Cloud Alpacas 세계관은 처음부터 끝까지
-> 가상이어야 자연스럽다).
-
-| Game_Date__c | Opponent__c | Result__c |
-|---|---|---|
-| 2026-04-04 | 블루웨일스 | Win |
-| 2026-04-18 | 선더버즈 | Loss |
-| 2026-05-02 | 레드폭스 | Win |
-| 2026-05-16 | 블루웨일스 | Win |
-| 2026-05-30 | 스톰이글스(가상) | Draw |
-
-> DEMO_DATASETS.md의 이루키 여정은 이 경기들 중 일부를 사용한다 — 실제 어느 경기를
-> 썼는지는 `DEMO_DATASETS.md`에서 확인한다.
-
----
-
-## 4. 배경 Fan (이루키 외 다른 팬)
-
-Fan 360 Dashboard의 목록 화면이 이루키 한 명만 있으면 어색하다 — 대시보드의 Current
-Segment(Life Cycle) 현황이 "여러 팬 중 하나"라는 맥락을 보여줄 수 있도록 배경 인물을
-최소한으로 둔다.
-
-| Name | Current_Segment__c | 비고 |
-|---|---|---|
-| 박서연 | Active Fan | 재방문 팬 예시 |
-| 김도현 | Dormant Fan | 장기 무활동 팬 예시 |
-| 최민재 | New Fan | 최근 가입 팬 예시 |
-
-> 이 3명의 상세 이력(Admission, Order 등)은 최소한으로만 채운다 — Demo의 주인공은
-> 이루키다. 대시보드 화면에서 "여러 Current Segment(Life Cycle)가 섞여 있다"는 것만
-> 보여주면 충분하다.
-
----
-
-## 5. Future Scope
-
-- Player/Goods/Game 수가 부족하다고 느껴지면(예: 화면이 너무 비어 보임) 이 문서에
-  추가한다 — 다만 Demo에 실제로 등장하지 않는 데이터는 과도하게 늘리지 않는다.
+```
+1. Season__c
+2. Contact(Player) — 기존 데이터 재사용
+3. Game__c (Season__c 연결)
+4. Person Account
+5. Product2 (신규 Category만)
+6. PricebookEntry
+7. Attendance_Record__c ← Admission보다 먼저!
+8. Order
+9. OrderItem
+10. Admission__c (Attendance_Record__c 연결)
+11. Engagement_Signal__c
+12. Fan_Activity_Pattern__c (Season__c 연결)
+13. Fan_Segment_History__c
+14. Recommendation__c
+15. Benefit__c
+16. Notification_Log__c
+17. Campaign/CampaignMember
+18. Case (Related_Order__c 연결)
+```
