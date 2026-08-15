@@ -1,3 +1,62 @@
+# 사라
+
+## [P2] Current Role
+
+🦙 **Fan 360 고도화 + B2B 연결**. PM / Solution Architect / Product Designer
+역할(`02_TEAM_GUIDE.md §1`)은 그대로 유지하되, Phase 2에서는 여기에 더해 **Fan
+360 고도화와 B2C↔B2B 연결 지점(Fan Insight/Fan Grouping)을 직접 책임지는
+Feature Owner**를 겸한다(`02_TEAM_GUIDE.md §11`). 동시에 Baby PM으로서 전체
+Story·Scope·공용 Data 기준·Integration/QA 흐름을 연결한다(`02_TEAM_GUIDE.md §10`).
+
+## [P2] Mission
+
+Phase 1에서 쌓은 Fan 360 데이터가 Phase 2 B2B 의사결정에 실제로 쓰일 수 있도록
+Fan Insight/Fan Grouping을 설계하고, 그 결과가 다른 담당자의 Feature(특히 혜준의
+Partner Candidate Discovery)로 끊기지 않고 이어지게 만든다(`00_STORY.md §8.2`,
+`01_PROJECT.md §2.7`).
+
+## [P2] Ownership
+
+- **Data**: Person Account(`Gender__c`/`Birthdate` 포함), `Current_Segment__c`/
+  `Engagement_Level__c`/`Fan_Value_Tier__c` 3축, `Fan_Activity_Pattern__c`,
+  `Engagement_Signal__c`(`03_SYSTEM.md §2.1`)
+- **Screen(TBD)**: Fan Insight/Fan Grouping 화면 — Standard Report/Report Type
+  으로 할지 Custom LWC로 할지 미확정(`03_SYSTEM.md §7 J`)
+- **B2C↔B2B 연결 지점**: Fan Insight 결과가 Collab360/Partner Candidate 발굴의
+  입력이 되는 지점 전체
+
+## [P2] End-to-End Responsibility
+
+Requirement(`00_STORY.md §8` B2B가 Fan 360을 필요로 하는 이유) → Business/Domain
+이해(`01_PROJECT.md §2.7`) → Salesforce Field(`Gender__c` 등, `03_SYSTEM.md §2.1`에
+이미 반영) → Admin(Report/Report Type 설계) → Demo Data(`04_DEMO.md §10` Fan 분포
+기준) → Flow/Automation(TBD) → Dev(LWC 필요 시, TBD) → 화면 → QA
+
+## [P2] Shared Scenario
+
+`SCN-B2B-001`의 **출발점(Fan Insight)**을 책임진다 — 이 결과가 혜준의 Partner
+Candidate Discovery 입력이 된다(`02_TEAM_GUIDE.md §13`).
+
+## [P2] Collaboration
+
+- **혜준**: Fan Insight 결과를 Partner Candidate 후보 발굴에 넘긴다.
+- **전체 팀**: Baby PM으로서 Integration/QA 흐름을 조율한다(`02_TEAM_GUIDE.md §15`).
+
+## [P2] TBD / Decision Needed
+
+- Fan Insight 화면 구현 방식(`03_SYSTEM.md §7 J`)
+- Target Segment 저장 방식(`§7 G`)
+- Segment Match 계산 주체(`§7 H`, 혜준과 공동 결정)
+
+> 위 항목은 화요일 Technical Decision 회의(`docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md`)
+> 전까지 확정된 것으로 간주하지 않는다.
+
+---
+
+## [P1] Previous Role & Contribution
+
+> Phase 1(B2C Fan 360 MVP)에서 사라가 실제로 수행한 역할과 기여를 보존한 History다.
+
 # Mission
 
 > **"이 프로젝트가 왜 존재하는지, 그리고 그 이유가 문서와 화면 설계에 끝까지 살아있게

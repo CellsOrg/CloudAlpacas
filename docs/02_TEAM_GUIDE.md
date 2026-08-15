@@ -10,7 +10,27 @@
 
 ---
 
-## 1. 팀원과 역할
+## 0. Team Mission
+
+Cellsforce는 Cloud Alpacas(가상 구단)의 Fan Relationship Management(FRM) Team이
+되어 Salesforce Customer 360을 만든다. Phase 1에서는 신규 팬을 이해하고 충성
+팬으로 성장시키는 B2C Fan 360을, Phase 2에서는 그 Fan 360 데이터를 구단의 B2B
+Collaboration/Sponsorship 의사결정에 활용하는 것까지 확장한다(`CLAUDE.md` §1~§2).
+
+## 0-1. Project Phase
+
+| Phase | 내용 | 상태 |
+|---|---|---|
+| Phase 1 | B2C Fan 360 MVP | [P1] 완료(~2026-08-14) |
+| Phase 2 | B2C 고도화 + B2B Collaboration/Sponsorship Expansion | [P2] 진행 중(2026-08-15~) |
+
+자세한 범위는 `CLAUDE.md` §5(Source of Truth)를 따른다 — 이 문서에서 반복하지
+않는다. 아래 §1~§2는 Phase 1 당시 확정한 역할 배정(History)이고, **현재 역할은
+문서 말미의 §10~§17([P2])을 따른다.**
+
+---
+
+## 1. [P1] 팀원과 역할 (Phase 1 History)
 
 | 담당자 | 역할 | 온보딩 문서 |
 |---|---|---|
@@ -56,7 +76,7 @@ Object/Flow/화면을 담당하는지**는 각자의 온보딩 문서(`docs/memb
 
 ---
 
-## 1-1. 자동차 비유로 보는 팀 역할
+## 1-1. [P1] 자동차 비유로 보는 팀 역할 (Phase 1 History)
 
 Salesforce를 처음 접하는 사람도 한 번에 이해할 수 있도록, Cloud Alpacas라는 "자동차"를
 함께 만든다고 생각해보자.
@@ -71,7 +91,7 @@ Salesforce를 처음 접하는 사람도 한 번에 이해할 수 있도록, Clo
 
 ---
 
-## 1-2. 만드는 순서 — 이 흐름이 곧 Business First다
+## 1-2. [P1] 만드는 순서 — 이 흐름이 곧 Business First다 (Phase 1 History)
 
 다섯 역할은 순서 없이 각자 흩어져 일하는 것이 아니라, 아래 순서로 서로 연결된다. 내
 작업이 앞사람의 무엇을 이어받고, 뒷사람에게 무엇을 넘겨주는지 알면 "내 일이 왜
@@ -94,11 +114,11 @@ flowchart TD
 
 ---
 
-## 2. Object / Flow / Screen 담당 (제안)
+## 2. [P1] Object / Flow / Screen 담당 (Phase 1 History)
 
-> **이 표는 초안(Proposed)이다.** 03_SYSTEM.md의 Object 설계가 끝난 뒤, 각자의 역할에
-> 맞춰 Claude가 제안한 배정이며 팀 논의를 거쳐 바뀔 수 있다. 확정되면 이 문서(SSOT)를
-> 먼저 고치고, 그다음 `docs/members/*.md`를 맞춘다.
+> **이 표는 Phase 1 History다.** 03_SYSTEM.md의 Phase 1 Object 설계가 끝난 뒤, 각자의
+> 역할에 맞춰 Claude가 제안했던 배정이며 Phase 1 MVP 구축에 실제로 쓰였다. **Phase 2
+> 현재 배정은 §11을 따른다.**
 
 | Object / Flow / Screen | 구축 담당 | 함께 하는 사람 |
 |---|---|---|
@@ -242,3 +262,142 @@ Candidate, Next Best Action 등 — 03_SYSTEM.md §4.3 참고)도 함께 수신�
 - GitHub Projects 컬럼 세분화(`Blocked`, `Testing` 등) — 워크플로우가 복잡해질 때.
 - §2 Object/Flow/Screen 담당은 "제안(Proposed)" 상태다 — 팀 논의 후 실제 배정으로
   확정되면 이 표를 갱신하고 "제안" 표시를 지운다.
+
+---
+
+## 10. [P2] Team Operating Model — Baby PM + Feature Owner
+
+Phase 2는 "PM이 모든 것을 대신 만드는 구조"가 아니다. **사라가 Baby PM으로서
+전체 Business Story·Scope·공용 Data 기준·Integration/QA 흐름을 연결**하고,
+**나머지 4명(Feature Owner, "Puppy")이 자신의 Feature 영역을 직접 설계·구현·
+책임지는 구조**다.
+
+- **사라(Baby PM)**: 전체 Story/Scope 정합성, 공용 Data 기준(§13), Integration/
+  QA 흐름(§15) 연결. 동시에 Fan 360 고도화라는 자신의 Feature도 담당한다(§11).
+- **나머지 4명(Feature Owner)**: 자신이 맡은 B2B Pipeline 구간을 하나의 작은
+  Salesforce 프로젝트처럼 Requirement부터 QA까지 완성한다(§12).
+
+---
+
+## 11. [P2] Phase 2 Team Roles
+
+| 담당 | [P2] 역할 | 주요 영역 | 주요 Dummy Data |
+|---|---|---|---|
+| 사라 | 🦙 Fan 360 고도화 + B2B 연결 | Fan / Fan Insight / Fan Grouping / B2C↔B2B 연결 | Fan, Segment, Engagement, Fan Value |
+| 혜준 | 🔎 Collab360 + Lead | Partner Candidate / Lead | Partner Candidate, Lead |
+| 아론 | 🏢 Account + Contact | Partner Account / Partner Contact | Account, Contact |
+| 은영 | 💼 Opportunity | Collaboration Opportunity | Opportunity, Stage, Benefit |
+| 승우 | 🎁 Product + Quote + Campaign | Collaboration Product / Quote / Campaign | Product, Quote, Campaign |
+
+> ⚠️ 위 역할은 현재 Phase 2 작업 방향의 초안이며, 화요일 Technical Decision
+> (`03_SYSTEM.md §7`, `docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md` A~K)에서
+> 바뀔 수 있는 항목은 TBD/⭐️로 표시한다. 특히 **Partner Candidate 구현 방식, AI
+> Matching, Quote, Campaign vs Collaboration, Lead Score, Expected Benefit,
+> Target Segment, Segment Match, Recommendation Reason, Fan Insight 화면,
+> Account 집계**는 아직 확정된 기술 구조가 아니다 — 각 담당자 문서(`docs/members/`)
+> 에도 동일하게 TBD로 표시한다. 이 표는 §17의 Phase 1→Phase 2 변화 요약과 함께
+> 읽는다.
+
+---
+
+## 12. [P2] End-to-End Ownership
+
+각 담당자는 "Object 하나만 담당"하지 않고, 가능한 범위에서 아래 흐름을 자신의
+Feature 영역 안에서 직접 경험한다.
+
+> Requirement → Business/Domain 이해 → Salesforce Object/Field → Admin → Demo
+> Data → Flow/Automation → (필요 시) Dev → 화면 → QA
+
+단, **Standard First**(`05_DECISIONS.md` Decision 003) 원칙은 그대로 유지한다 —
+Standard 기능으로 해결 가능한 것은 불필요하게 Apex/LWC를 만들지 않는다. Custom
+개발은 Standard로 해결 안 되는 요구사항이 명확해졌을 때만 검토한다.
+
+---
+
+## 13. [P2] Shared Data / Scenario Rule
+
+Phase 2는 각자 따로 만드는 프로젝트가 아니라, 하나의 Shared Scenario(예:
+`SCN-B2B-001`)로 연결된다.
+
+> Fan Insight → Partner Candidate → Lead → Account/Contact → Opportunity →
+> Product/Quote → Campaign/Collaboration → Performance → Partnership/Sponsorship
+
+예: 혜준이 만든 Lead가 → 아론의 Account/Contact로 이어지고 → 은영의 Opportunity가
+되고 → 승우의 Product/Campaign과 연결되고 → 사라의 Fan Insight와 연결되어야 한다.
+
+각 담당자는 자신의 Dummy Data가 다른 담당자의 Feature와 연결되는 데 필요한 최소
+정보(Naming Rule, Related Record, Owner, Dependency, QA)를 함께 정의한다 — 공용
+기준은 `docs/data/DEMO_DATA_STANDARD.md`를 따른다(CLAUDE.md §7 중복 방지, 이
+문서에서 반복하지 않는다).
+
+---
+
+## 14. [P2] Shared Object Change Rule
+
+Person Account, Fan 관련 구조, `Season__c`, `Game__c`, Product2 등 여러
+Feature가 공유하는 Object는 담당자가 단독으로 구조를 변경하지 않는다. 새
+Field/Object가 필요하면 아래 형식으로 제안하고, 팀 Decision(`05_DECISIONS.md`)을
+거친 뒤 반영한다.
+
+```
+[P2 Proposal] {Object}에 {Field/변경 내용} 필요
+이유:
+사용하는 Feature:
+관련 Scenario:
+영향 범위:
+```
+
+---
+
+## 15. [P2] Integration / QA
+
+```
+Feature QA → Integration QA → End-to-End Demo QA
+```
+
+- **Feature QA**: 각 담당자가 자기 영역(예: Lead)이 단독으로 정확히 동작하는지 확인
+- **Integration QA**: 앞뒤 담당자와 Record가 실제로 연결되는지 확인(예: 혜준의
+  Lead → 아론의 Account 전환이 끊기지 않는지)
+- **End-to-End Demo QA**: `SCN-B2B-001` 전체가 `04_DEMO.md §9`의 Scene 순서대로
+  끊기지 않고 재현되는지 확인
+
+---
+
+## 16. [P2] Decision / TBD
+
+화요일 회의에서 결정해야 하는 기술 항목(A~K)과 그 배경·Option은
+`docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md`에서 관리한다(중복 방지,
+이 문서에는 결과가 각 역할에 주는 영향만 정리한다).
+
+| Decision | 영향받는 역할 |
+|---|---|
+| A. Partner Candidate | 혜준 |
+| B. AI Matching | 혜준 |
+| C. Quote | 승우 |
+| D. Campaign vs Collaboration | 승우 |
+| E. Lead Score | 혜준 |
+| F. Expected Benefit | 은영 |
+| G. Target Segment | 사라, 혜준 |
+| H. Segment Match | 혜준 |
+| I. Recommendation Reason | 혜준 |
+| J. Fan Insight 화면 | 사라 |
+| K. Account 집계 필드 | 아론 |
+
+결정된 항목은 회의 후 `05_DECISIONS.md`에 공식 기록하고, 필요한 경우
+`01_PROJECT.md`/`03_SYSTEM.md`/`docs/members/*.md`에 반영한다(반영 순서는
+Decision Sheet 하단 규칙과 동일).
+
+---
+
+## 17. [P2] Role Change Summary
+
+| Member | [P1] Phase 1 | [P2] Phase 2 | Main Ownership |
+|---|---|---|---|
+| 사라 | PM / Solution Architect / Product Designer | Fan 360 고도화 + B2B 연결 | Fan Insight / Grouping |
+| 혜준 | Salesforce Experience Lead / QA Lead | Collab360 + Lead | Partner Candidate / Lead |
+| 아론 | Business Analyst / Demo Experience Lead | Account + Contact | Partner Account / Contact |
+| 은영 | Developer Lead / Team Lead | Opportunity | Collaboration Pipeline |
+| 승우 | Salesforce Builder | Product + Quote + Campaign | Collaboration Product/Quote/Campaign |
+
+> [P1] 열은 §1(Phase 1 History) 표를 그대로 옮긴 것이다 — Phase 1 역할이 사라진
+> 것이 아니라 History로 보존되고, 그 위에 Phase 2 역할이 새로 정의된 것이다.

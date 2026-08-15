@@ -1,3 +1,60 @@
+# 혜준
+
+## [P2] Current Role
+
+🔎 **Collab360 + Lead**. Salesforce Experience Lead / QA Lead 역할
+(`02_TEAM_GUIDE.md §1`)에서, Phase 2에서는 **Partner Candidate Discovery(Collab360)와
+Lead 영역을 End-to-End로 담당**한다(`02_TEAM_GUIDE.md §11`) — 화면·데이터·QA를
+모두 아우르는 역할로 확장된다.
+
+## [P2] Mission
+
+Fan Insight 결과를 바탕으로 제휴 후보를 발굴·관리하는 Collab360 화면과, 실제
+영업 파이프라인 진입점인 Lead를 설계하고 구축한다(`00_STORY.md §8.3`,
+`01_PROJECT.md §2.7`).
+
+## [P2] Ownership
+
+- Partner Candidate — Object 여부 TBD(`03_SYSTEM.md §7 A`)
+- Lead(Standard Lead) — Lead Score 필드 형태 TBD(`§7 E`)
+- AI Matching 방식 — Rule-based/Demo Sample/미확정(`§7 B`)
+- Segment Match / Recommendation Reason(`§7 H·I`)
+
+## [P2] End-to-End Responsibility
+
+Requirement(Wireframe Collab360/Lead 화면) → Business/Domain 이해
+(`01_PROJECT.md §2.7`) → Salesforce Object/Field(TBD) → Admin → Demo Data →
+Flow/Automation(TBD) → Dev(LWC 필요 시, TBD) → 화면 → QA — Phase 1에서는 QA
+비중이 컸다면, Phase 2에서는 Requirement/Data/Automation까지 직접 담당하는 것이
+가장 큰 차이다.
+
+## [P2] Shared Scenario
+
+사라의 Fan Insight를 받아 Partner Candidate를 발굴하고, 승인된 후보를 Lead로
+등록한 뒤 아론에게 넘긴다(Lead Convert, `02_TEAM_GUIDE.md §13`).
+
+## [P2] Collaboration
+
+- **사라**: Fan Insight 결과를 전달받는다.
+- **아론**: Lead Convert 이후 Account/Contact로 인수인계한다.
+
+## [P2] TBD / Decision Needed
+
+- A. Partner Candidate(`03_SYSTEM.md §7 A`)
+- B. AI Matching(`§7 B`)
+- E. Lead Score(`§7 E`)
+- H. Segment Match(`§7 H`)
+- I. Recommendation Reason(`§7 I`)
+
+> 화요일 회의에서 혜준이 가장 많은 항목(A/B/E/H/I)을 직접 판단해야 한다 — 회의
+> 전까지 임의로 Standard/Custom을 확정하지 않는다.
+
+---
+
+## [P1] Previous Role & Contribution
+
+> Phase 1(B2C Fan 360 MVP)에서 혜준이 실제로 수행한 역할과 기여를 보존한 History다.
+
 # Mission
 
 > **"Demo 당일, 화면이 예상대로 정확하게 동작한다는 것을 보장한다."**

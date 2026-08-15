@@ -870,3 +870,116 @@ Account에 직접 저장한다(Decision 009·010과 변경 없음).
 - `03_SYSTEM.md`에 "Fan Profile 설계 원칙" 섹션을 신설해 위 표를 그대로 반영한다.
 - `04_DEMO.md` §4 Fan Profile 화면 설명이 이 원칙(원천 참조 vs Account 직접 저장)을
   따르는지 이후 확인이 필요하다(이번 갱신 범위 밖).
+
+---
+
+## Decision 015 — [P2] Phase 2 B2B Business Workflow 및 핵심 개념 도입
+
+**상태**: 확정
+**기록일**: 2026-08-15
+
+### 배경
+
+Phase 1(B2C Fan 360 MVP)이 2026-08-14 Demo로 완료되고, Phase 2(MVP 고도화 + B2B
+Collaboration/Sponsorship Expansion)가 시작되면서 `00_STORY.md` §8/§9와
+`01_PROJECT.md` §2.7/§8이 Fan 360 데이터를 구단의 B2B 의사결정에 활용하는 Business
+Workflow를 새로 정의했다. 이 내용은 프로젝트 전체 범위에 영향을 주는 변경
+(CLAUDE.md §7)이므로 Decision으로 공식 기록한다.
+
+### 결정
+
+1. Phase 1에서 구축한 Fan 360 데이터를 Phase 2 B2B Collaboration/Sponsorship
+   의사결정의 입력으로 활용한다.
+2. 다음 Business Workflow를 Phase 2의 공식 Workflow로 채택한다.
+
+   > Fan Insight → Business Fit 가설 → Candidate Discovery → Lead →
+   > Account/Contact → Opportunity → Collaboration → Performance/Evaluation →
+   > Partnership/Sponsorship
+
+3. **Lead**는 아직 관계가 형성되지 않은 잠재 기업/후보를 관리하는 Business
+   개념으로 정의한다. 단, Salesforce Standard Lead Object를 사용할지는 아직
+   확정하지 않는다.
+4. **Proposal**은 Lead를 대체하는 개념이 아니다. Opportunity 단계에서 발생하는
+   제안/제안서의 Business 개념으로 위치를 명확히 한다(기존 §2.6·§6.1 정의는
+   그대로 유지한다). 단, Salesforce에서 별도 Object로 만들지 Opportunity에
+   흡수할지는 TBD.
+5. **Collaboration**은 장기 Partnership/Sponsorship 이전에 성과를 검증하기
+   위한 단기 실행 단계로 정의한다. 단, Campaign으로 구현할지 별도 Object로
+   구현할지는 TBD.
+
+### 이유
+
+- Fan 360 없이 B2B 영업을 하면 "유명한 회사에 무작정 제안하는" 방식으로
+  되돌아간다(`00_STORY.md` §8.2) — Fan 360을 입력으로 삼는 것은 선택이 아니라
+  Phase 2가 존재하는 이유 자체다.
+- Lead 개념이 필요한 이유는 B2B 영업이 본질적으로 "후보 다수 → 소수만 실제
+  전환되는" 깔때기 구조이기 때문이다 — Fan(B2C)처럼 "가입 = 관계 시작"이
+  아니다(`01_PROJECT.md` §6.11).
+- Proposal을 Lead와 분리한 이유는, 기존 §2.6 Workflow가 이미 "접촉이 있는
+  상대에게 제안하는" 상황을 전제했기 때문이다 — 이 정의를 바꾸지 않고, 그
+  앞에 빠져 있던 단계(Lead)만 새로 추가하는 것이 기존 결정과 충돌하지 않는
+  방법이다.
+- Collaboration을 별도 개념으로 도입한 이유는, 검증되지 않은 상대와 곧바로
+  장기 계약을 맺는 리스크를 줄이기 위해서다(`00_STORY.md` §8.3). Object 구현
+  여부를 지금 확정하지 않는 이유는, Decision 003의 "Standard First, Custom
+  When Needed" 판단을 이번에도 `03_SYSTEM.md` 단계에서 실제 후보 수·업무량을
+  보고 내리는 것이 안전하기 때문이다.
+
+### 영향
+
+- `00_STORY.md` §8/§9, `01_PROJECT.md` §2.7/§4/§5/§6.11/§8은 이미 이 Decision의
+  내용을 반영하고 있다 — 이 Decision은 새 내용을 만드는 것이 아니라 두 문서에
+  서술된 것을 공식 기록으로 확정하는 것이다.
+- `03_SYSTEM.md`는 이 Decision 이후 Lead/Proposal/Collaboration의 실제
+  Salesforce Object/Field를 설계한다.
+
+### TBD (아직 확정하지 않은 것)
+
+- Lead의 Salesforce 구현 방식(Standard Lead vs 비활성 Account)
+- Collaboration의 Salesforce 구현 방식(Campaign 재사용 vs 별도 Object)
+- Proposal의 Salesforce 구현 방식(Opportunity 흡수 vs 별도 개념)
+- B2B 성과 측정에 사용할 구체적인 Fan 360 데이터/필드
+- Collaboration 성과가 기대에 못 미칠 경우의 재검토/종료 기준
+
+---
+
+## Decision 016 — [P2] Decision 005 Future Scope 중 Phase 2 승격 범위 재확인
+
+**상태**: 확정
+**기록일**: 2026-08-15
+
+### 배경
+
+Decision 005는 "Sponsorship/Partnership Domain 전체를 Phase 1 MVP 구현 범위에서
+제외"했다. Phase 2가 시작되면서 이 Future Scope 중 일부를 다시 다뤄야 하는데,
+Decision 005 자체를 수정하면 "그때 결정이 틀렸다"는 뜻으로 오해될 수 있다 — 이를
+방지하기 위해 시간적 맥락을 명확히 하는 별도 Decision을 남긴다.
+
+### 결정
+
+- Decision 005는 Phase 1 MVP 범위에 대한 결정이므로 수정하지 않는다.
+- Phase 1에서 제외했던 Sponsorship/Partnership 영역 중 **Sponsor / Partner /
+  Partner Contact / Sponsorship Package / Sponsor Contract** 등의 Business
+  개념을 Phase 2에서 다시 활용한다(`01_PROJECT.md` §2.6·§4·§5·§8).
+- 이것은 Decision 005를 번복하는 것이 아니라, Phase 1에서 제외했던 영역을
+  Phase 2의 확장 범위로 **승격**하는 것이다.
+- 실제 Salesforce Object/Field/Relationship 구현 범위는 이후 `03_SYSTEM.md`에서
+  결정한다.
+
+### 이유
+
+- Decision 005가 내려진 시점(2026-08-06)에는 Demo가 팬 개인의 여정(김매니저 ↔
+  이루키)에만 초점이 있었고, 스폰서십은 그 여정에 등장하지 않았다 — 그 판단은
+  **그 시점 범위**에서 옳았다. Phase 2에서 B2B가 새 Business Goal(CLAUDE.md §2)로
+  추가된 것이지, Decision 005 당시의 판단이 잘못됐던 것이 아니다.
+- "제외 → 승격"이라는 표현을 쓰는 이유는, Decision 005가 이미 남겨둔 Future
+  Scope 목록(`01_PROJECT.md` §4의 Partnership Domain Entity)을 그대로 재사용할
+  수 있기 때문이다 — 처음부터 다시 설계할 필요가 없다.
+
+### 영향
+
+- `03_SYSTEM.md` §0-1 MVP Implementation Matrix와 §5 Future Scope의
+  "Sponsor/Partner 전체 Object군" 항목은, 이제 "영구 제외"가 아니라 "Phase 2에서
+  다시 설계할 대상"이라는 성격으로 바뀐다 — 다만 이 Decision은 `03_SYSTEM.md`를
+  직접 수정하지 않으며, 실제 반영은 이후 `03_SYSTEM.md` 개정 작업에서 이루어진다.
+- Decision 005 본문은 이 Decision이 참조만 할 뿐 어떤 문구도 변경하지 않는다.

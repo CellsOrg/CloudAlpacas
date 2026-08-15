@@ -1,3 +1,55 @@
+# 승우
+
+## [P2] Current Role
+
+🎁 **Product + Quote + Campaign**. Salesforce Builder 역할(`02_TEAM_GUIDE.md §1`)은
+유지하되, Phase 2에서는 B2B Collaboration의 "무엇을, 얼마에, 어떤 캠페인으로
+실행하는가" 구간(Product/Quote/Campaign)을 End-to-End로 담당한다
+(`02_TEAM_GUIDE.md §11`).
+
+## [P2] Mission
+
+Sponsorship Package를 Product2로 표현하고, 제안서를 Quote로 관리할지(TBD),
+Collaboration 실행을 Campaign으로 표현할지 결정하고 구축한다
+(`01_PROJECT.md §6.11`, `03_SYSTEM.md §7 C·D`).
+
+## [P2] Ownership
+
+- Product2(Sponsorship Package RecordType, TBD) / PricebookEntry
+- Quote / QuoteLineItem — 사용 여부 TBD(`03_SYSTEM.md §7 C`)
+- Campaign — Collaboration 연결 방식(RecordType vs Lookup) TBD(`§7 D`)
+
+## [P2] End-to-End Responsibility
+
+Requirement(Wireframe Opportunity Detail의 Product/Quote/Campaign) →
+Business/Domain 이해(`01_PROJECT.md §6.11`) → Salesforce Object/Field(TBD) →
+Admin → Demo Data → Flow/Automation(필요 시) → Dev(필요 시) → 화면 → QA — 기존
+Phase 1과 동일한 흐름을 Product/Quote/Campaign 영역에 적용한다.
+
+## [P2] Shared Scenario
+
+은영의 Opportunity가 진행되는 동안 **Product 라인업과 Quote(TBD)를 확정**하고,
+**Campaign으로 실행을 연결**한다(`02_TEAM_GUIDE.md §13`).
+
+## [P2] Collaboration
+
+- **은영**: Opportunity의 Product/Quote Related List가 정확히 연결되는지 확인한다.
+- **사라**: Sponsorship Package가 Fan Insight의 Target Segment와 맞는지 확인한다.
+
+## [P2] TBD / Decision Needed
+
+- Quote 사용 여부(`03_SYSTEM.md §7 C`) — Sponsorship Package=Product2 확정이 선행
+- Campaign RecordType vs Lookup(`§7 D`)
+
+> 화요일 회의에서 승우가 우선 판단해야 하는 두 항목이다. 회의 전까지 확정된 것으로
+> 문서화하지 않는다.
+
+---
+
+## [P1] Previous Role & Contribution
+
+> Phase 1(B2C Fan 360 MVP)에서 승우가 실제로 수행한 역할과 기여를 보존한 History다.
+
 # Mission
 
 > **"설계된 Object와 Flow를 실제로 동작하는 Salesforce Org로 만든다."**

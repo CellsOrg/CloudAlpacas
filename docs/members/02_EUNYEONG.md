@@ -1,3 +1,56 @@
+# 은영
+
+## [P2] Current Role
+
+💼 **Opportunity**. Developer Lead 역할(`02_TEAM_GUIDE.md §1`)은 유지하되, Phase 2
+에서는 B2B Collaboration의 핵심 파이프라인인 **Opportunity**를 End-to-End로
+담당한다(`02_TEAM_GUIDE.md §11`) — Phase 1에서 Fan App 개발에 쏠려 있던 비중이
+Opportunity 영역으로 확장된다.
+
+## [P2] Mission
+
+Lead가 Account/Contact로 전환된 뒤 실제 협업 거래(Opportunity)가 Stage를 따라
+진행되고, Expected Benefit·Performance까지 자연스럽게 이어지도록 만든다
+(`00_STORY.md §9`, `03_SYSTEM.md §7`).
+
+## [P2] Ownership
+
+- Opportunity(Stage Kanban, Amount/CloseDate/Probability)
+- Expected Benefit 필드(단기/중기/장기) — 구조 TBD(`03_SYSTEM.md §7 F`)
+- OpportunityLineItem(Product 연결, 승우 협업)
+
+## [P2] End-to-End Responsibility
+
+Requirement(Wireframe Opportunity Detail/Stage Kanban) → Business/Domain
+이해(`01_PROJECT.md §8`) → Salesforce Object/Field(Opportunity는 Standard 확정,
+Expected Benefit은 TBD) → Admin → Demo Data → Flow/Automation(필요 시) →
+Dev(필요 시) → 화면 → QA
+
+## [P2] Shared Scenario
+
+아론의 Account/Contact 전환 직후 Opportunity를 생성·진행하고, 승우의
+Product/Quote/Campaign과 연결하며, 최종적으로 Performance/장기 Partnership
+판단으로 넘긴다(`02_TEAM_GUIDE.md §13`).
+
+## [P2] Collaboration
+
+- **아론**: Account/Contact 전환 시점에 Opportunity가 생성되는 흐름을 맞춘다.
+- **승우**: Opportunity에 Product/Quote/Campaign이 연결되는 구조를 함께 정한다.
+- **사라**: Target Segment 필드가 Opportunity에 어떻게 들어가는지 확인한다.
+
+## [P2] TBD / Decision Needed
+
+- Expected Benefit 필드 구조(`03_SYSTEM.md §7 F`)
+- Target Segment 저장 방식이 Opportunity에 미치는 영향(`§7 G`, 사라·혜준과 공동)
+
+> 화요일 회의 전까지는 필드 구조를 확정된 것으로 문서화하지 않는다.
+
+---
+
+## [P1] Previous Role & Contribution
+
+> Phase 1(B2C Fan 360 MVP)에서 은영이 실제로 수행한 역할과 기여를 보존한 History다.
+
 # Mission
 
 > **"표준 기능으로 안 되는 모든 것을, 코드로 만들어 실제로 동작하게 한다."**

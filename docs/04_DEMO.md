@@ -1,4 +1,12 @@
-# 04_DEMO.md — Cloud Alpacas Demo Story & 발표 시나리오
+# 04_DEMO.md — Cloud Alpacas Demo Story & 발표 시나리오 [DRAFT — Phase 2 포함]
+
+> **Status: DRAFT.** 이 문서는 원래 8/14 Phase 1 B2C Demo 계획이었다(§1~§6, 완료·보존).
+> 현재는 그 다음 단계 — **B2C Fan 360 고도화 + Phase 2 B2B Collaboration/Sponsorship
+> Expansion까지 구현한 뒤, 실제 Business Story와 End-to-End Workflow가 처음부터
+> 끝까지 제대로 이어지는지 검증하기 위한 Demo Plan**으로 §7부터 재정의한다.
+> **9/4 발표를 위한 계획이 아니다** — 발표 일정이 확정되면 그때 별도로 기록한다.
+> §7 이후는 `03_SYSTEM.md §7`의 Technical Decision(A~K, 화요일 회의)이 아직
+> 확정되지 않은 상태를 전제로 한 DRAFT다.
 
 > 이 문서는 Demo Story, Screen, 발표 시나리오를 다룬다. Persona(김매니저·이루키)와
 > Customer Journey의 근거는 `00_STORY.md`, 화면에 나오는 Object/Field 근거는
@@ -158,3 +166,110 @@ Demo가 자연스럽게 이어지려면 아래 데이터가 **미리 준비**되
 - Demo 시간이 확정되면, 이 문서에 실제 발표 시간(예: "10분 확정")과 최종 Scene 조합을
   추가로 기록한다.
 - 리허설 후 대사(멘트)는 실제 발표에 맞게 다듬는다 — 이 문서의 멘트 포인트는 초안이다.
+
+---
+
+## 7. [P2] DRAFT — Post Phase 1 / Phase 2 Demo 개요
+
+Phase 1 Demo와 현재 Demo는 목적이 다르다. Phase 1 Demo(§1~§6)는 그대로 보존하고,
+아래는 별도의 새 Demo Plan이다.
+
+| | Phase 1 Demo (§1~§6, 완료) | 현재 Demo (§7~, DRAFT) |
+|---|---|---|
+| 목적 | B2C Fan 360 MVP를 8/14에 발표 | B2C 고도화 + B2B가 실제로 하나의 Story로 이어지는지 검증 |
+| Persona | 김매니저 · 이루키 | 김매니저(B2C) + **이 매니저**(B2B) |
+| 흐름 | Fan App Event → Salesforce Customer 360 → Fan Profile/Timeline → Recommendation → Flow/Slack | B2C Fan 360 고도화 → Fan Insight/Fan Grouping → B2B Partner Candidate Discovery → Lead → Account/Contact → Opportunity → Product/Quote → Campaign/Collaboration → Performance → 장기 Partnership/Sponsorship 판단 |
+| 기술 상태 | 확정(Decision 001~014) | 상당 부분 DRAFT(`03_SYSTEM.md §7` A~K, 화요일 회의 전) |
+
+---
+
+## 8. [P2] Core End-to-End Scenario
+
+Demo는 "화면을 다 보여주는 것"이 아니라, **하나의 Business Story가 처음부터 끝까지
+끊기지 않고 이어지는지**를 검증한다.
+
+**B2C**: 김매니저가 Fan 360에서 팬을 이해한다 → Fan의 행동/Engagement/Fan Value를
+확인한다 → Fan Grouping/Fan Insight를 확인한다.
+
+**B2B**: 이 매니저가 Fan Insight를 확인한다 → 어떤 팬층이 Cloud Alpacas와 함께
+성장하고 있는지 발견한다 → 그 팬층과 궁합이 좋은 기업/브랜드 후보를 찾는다 → 후보를
+Lead로 관리한다 → Account/Contact로 관계를 발전시킨다 → Opportunity를 만든다 →
+Collaboration/Campaign을 실행한다 → 성과를 확인한다 → 장기 Partnership/Sponsorship으로
+발전시킬지 판단한다.
+
+---
+
+## 9. [P2] Scene 상세
+
+각 화면을 "보여주는 것"이 아니라 **이 사람이 이 질문을 가지고 이 화면에 들어갔을 때,
+무엇을 보고, 무슨 판단을 하고, 다음 Action으로 넘어가는가**를 기준으로 정리한다.
+⭐️ 표시는 `03_SYSTEM.md §7`에서 아직 Technical Decision이 확정되지 않은 부분이다.
+
+| Scene | Persona | Business Question | Action | Salesforce Result | 화면에서 확인할 것 | Required Data |
+|---|---|---|---|---|---|---|
+| B2C-1. 팬 전체 조망 | 김매니저 | 우리 팬은 지금 어떤 상태인가? | Fan 360 Dashboard 조회 | Person Account 필드 기반 분포 | Current Segment/Engagement Level/Fan Value 분포 | 여러 세그먼트에 걸친 Fan 다수(§10 참고) |
+| B2C-2. Fan Insight/Grouping ⭐️ | 김매니저 → 이 매니저 | 특정 팬층이 뚜렷한 특징을 보이는가? | Report/Report Type 조회(연령대×성별×관심사×Engagement) | 그룹별 집계 결과 | "○○명, 최근 3개월 증가율, 선호 카테고리" 같은 요약 | `Gender__c`/`Birthdate`/`Favorite_Player__c`/`Engagement_Signal__c` 채워진 Fan 다수 — 화면 구현 방식은 `03_SYSTEM.md §7 J` TBD |
+| B2B-1. Business Fit 가설 | 이 매니저 | 이 팬층과 궁합 좋은 기업은? | Insight 확인 후 가설 수립(사람의 판단) | 없음(자동화 아님) | 후보 기업 리스트(가설 단계) | B2C-2의 Fan Insight 결과 |
+| B2B-2. Partner Candidate ⭐️ | 이 매니저 | 실제로 접촉할 가치가 있는 후보인가? | 후보 등록/조회 | 후보 레코드(Object 형태 TBD) | 후보 점수·근거 | `03_SYSTEM.md §7 A`(Partner Candidate) 결정 대기 |
+| B2B-3. Lead | 이 매니저 | 이 후보에게 접촉을 시작하는가? | Lead 생성, Status 변경 | Lead 레코드 | Lead List/Detail, Lead Score(⭐️ `§7 E`) | 후보 기업 정보 |
+| B2B-4. Account/Contact 전환 | 이 매니저 | 누구와 논의를 이어가는가? | Convert Lead | Account+Contact(+Opportunity) 생성 | Account Detail, Related Contacts | 전환된 Lead |
+| B2B-5. Opportunity | 이 매니저 | 이 제휴를 추진할 것인가? | Stage 변경(Kanban) | Opportunity Stage 진행 | Stage Kanban, Amount, Probability | Opportunity, Product(Sponsorship Package) |
+| B2B-6. Product/Quote ⭐️ | 이 매니저 | 무엇을, 얼마에 제안하는가? | 라인업 확정, 제안서 준비 | Product 연결(+Quote는 `§7 C` TBD) | Products Related List(+Quote는 TBD) | Sponsorship Package(Product2) |
+| B2B-7. Collaboration/Campaign ⭐️ | 이 매니저 | 실제로 무엇을 함께 실행하는가? | Campaign 생성/연결 | Campaign 레코드 | Campaign Related List | Campaign — RecordType vs Lookup은 `§7 D` TBD |
+| B2B-8. Performance | 이 매니저 | 효과가 있었는가? | Report/Dashboard 조회 | 성과 지표 | Pipeline/Won Revenue/전환 지표 | Order/Campaign 성과 데이터 |
+| B2B-9. 장기 Partnership 판단 | 이 매니저 | 장기 계약으로 발전시킬 것인가? | Opportunity Closed Won → 장기 계약 검토 | Account 상태 변화(Active Partner) | Account Detail, Sponsor Contract(TBD) | 성과 데이터 + Sponsor Contract 개념(§4 기존, Object 구현 TBD) |
+
+---
+
+## 10. [P2] Demo Data 규모 검토
+
+### 현재 상태
+
+Org에는 Fan이 약 20명 있고, `docs/data/SAMPLE_DATA_v2_1.md`에 상세히 정의된 것은
+5명(이루키·박서연·김도현·최민재·정하윤)이다. 이 5명은 **"Picklist 값이 최소 1번씩
+동작하는지" 검증용**으로 설계되어 있다 — Current Segment 5종, Fan Value 3종,
+Engagement Level 5종이 각각 1명씩만 배정되어 있다.
+
+### 무엇이 부족한지
+
+- **`Gender__c`/`Birthdate` 값 자체가 어떤 샘플에도 채워져 있지 않다** — Fan
+  Grouping/Insight를 성별·연령으로 보여주는 Demo는 지금 데이터로는 아예 불가능하다.
+- 조합마다 사람이 1명뿐이라 "그룹"이라는 표현이 성립하지 않는다 — 예를 들어 지금
+  구조로는 "20~30대 여성 팬 2,140명" 같은 화면을 만들 수 없고, "20~30대 여성 팬
+  1명"만 보여줄 수 있다.
+- `Engagement_Signal__c`가 팬당 1~2건뿐이라, "선호 굿즈 카테고리"·"관심사" 같은
+  집계형 분석에는 근거가 부족하다.
+- 시간에 따른 변화(예: "최근 3개월 관람 증가율")를 보여주려면 여러 달에 걸쳐
+  분산된 이벤트 데이터가 필요한데, 현재는 특정 시즌 한 시점에 몰려 있다.
+
+### 규모 제안 (Demo Proposal — 확정 아님)
+
+| 단계 | 목적 | 규모 제안 | 근거 |
+|---|---|---|---|
+| **Minimum** | 화면/Flow가 깨지지 않고 동작하는지 검증 | 현재 수준(5~10명, Picklist 값 1회 이상) | 이미 갖춰짐 — "그룹"을 보여줄 수는 없음 |
+| **Recommended** | Fan Grouping/Insight가 "의미 있는 그룹"으로 보임 | 총 30~50명, 대표 세그먼트(예: 특정 연령대×성별) 1개당 5명 이상 | "그룹"이라는 표현이 성립하려면 한 조합에 최소 5명은 필요, 대표 세그먼트 3~4개 노출 기준 |
+| **Ideal** | B2B Partner Candidate 추천까지 자연스럽게 설득력 있음 | 총 60~100명 + 2~3개월 이상 시간 분산된 Admission/Order | 세그먼트 간 규모 차이 + 증가 추세("최근 3개월 +24%" 같은 표현)를 보여주려면 시계열 데이터 필요 |
+
+Fan 수뿐 아니라 관련 Record도 함께 늘어나야 한다: Order/OrderItem, Admission,
+Attendance_Record, Fan_Activity_Pattern, Engagement_Signal, Recommendation,
+Benefit, Campaign/CampaignMember — Fan 1명이 늘면 이 Record들도 비례해서 늘어야
+"팬 하나의 여정"이 아니라 "팬층의 패턴"이 보인다. 정확한 배율은 팀 확인 필요
+(TBD) — 실제 값과 비율은 `data/DEMO_DATA_STANDARD.md` §6.4에서 관리한다.
+
+---
+
+## 11. [P2] 공용 Dummy Data 기준
+
+팀 전체가 같은 규칙으로 Demo Data를 만들기 위한 공용 기준(Naming Rule, Fan 분포,
+Cross-Object 일관성, 담당자, Freeze 절차)은 `docs/data/DEMO_DATA_STANDARD.md`에서
+관리한다(CLAUDE.md §7 중복 방지 — 이 문서에는 반복하지 않는다).
+
+---
+
+## 12. [P2] Future Scope / 미확정 사항
+
+- Partner Candidate Object 여부, AI Matching 방식, Quote 사용 여부, Collaboration
+  구현 방식 등은 `03_SYSTEM.md §7`의 화요일 회의 결과를 따른다.
+- 발표 일정·시간은 아직 확정되지 않았다.
+- Fan Data 실제 증분(§10 Recommended/Ideal)은 팀이 실제로 만들지 결정한 뒤 진행한다
+  — 이번 문서는 규모만 제안했을 뿐 실제 Dummy Data를 생성하지 않았다.

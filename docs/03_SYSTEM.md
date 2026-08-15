@@ -175,7 +175,8 @@ Fan은 표준 Person Account 필드(이름, 이메일, 휴대폰 등)에 아래 
 | Field (API Name) | 타입 | 설명 |
 |---|---|---|
 | `Favorite_Player__c` | Lookup(Contact) | 최애 선수. Favorite Player Campaign, 개인화 굿즈 추천에 사용. |
-| `Acquisition_Channel__c` | Picklist (SNS/지인 추천/검색/오프라인 등) | 이루키처럼 "SNS에서 처음 알게 됨"을 기록 — Pain Point 1(팬 정보 흩어짐) 해결. |
+| **[P2] Gender__c** | Picklist (남/여) | Phase 2 Fan Insight/Fan Grouping의 인구통계 기준. 연령은 신규 필드 없이 표준 `Birthdate` 필드를 원천으로 분석한다(`05_DECISIONS.md` Decision 015). |
+| `Acquisition_Channel__c` | Picklist (SNS/지인 추천/검색/오프라인 등) | 이루키처럼 "SNS에서 처음 알게 됨"을 기록 — Pain Point 1(팬 정보 흩어짐) 해결. **Org 연결 후 Final Verification**: Fan App QA에서 Multi-Select Picklist 변경 요구가 있었으나, 실제 Org의 현재 Data Type을 확인하기 전까지는 단일 Picklist로 유지한다(§6). |
 | `Current_Segment__c` | Picklist (New Fan/Active Fan/At-Risk Fan/Dormant Fan/Churned Fan/Unreachable Fan) | 00_STORY.md §6 Current Segment(Life Cycle) — "지금 이 팬이 활동 주기의 어디에 있는가". `Fan_Segment_History__c`의 최신 값을 캐시. |
 | `Segment_Updated_Date__c` | Date | 현재 Segment(Life Cycle)로 바뀐 날짜. |
 | `Engagement_Level__c` | Picklist (가입 팬/관심 팬/활동 팬/충성 팬/멤버십 팬/핵심 팬) | "이 팬이 우리와 얼마나 깊게 관계를 맺고 있는가" — Current Segment와는 다른 축(Decision 009·010). |
@@ -183,6 +184,13 @@ Fan은 표준 Person Account 필드(이름, 이메일, 휴대폰 등)에 아래 
 | `Fan_Value_Tier__c` | Picklist (일반/우수/VIP) | "이 팬이 우리에게 얼마나 가치 있는 고객인가" — Current Segment·Engagement Level과는 다른 축(Decision 009·010). **VIP는 이 필드의 값이며, Product2.`Tier__c`의 "VIP" 멤버십 등급과는 다른 개념**이다. Flow/Demo의 "VIP 후보"는 이 필드가 VIP로 바뀔 가능성이 높다는 뜻이지, 자동으로 VIP를 확정하는 것이 아니다(§4.5 참고). |
 | `Email_Opt_In__c` / `SMS_Opt_In__c` / `Push_Opt_In__c` / `Kakao_Opt_In__c` | Checkbox | 채널별 마케팅 수신 동의(Decision 004 — Marketing Consent를 필드로 관리). |
 | `Consent_Updated_Date__c` | Date | 동의 값이 마지막으로 바뀐 날짜. |
+
+> **[P2] Fan Grouping은 어떻게 하나?** 별도의 `Fan Segment` Custom Object를 새로
+> 만들지 않는다(`05_DECISIONS.md` Decision 015 — Fan Segment 3축 유지 원칙과 동일선상).
+> `Gender__c`/`Birthdate`(인구통계) + `Current_Segment__c`/`Engagement_Level__c`/
+> `Fan_Value_Tier__c`(3축) + `Fan_Activity_Pattern__c`/`Engagement_Signal__c`(행동·관심사)를
+> Person Account 기준 **Report/Report Type**으로 조회·집계해 "팬층 특성"을 확인한다 —
+> 이 결과가 Phase 2 **Fan Insight**의 실체다(`01_PROJECT.md` §2.7·§8, 신규 Object 없음).
 
 > **왜 Current_Segment__c와 Fan_Segment_History__c를 둘 다 두나?** Fan 목록 화면에서
 > 매번 "이 팬의 최신 상태"를 계산하면 느리다. 그래서 최신 값은 Fan 레코드에 캐시해두고
@@ -241,9 +249,11 @@ RecordType으로 4종을 구분한다. 공통 필드(Name, ProductCode, IsActive
 | `Membership_Status__c` | Order | Picklist (Active/Expired/Cancelled) | Membership Enrollment 전용. Renewal은 이 값의 상태 전이로 처리(Decision 004). |
 | `Coverage_Start_Date__c` / `Coverage_End_Date__c` | Order | Date | Membership Enrollment/Season Pass 공통 — 적용 기간. 기존 `Membership_End_Date__c`를 대체·통합(Decision 013). |
 | `Payment_Status__c` | Order | Picklist (Paid/Cancelled/Refunded) | 결제/환불 상태. 표준 `Status`(Draft/Activated)와는 **다른 축**이다(Decision 013). |
+| **[P2] Payment_Method__c** | Order | Picklist (카드/간편결제/계좌이체) | 결제 수단. Fan App에서 이미 사용 중인 필드로 확인되어 문서에 반영했다 — **"Fan App에서 사용한다" ≠ "Org에 이미 구현되어 있다"**(§6). 실제 Org 존재 여부는 Org 연결 후 검증한다. |
 | `Refund_Date__c` | Order | Date | 환불 처리일. |
 | `Refund_Reason__c` | Order | Picklist (단순변심/상품불량/경기취소/일정변경) | 환불 사유. MVP는 Order 전체 단위 환불만 지원하며, 부분 환불(OrderItem 단위)은 Future Scope다(Decision 013, §5). |
 | `Section__c` / `Row__c` / `Seat_Number__c` | OrderItem | Picklist/Text/Text | Ticket Purchase 전용 — 구매 시점에 정해지는 좌석 정보(Decision 006). |
+| **[P2] Size__c** | OrderItem | Picklist | Goods Purchase 전용 — 굿즈 사이즈. Fan App에서 사용하는 데이터로 확인되어 필드는 반영하되, **실제 Picklist 값은 아직 확정하지 않았다(TBD)** — Org 연결 후 검증한다(§6). |
 | `Current_Owner__c` | OrderItem | Lookup(Person Account) | 기본값은 구매자. 선물·양도 시 실제 입장자로 변경(Ticket Transfer, Decision 004). |
 | `Transfer_Status__c` | OrderItem | Picklist (Not Transferred/Transferred) | 양도 여부. |
 
@@ -675,3 +685,461 @@ flowchart TD
 | `Engagement_Level__c`/`Fan_Value_Tier__c` 이력 Object(`Engagement_Level_History__c` 등) | 두 축의 변경 시점을 자동화 트리거 근거로 남겨야 할 만큼 중요해지면 | Decision 009 |
 | OWD/Sharing Rule/Role Hierarchy/Queue 기반 접근 제한 | Staff(담당 직원)가 김매니저 1명에서 여러 명으로 늘어날 때 | Decision 009 |
 | Marketing Cloud Next 확장 파이프라인(Sales Cloud Fan Data → Data Cloud → Segment Builder → Marketing Cloud Next → Campaign/Journey/Personalization → 성과 분석) | 실제 Org 구현 이후 고도화 필요성이 확인되면 — 현재 MVP Object를 Marketing Cloud 전용 구조로 미리 재설계하지 않음 | Decision 009, CLAUDE.md §5 |
+
+---
+
+## 6. [P2] Org 연결 후 Final Verification
+
+이번 Phase 2 문서 설계는 실제 Salesforce Org 연결 없이 진행했다. Fan App에서 이미 쓰고
+있는 필드는 "Fan App에서 사용한다"는 근거로 문서에 반영했지만, **"Fan App에서
+사용한다" ≠ "현재 Salesforce Org에 이미 구현되어 있다"**다 — 이 둘을 구분한다. Org
+연결 전에는 아래 항목의 실제 존재 여부를 근거로 문서의 Field를 삭제·수정하지 않는다.
+
+Org 연결 후 아래 10개 항목을 최종 대조한다.
+
+1. Object 존재 여부
+2. Field 존재 여부
+3. Field API Name
+4. Data Type
+5. Picklist Value
+6. Lookup / Master-Detail 관계
+7. Record Type
+8. Fan App → Salesforce 데이터 매핑
+9. 문서에만 존재하는 Field
+10. Org에만 존재하는 Field
+
+**우선 검증 대상**:
+
+| 항목 | 현재 상태 |
+|---|---|
+| Person Account `Gender__c` | 이번에 문서 반영(Picklist, 남/여) — Org 존재 여부 미확인 |
+| Order `Payment_Method__c` | 이번에 문서 반영(Picklist, 카드/간편결제/계좌이체) — Org 존재 여부 미확인 |
+| OrderItem `Size__c` | 이번에 문서 반영(Picklist) — **Picklist 값 자체가 미확정**, Org 확인 후 채운다 |
+| OrderItem `Marking_Player__c` | 문서 미반영 — Lookup(Contact) vs Text, `Product2.Related_Player__c`와의 관계 모두 TBD |
+| Benefit__c `Discount_Percent__c` | 문서 미반영 — Org 존재 확인 후 없으면 추가 설계 |
+| Person Account 이용약관 동의 / 개인정보 수집·이용 동의 | 문서 미반영 — 기존 마케팅 수신 동의(`Email/SMS/Push/Kakao_Opt_In__c`)와는 별개 개념. Field Label/API Name 모두 TBD |
+| `Acquisition_Channel__c` Data Type | 문서상 현재 단일 Picklist 유지(§2.1) — Multi-Select 변경 여부 Org 확인 필요. 변경이 확인되면 `00_STORY.md`/`01_PROJECT.md`/`03_SYSTEM.md` 전체 동기화 여부를 그때 판단한다 |
+| `Game__c` Venue(구장) Field | 문서 미반영 — 단순 Field(경기별 구장 표시)인지 별도 Stadium Object가 필요한 상황인지부터 판단 필요. Decision 006("단일 홈구장이라 별도 Object 불필요")과 충돌하지 않는 선에서 검토한다 |
+
+---
+
+## 7. [P2] Phase 2 B2B Architecture Draft — Team Review Required
+
+> ## ⚠️ Phase 2 Draft — Team Review Required
+>
+> 이 문서는 2026-08-15 현재 Wireframe과 Business 분석을 바탕으로 작성한
+> Phase 2 Salesforce Architecture Draft입니다.
+>
+> Phase 2의 Business/UX 방향은 확인되었지만,
+> 일부 Salesforce Object / Field / Automation / UI 구현 방식은 아직 확정되지 않았습니다.
+>
+> ⭐️ 표시가 있는 항목은 화요일 팀 회의에서 논의 후 Technical Decision으로 확정합니다.
+>
+> **Draft → Team Discussion → Decision Record → Final Architecture**
+>
+> 따라서 이 문서의 ⭐️ 항목은 현재 구현 지시사항이 아닙니다.
+
+### 7.1 [P2] ✅ CONFIRMED
+
+Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분히 확정된 것.
+
+- **Lead** — Standard Lead 사용, Convert 시 Account/Contact/Opportunity 표준 전환 흐름 재사용
+- **Account / Contact** — Standard 재사용, Sponsor/Partner는 Account(RecordType), Partner Contact는 Contact(RecordType) — Player와 동일 패턴
+- **Opportunity** — Standard 재사용, Stage는 Kanban(표준 List View 기능)으로 표현
+- **Product2 / PricebookEntry** — Sponsorship Package 표현에 재사용(Ticket/Membership/Goods와 동일 패턴)
+- **Campaign(Object 자체)** — 신규 Object 없이 기존 Campaign 재사용(§3.3 기존 결정과 일치). 단, RecordType 여부는 아래 §7.2 D 참고
+- **Performance/Evaluation(방향)** — Custom Object를 만들지 않고 Report/Dashboard로 접근하는 방향 자체는 확정(세부 리포트 설계는 §7.2 참고)
+- **Standard First 원칙 재확인** — 이번 검토에서 Custom Object 후보는 `Partner_Candidate__c` 단 하나뿐이며, 이마저도 아래에서 논의 대상으로 남김(Decision 003·006과 일치)
+
+### 7.2 [P2] ⭐️ DRAFT / TEAM DISCUSSION REQUIRED
+
+#### A. Partner Candidate
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> Wireframe(Collab360 화면)에는 Partner Candidate / Candidate Score / Status /
+> Recommendation Reason 등의 개념이 실제 화면 요소로 존재한다. 하지만
+> `01_PROJECT.md` §2.7은 "Candidate Discovery는 새 저장 Entity가 아니라 기존 Fan
+> Analytics를 활용하는 분석 과정"이라고 명시하고 있어 — **직접 충돌**한다. 이번
+> Draft에서는 어느 쪽도 임의로 확정하지 않는다.
+>
+> **Option A — Custom Object (`Partner_Candidate__c`)**
+> - 무엇을 의미하는지: 아직 Lead가 되지는 않았지만, 우리 구단과 잘 맞는 기업 후보를
+>   따로 관리하는 것. 쉽게 말하면 "아직 연락하지 않은, AI(또는 담당자)가 추천한
+>   후보 명단"을 별도 서랍에 보관하는 것이다.
+> - Salesforce 구현: 신규 Custom Object. `Candidate_Score__c`, `Segment_Match__c`,
+>   `Recommendation_Reason__c`, `Status__c`(New/Held/Approved/Rejected) 등을 보유.
+>   승인 시 Flow/Apex로 Lead 레코드를 생성.
+> - 장점: 후보 단계의 점수·근거·보류 이력을 Lead와 완전히 분리해서 관리할 수 있다.
+> - 단점: Object가 하나 늘어난다(Decision 006 원칙과 긴장 관계). Lead와 필드가
+>   중복될 수 있고, Candidate→Lead 전환은 표준 Lead Conversion이 아니라 별도
+>   자동화(Flow/Apex)가 필요하다.
+>
+> **Option B — Lead로 흡수**
+> - 무엇을 의미하는지: 기업 후보를 처음부터 Standard Lead로 관리하고, 초기
+>   Status(예: "New")와 관련 필드로 "아직 후보 단계"임을 표현하는 것.
+> - Salesforce 구현: Lead에 Candidate 관련 필드를 추가(§7.2 E `Lead_Score__c`
+>   포함)하고, Status 값으로 후보/컨택/자격확인 단계를 구분.
+> - 장점: Standard Object 그대로 활용(Object 수 유지). 이후 Account/Contact/
+>   Opportunity 전환이 표준 Convert 기능으로 자연스럽게 이어진다.
+> - 단점: 아직 실제 영업 대상이 아닌 "분석상 후보"까지 Lead로 관리하게 되어,
+>   Lead 목록에 "진짜 영업 중인 것"과 "그냥 후보"가 섞일 수 있다.
+>
+> **현재 추천**: Standard First 원칙(Decision 003)에 따라 Option B를 우선
+> 검토한다. 단, Candidate가 Lead와 다른 생명주기(예: "보류"가 Lead Status로
+> 표현하기 어려운 별도 상태)나 독립적인 분석 이력을 가져야 한다면 Option A를
+> 다시 검토한다.
+>
+> **화요일 결정 질문**: "Partner Candidate는 실제 영업 관리 대상인가, 아니면
+> Fan 데이터를 분석해서 발견한(아직 영업 전 단계의) 후보 기업인가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### B. AI Matching
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> Wireframe에는 AI Matching / Segment Match / Lead Score / Recommendation
+> Reason이 등장하지만, 실제 계산 방식은 어느 공식 문서에도 확정되어 있지 않다.
+> "AI 기능을 구현한다"고 지금 확정하지 않는다 — 이 결정은 §A(Partner
+> Candidate), §7.2 H(Segment Match), §7.2 I(Recommendation Reason)와도 직결된다.
+>
+> **Option A — Rule-based Matching**
+> - 무엇을 의미하는지: 쉽게 말하면 "Cloud Alpacas 팬층과 기업의 조건을 우리가
+>   정한 규칙으로 비교한다" — VIP 후보 감지 Flow(`03_SYSTEM.md §4.5`)와 같은
+>   패턴이다.
+> - Salesforce 구현: Flow/Formula/Apex로 Fan 360 데이터(Segment/Engagement/
+>   Fan Value 등)와 후보 기업의 카테고리를 비교해 점수를 계산.
+> - 장점: 결과를 설명하기 쉽다("왜 94점인지" 추적 가능). MVP에서 구현 가능한
+>   범위. 기존 VIP 감지 Flow 패턴을 재사용할 수 있어 Baby Team에게 익숙하다.
+> - 단점: 진짜 AI라기보다는 규칙 기반 Scoring이다 — "AI 매칭"이라는 이름과 실제
+>   구현 사이에 기대치 차이가 생길 수 있다.
+>
+> **Option B — Demo Sample Score**
+> - 무엇을 의미하는지: 쉽게 말하면 "지금은 실제로 계산하지 않고, Demo에 보여줄
+>   숫자를 미리 정해서 넣어둔다."
+> - Salesforce 구현: 실제 자동화 없이 Sample/Dummy Data로 점수·근거 텍스트를
+>   직접 입력.
+> - 장점: Phase 2 MVP 범위를 크게 늘리지 않는다. 실제 계산 로직(Architecture)은
+>   나중에 결정할 수 있다.
+> - 단점: 실제 자동화된 Matching 기능이 아니다 — Demo 이후 실사용 단계에서는
+>   다시 설계해야 한다.
+>
+> **Option C — Agentforce / AI 기반 Matching**
+> - 무엇을 의미하는지: 실제 AI가 Fan Segment와 Partner 정보를 분석해 Match
+>   Score와 Recommendation Reason을 직접 생성하는 것.
+> - Salesforce 구현: Agentforce 등 AI 기능 활용.
+> - 장점: 향후 AI 기반 B2B 전략과 연결할 수 있다.
+> - 단점: **CLAUDE.md §5가 Agentforce를 Future Scope로 이미 못박아뒀다** — 현재
+>   Phase 2 범위를 크게 벗어난다. 데이터/프롬프트/평가 기준 설계가 추가로
+>   필요하다.
+>
+> **현재 추천**: Option A 또는 B로 Phase 2 MVP를 검토한다. Option C(실제
+> Agentforce 기반 AI Matching)는 별도 Decision 없이는 지금 구현하지 않는다 —
+> CLAUDE.md의 기존 Future Scope 원칙을 그대로 따른다.
+>
+> **화요일 결정 질문**: "우리가 화요일 이후 만들려는 것은 실제 Matching
+> Engine인가, 아니면 먼저 B2B 업무 흐름을 증명하는 Prototype인가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### C. Quote
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> Wireframe의 Opportunity Detail 화면에 Quote Related List(`Sanrio
+> Collaboration Proposal Q1`)가 실제로 존재한다. 지난 분석에서 "Quote는 근거
+> 없음"이라고 판단했던 것은 이 Wireframe을 근거로 재검토가 필요하다 — Business
+> 개념의 존재는 인정하되, 구현 방식은 Draft로 남긴다.
+>
+> **Option A — Standard Quote (Quote + QuoteLineItem)**
+> - 무엇을 의미하는지: 쉽게 말하면 "제안서/견적서를 Salesforce 표준 양식으로
+>   만들어서 PDF로 뽑고 이력으로 관리한다."
+> - Salesforce 구현: Opportunity 하위에 표준 Quote 생성, QuoteLineItem으로
+>   Sponsorship Package(Product2) 라인업과 가격을 담는다.
+> - 장점: 표준 PDF 생성/발송 기능, Product2/PriceBook과 자동 연결, 여러 버전의
+>   제안서(Q1/Q2 등)를 이력으로 남길 수 있다.
+> - 단점: Quote 설정(Template, Sync 설정)이 추가로 필요해 Baby Team에게는 설정
+>   부담이 있을 수 있다. **Sponsorship Package가 Product2로 확정되지 않으면
+>   Quote도 의미가 없어진다(선결 조건)**.
+>
+> **Option B — Opportunity 필드/활동으로 대체 (Quote 없음)**
+> - 무엇을 의미하는지: 쉽게 말하면 "별도 견적서 기능 없이, 제안 내용을
+>   Opportunity의 설명·첨부파일·활동 기록으로만 남긴다."
+> - Salesforce 구현: Opportunity의 Description, Notes & Attachments, Activity
+>   Log만 사용. 별도 기능 활성화 없음.
+> - 장점: 설정이 훨씬 단순하다. Decision 015가 "Proposal은 Opportunity 단계
+>   산출물"이라 규정한 것과 최소한으로 일치한다.
+> - 단점: 여러 버전의 제안 내용을 구조화된 이력으로 관리하기 어렵다. Wireframe이
+>   보여준 "Quote (Related List)" UI를 그대로 구현할 수 없다.
+>
+> **현재 추천**: Wireframe이 이미 Quote를 구체적 화면 요소로 보여준 만큼 Option
+> A 쪽에 무게가 실리지만, Sponsorship Package(Product2) 확정이 선행돼야 하므로
+> 두 Decision을 묶어서 논의하는 것을 추천한다.
+>
+> **화요일 결정 질문**: "제안서를 표준 문서(PDF)로 만들어 이력 관리할 필요가
+> 실제로 있는가, 아니면 Opportunity 안에서 텍스트로 관리해도 충분한가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### D. Campaign vs Collaboration
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> Wireframe에서는 Collaboration과 Campaign의 관계가 나타나지만, RecordType을
+> 쓸지 Lookup Field를 쓸지는 확정하지 않는다.
+>
+> **Option A — Campaign Record Type**
+> - 무엇을 의미하는지: 쉽게 말하면 "Campaign이라는 같은 서랍 안에서 '마케팅용
+>   칸'과 'B2B 협업용 칸'을 나눠서 관리한다."
+> - Salesforce 구현: Campaign에 RecordType(예: B2C Marketing / B2B
+>   Collaboration) 추가, RecordType별로 다른 화면 레이아웃 구성 가능.
+> - 장점: List View/Report에서 RecordType으로 손쉽게 필터링. B2B에 맞는 레이아웃
+>   구성 가능(불필요한 B2C 필드 숨기기).
+> - 단점: RecordType 설정이라는 Admin 작업이 추가된다. 기존 §3.3 결정
+>   (Collaboration Campaign→Campaign 통합)이 RecordType까지 논의한 것은 아니라
+>   재확인이 필요하다.
+>
+> **Option B — 단순 Lookup/관계 필드(`Collaboration__c`)**
+> - 무엇을 의미하는지: 쉽게 말하면 "Campaign은 그대로 두고, '이 Campaign이 어떤
+>   B2B 협업(Opportunity)과 연결되는지'만 필드 하나로 표시한다."
+> - Salesforce 구현: Campaign에 `Collaboration__c`(Lookup to Opportunity 또는
+>   Checkbox) 필드만 추가. RecordType 변경 없음.
+> - 장점: 설정이 가장 단순하다(Wireframe의 Object Map이 실제로 이 방식을 보여준다).
+>   기존 B2C Campaign 구조를 전혀 건드리지 않는다.
+> - 단점: RecordType 기반 필터링/레이아웃 분리가 안 되어, Campaign이 많아지면
+>   B2C/B2B가 섞여 보일 수 있다.
+>
+> **현재 추천**: Wireframe 자체가 Option B(단순 필드) 형태로 그려져 있고,
+> Decision 006의 "필요한 만큼만" 원칙에도 더 맞아 Option B를 우선 검토
+> 추천한다. RecordType은 Campaign 수가 실제로 많아졌을 때 재검토한다.
+>
+> **화요일 결정 질문**: "지금 시점에 Campaign을 B2C/B2B로 화면·리스트에서
+> 분리해서 봐야 할 만큼 수가 많아질 것으로 예상되는가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### E. Lead Score
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> Wireframe에는 94/92/85 같은 정량적인 Score가 등장한다. Standard Lead의
+> `Rating`은 Hot/Warm/Cold 같은 정성적 분류이므로 숫자 Score와 성격이 다르다는
+> 점을 먼저 짚어둔다.
+>
+> **Option A — Standard `Rating` 재사용**
+> - 무엇을 의미하는지: 쉽게 말하면 "이미 있는 '온도계'(Hot/Warm/Cold) 필드에
+>   숫자 점수를 억지로 끼워 넣는다."
+> - Salesforce 구현: `Rating`의 Picklist 값을 숫자처럼 보이게 바꾸거나 그대로
+>   둔 채 별도 관리.
+> - 장점: 새 필드를 안 만들어도 된다.
+> - 단점: `Rating`은 원래 정성적 값이 표준이라, 94/92/85 같은 정량 점수와
+>   성격이 맞지 않는다 — 나중에 표준 Rating 관련 기능(리포트 등)과 충돌할 수
+>   있다.
+>
+> **Option B — 신규 `Lead_Score__c`(Number) 필드**
+> - 무엇을 의미하는지: 쉽게 말하면 "점수 전용 필드를 새로 하나 만든다."
+> - Salesforce 구현: Lead에 Number(0~100) 필드 추가.
+> - 장점: Wireframe에 나온 정량 점수를 정확히 표현. 표준 `Rating`은 원래 목적
+>   (Hot/Warm/Cold)대로 그대로 남길 수 있다.
+> - 단점: 필드가 하나 늘어난다(다만 Custom Object가 아니라 Field 하나라 영향은
+>   작다).
+>
+> **현재 추천**: Option B. 정량 점수와 정성 Rating은 성격이 다른 축이라 —
+> Decision 009가 Current Segment/Engagement/Fan Value를 섞지 말라고 했던
+> 것과 같은 이유로 — 섞지 않는 것을 추천한다.
+>
+> **화요일 결정 질문**: "Lead Score를 실제 숫자로 계산/표시할 것인가, 아니면
+> Hot/Warm/Cold 같은 단순 등급으로 충분한가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### F. Expected Benefit (단기/중기/장기)
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> **Option A — 개별 필드 3개(Short/Mid/Long-term Benefit)**
+> - 무엇을 의미하는지: 쉽게 말하면 "기대 효과를 '지금 당장', '몇 달 뒤', '오래
+>   뒤' 3칸으로 나눠 적는다."
+> - Salesforce 구현: Opportunity에 Text 필드 3개 추가(예: `Short_Term_Benefit__c`
+>   등).
+> - 장점: Wireframe 화면 그대로 구현 가능, 구조가 명확하다.
+> - 단점: 필드 3개가 늘어난다. 값이 자유 텍스트라 나중에 집계·분석은 어렵다.
+>
+> **Option B — Long Text 필드 1개로 통합**
+> - 무엇을 의미하는지: 쉽게 말하면 "기대 효과를 한 칸에 자유롭게 적는다."
+> - Salesforce 구현: Opportunity에 Long Text Area 필드 1개.
+> - 장점: 필드 수 최소화.
+> - 단점: 화면에서 단기/중기/장기를 구분해서 보여주기 어려워 Wireframe UI와
+>   차이가 생긴다.
+>
+> **현재 추천**: Wireframe이 3단 구조를 명확히 보여주므로 Option A에 무게가
+> 실리지만, 실제 Business 활용도(정말 3개 다 채워질지)를 보고 최종 판단한다.
+>
+> **화요일 결정 질문**: "기대 효과를 단기/중기/장기로 항상 구분해서 관리할
+> 것인가, 자유 서술로 충분한가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### G. Target Segment
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> **Option A — Picklist(사전 정의된 세그먼트 목록)**
+> - 무엇을 의미하는지: 쉽게 말하면 "미리 정해둔 팬 그룹 이름(예: 10-30대 여성
+>   팬) 중에서 골라 쓴다."
+> - Salesforce 구현: Opportunity/Lead/Partner Candidate에 Picklist 필드.
+> - 장점: 값이 통일되어 리포트·집계가 쉽다.
+> - 단점: 새로운 세그먼트 조합이 필요할 때마다 Picklist 값을 계속 추가해야
+>   한다.
+>
+> **Option B — Text(자유 입력) 또는 Report 결과 요약**
+> - 무엇을 의미하는지: 쉽게 말하면 "Fan Insight 화면에서 뽑은 조건을 그대로
+>   텍스트로 옮겨 적는다."
+> - Salesforce 구현: Text 필드에 담당자가 직접 요약해서 입력.
+> - 장점: 유연하다, Picklist 관리 부담이 없다.
+> - 단점: 같은 세그먼트를 표현하는 방식이 사람마다 달라질 수 있어 나중에
+>   집계가 어렵다.
+>
+> **현재 추천**: 초기엔 Picklist(Option A)로 시작하되 값 목록은 최소한으로
+> 유지한다. Fan Grouping 조건 자체가 자유로워질 필요가 생기면 Option B와
+> 혼합한다.
+>
+> **화요일 결정 질문**: "Target Segment 값을 몇 가지로 미리 정해둘 수 있는가,
+> 아니면 매번 새로운 조합이 나올 것인가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### H. Segment Match
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> **Option A — Number/Percent 필드(수동 입력)**
+> - 무엇을 의미하는지: 쉽게 말하면 "담당자가 판단한 일치도(%)를 직접 적어
+>   넣는다."
+> - Salesforce 구현: Partner Candidate 또는 Lead에 Percent 필드.
+> - 장점: 계산 로직 없이 바로 시작 가능하다.
+> - 단점: "왜 94%인지" 근거가 자동으로 남지 않고, 사람마다 기준이 다를 수 있다.
+>
+> **Option B — Flow/Formula로 자동 계산**
+> - 무엇을 의미하는지: 쉽게 말하면 "정해진 규칙(예: 연령대 일치 몇 %, 관심사
+>   일치 몇 %)으로 시스템이 계산한다."
+> - Salesforce 구현: Flow 또는 Formula 필드로 Fan 360 데이터 기반 계산.
+> - 장점: 일관된 기준, VIP 후보 감지 Flow와 같은 패턴이라 팀에게 익숙하다.
+> - 단점: 계산 규칙을 먼저 합의해야 한다 — `Engagement_Score__c` 계산 공식이
+>   아직 TBD인 것과 같은 이유로 시간이 걸릴 수 있다.
+>
+> **현재 추천**: §B(AI Matching)의 결정과 세트로 묶어서 판단한다 — Rule-based로
+> 간다면 Segment Match도 Formula/Flow로, Sample Data로 간다면 당분간 수동
+> 입력으로 시작한다.
+>
+> **화요일 결정 질문**: "Segment Match를 지금 규칙으로 계산할 수 있는가, 아니면
+> 아직 기준이 정해지지 않았는가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### I. Recommendation Reason
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> **Option A — Long Text(자동 생성 텍스트)**
+> - 무엇을 의미하는지: 쉽게 말하면 "왜 이 후보를 추천했는지 시스템이 문장으로
+>   설명해준다."
+> - Salesforce 구현: Flow/Apex가 조건에 따라 문장을 조합해 채워 넣는다(예:
+>   "디저트류 판매 31% 증가 + 타겟 세그먼트 일치").
+> - 장점: Wireframe UI와 정확히 일치한다.
+> - 단점: 문장 생성 로직 설계가 필요하다 — §B(AI Matching)이 Rule-based로
+>   정해져야 가능하다.
+>
+> **Option B — Long Text(수동 입력)**
+> - 무엇을 의미하는지: 쉽게 말하면 "담당자가 왜 추천했는지 직접 적는다."
+> - Salesforce 구현: 단순 Text 필드, 사람이 채운다.
+> - 장점: 즉시 시작 가능, 별도 로직이 불필요하다.
+> - 단점: 담당자마다 품질이 다를 수 있다.
+>
+> **현재 추천**: AI Matching(§B)이 Option B(Demo Sample)로 결정된다면
+> Recommendation Reason도 Option B(수동)로 시작하는 것이 자연스럽다 — 두
+> 결정을 같이 묶어서 판단한다.
+>
+> **화요일 결정 질문**: §B(AI Matching)와 동일.
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### J. Fan Insight / Fan Grouping — 화면 구현 방식
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> 별도 `Fan Segment` Object를 만들지 않는다는 방향(§2.1 [P2] 안내)은 유지한다.
+> 이번에 논의가 필요한 것은 **그 데이터를 보여주는 화면**이다.
+>
+> **Option A — Standard Report + Report Type + Dashboard**
+> - 무엇을 의미하는지: 쉽게 말하면 "이미 있는 팬 데이터를 표준 '보고서' 기능
+>   으로 조회한다."
+> - Salesforce 구현: Person Account 기준 Report/Custom Report Type, Dashboard로
+>   시각화.
+> - 장점: 추가 개발 없이 표준 기능만으로 가능(Decision 003과 정확히 일치).
+>   Object도 만들지 않는다(Decision 009 원칙 유지).
+> - 단점: Wireframe처럼 탭 전환, 카드형 후보 리스트, 버튼(상세검토/보류) 같은
+>   인터랙션은 표준 Report만으로는 어렵다 — 화면이 Wireframe보다 단순해진다.
+>
+> **Option B — Custom Lightning App Page / LWC**
+> - 무엇을 의미하는지: 쉽게 말하면 "Wireframe에 나온 것과 똑같이 생긴 화면을
+>   직접 만든다."
+> - Salesforce 구현: LWC로 Collab360 화면 제작, 내부적으로는 Report/Apex를
+>   호출해 데이터 표시.
+> - 장점: Wireframe UI를 그대로 구현할 수 있다.
+> - 단점: LWC 개발이 필요하다(Decision 008 "표준으로 안 될 때만 개발" 원칙과
+>   함께 검토 필요) — Phase 2 MVP 범위가 커진다.
+>
+> **현재 추천**: 처음엔 Option A(Report/Dashboard)로 데이터 흐름을 검증하고,
+> 실제로 Wireframe 수준의 화면이 꼭 필요하다고 판단되면 Option B로 확장한다 —
+> Decision 008의 "표준 우선, 필요할 때만 개발" 원칙 그대로 적용한다.
+>
+> **화요일 결정 질문**: "화요일 이후 Demo에서 Wireframe과 똑같은 화면이 꼭
+> 필요한가, 아니면 표준 Report로 데이터 흐름만 증명해도 충분한가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+#### K. Account `Active Collaboration` / `Total Collaboration Value`
+
+> ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> **Option A — Roll-up Summary / Formula**
+> - 무엇을 의미하는지: 쉽게 말하면 "Account 밑에 달린 Opportunity들을
+>   자동으로 합산해서 보여준다."
+> - Salesforce 구현: Account에 Roll-up Summary(Opportunity 합계) 또는 Formula
+>   필드.
+> - 장점: 자동 갱신, 별도 관리가 불필요하다. `Attendance_Record__c`의 Roll-up
+>   패턴(Decision 012)과 같은 방식이라 팀에게 익숙하다.
+> - 단점: **Opportunity-Account는 기본적으로 표준 Lookup 관계라, 표준 Roll-up
+>   Summary가 안 될 수 있다** — 이 경우 Formula나 Report로 대체해야 한다(추가
+>   기술 확인 필요).
+>
+> **Option B — Report/Dashboard로 대체(필드 없음)**
+> - 무엇을 의미하는지: 쉽게 말하면 "Account 화면에 필드로 안 두고, 별도
+>   리포트에서 확인한다."
+> - Salesforce 구현: Account 관련 Opportunity Report.
+> - 장점: 필드 추가가 없다.
+> - 단점: Wireframe처럼 Account List View에서 바로 보이지 않는다.
+>
+> **현재 추천**: Opportunity-Account 관계의 Roll-up 가능 여부를 먼저 기술
+> 확인한 뒤 Option A/B를 결정한다 — 이번 Draft에서는 어느 쪽도 확정하지
+> 않는다.
+>
+> **화요일 결정 질문**: "이 두 숫자를 Account 화면에 실시간 필드로 꼭 보여줘야
+> 하는가, 아니면 별도 리포트에서 확인해도 되는가?"
+>
+> **Status: DRAFT — NOT FINAL**
+
+### 7.3 [P2] 🔵 FUTURE SCOPE
+
+현재 Phase 2에서 구현하지 않는 것. 기존 `CLAUDE.md` §5가 이미 Future Scope로
+지정한 항목을 Draft 기능으로 슬쩍 끌어오지 않는다.
+
+- **Agentforce 기반 실제 AI Matching**(§7.2 B Option C) — CLAUDE.md §5 Future
+  Scope
+- Marketing Cloud / Data Cloud 활용
+- 실제 외부 API / AWS 기반 실시간 데이터 연동(Candidate Discovery의 외부 기업
+  데이터 조회 포함)
+- 위 항목은 화요일 회의에서도 "지금 구현할지"를 논의하지 않는다 — 이미
+  CLAUDE.md에서 확정된 범위 밖이다

@@ -10,7 +10,7 @@
 
 우리는 티켓 예매 시스템이나 쇼핑몰을 만드는 것이 아니라, **팬을 이해하고 성장시키는 Salesforce Customer 360**을 설계합니다.
 
-Demo에서는 Cloud Alpacas의 FRM Manager인 **김매니저**가 Salesforce를 사용하여 신규 팬 **이루키**를 충성 팬으로 성장시키는 과정을 보여줍니다.
+8/14 Phase 1 Demo에서는 Cloud Alpacas의 FRM Manager인 **김매니저**가 Salesforce를 사용하여 신규 팬 **이루키**를 충성 팬으로 성장시키는 과정을 보여주었습니다. 현재는 이 Fan 360 데이터를 기반으로 **MVP 고도화**와 **B2B Collaboration/Sponsorship Expansion**을 함께 진행하는 **Phase 2** 단계입니다.
 
 ---
 
@@ -32,6 +32,10 @@ Demo에서는 Cloud Alpacas의 FRM Manager인 **김매니저**가 Salesforce를 
 
 모든 설계와 구현은 이 목표를 달성하기 위한 수단입니다.
 
+이 Business Goal은 **Phase 1(B2C Fan 360 MVP, ~2026-08-14 완료)**의 목표였습니다.
+
+현재 프로젝트는 **Phase 2(MVP 고도화 + B2B Collaboration/Sponsorship Expansion)**로 넘어와, 이 Fan 360 데이터를 구단의 제휴·스폰서 영업 의사결정에 활용하는 방향으로도 확장하고 있습니다. Phase 2의 세부 Business Goal과 Pain Point는 이후 `00_STORY.md`에서 별도로 정의합니다.
+
 ---
 
 ## 3. 프로젝트 철학 (Business First)
@@ -52,20 +56,41 @@ Salesforce는 문제를 해결하기 위한 도구입니다. Object를 먼저 �
 
 FRM Team의 역할은 팬 데이터를 분석하는 것이 목적이 아니라, 팬을 이해하고, 팬의 현재 상태를 파악하며, 가장 적절한 Next Best Action을 실행하여 팬이 Cloud Alpacas와 더 오래 함께하도록 돕는 것입니다.
 
-이번 프로젝트의 주인공은 두 사람입니다.
+Cloud Alpacas의 이야기는 팬과 구단 운영에서 시작해, 이후 팬 데이터를 활용한 제휴·스폰서십 영역으로 확장됩니다.
 
-- **김매니저** : Cloud Alpacas의 FRM Manager. Salesforce Customer 360을 사용하는 사용자(User)
+### B2C Story
+
+FRM Team의 역할은 팬 데이터를 분석하는 것 자체가 목적이 아니라, 팬을 이해하고, 팬의 현재 상태를 파악하며, 가장 적절한 Next Best Action을 실행하여 팬이 Cloud Alpacas와 더 오래 함께하도록 돕는 것입니다.
+
+- **김매니저** : 팬 데이터를 관리하고 팬을 이해하며 Next Best Action을 실행하는 Cloud Alpacas의 FRM Manager. Salesforce Customer 360을 사용하는 사용자(User)
 - **이루키** : SNS를 통해 처음 Cloud Alpacas를 알게 된 신규 팬(Customer)
 
 Customer 360은 이루키의 행동을 하나의 화면에서 연결하여 보여주고, 김매니저는 그 정보를 바탕으로 적절한 Action을 실행합니다.
 
+### B2B Expansion Story
+
+팬은 늘고 있지만 구단 재정 운영상 적자인 상황에서, Cloud Alpacas는 팬 데이터를 활용해 새로운 스폰서/제휴사를 발굴하고 영업 기회로 연결해야 합니다.
+
+- **이 매니저** : Cloud Alpacas의 스폰서 및 제휴 담당자
+  - 팬이 증가하고 있지만 구단 재정 운영상 적자 상황에서 새로운 스폰서/제휴사를 발굴해야 함
+  - 어떤 기업이 Cloud Alpacas의 팬층과 잘 맞는지 판단하기 어려움
+  - 팬 데이터를 활용해 잠재 제휴사/스폰서사를 발굴하고 영업 기회로 연결하고 싶음
+  - 단기 Collaboration을 통해 성과를 검증하고 장기적인 Partnership/Sponsorship으로 발전시키고 싶음
+
+이 Story의 상세 여정과 시나리오는 이후 `00_STORY.md`에서 별도로 정의합니다.
+
 ---
 
-## 5. 현재 프로젝트 범위 (MVP)
+## 5. 프로젝트 진행 단계 (Phase 1 완료 → Phase 2 진행 중)
 
-이번 프로젝트는 MVP(Minimum Viable Product)를 목표로 합니다. 다음 범위까지만 구현합니다.
+Cloud Alpacas 프로젝트는 아래와 같이 단계적으로 진행합니다. Phase 1/Phase 2의 시간 구분(~8/14, 8/15~)은 `02_TEAM_GUIDE.md`에서 정의한 것과 동일합니다.
 
+### Phase 1 — B2C Fan 360 MVP (완료, ~2026-08-14)
+
+- B2C Fan 360 MVP 개발 및 8/14 Demo 완료
+- 이루키 / 김매니저를 중심으로 한 B2C Fan 360 Story
 - Salesforce Customer 360
+- 이루키의 Fan Journey
 - Fan 360 Dashboard
 - Fan Profile
 - Fan Timeline
@@ -73,15 +98,35 @@ Customer 360은 이루키의 행동을 하나의 화면에서 연결하여 보�
 - Recommendation (Next Best Action)
 - Salesforce Flow
 - Slack Notification
-- Demo용 Fan App (데이터 생성 목적)
+- Demo용 Fan App (Ticket / Admission / Goods / Membership 등 이벤트 생성)
 
-이번 프로젝트에서 **Fan App은 주인공이 아닙니다.** Fan App은 티켓 구매, 체크인, 굿즈 구매 등의 이벤트를 생성하여 Salesforce에 데이터를 전달하는 **Demo용 채널**입니다.
+Phase 1에서 **Fan App은 주인공이 아닙니다.** Fan App은 티켓 구매, 체크인, 굿즈 구매 등의 이벤트를 생성하여 Salesforce에 데이터를 전달하는 **Demo용 채널**입니다.
 
-프로젝트의 핵심은 **Salesforce Customer 360**이며, Demo 역시 Customer 360을 중심으로 진행합니다.
+Phase 1의 핵심은 **Salesforce Customer 360**이며, 8/14 Demo 역시 Customer 360을 중심으로 진행했습니다.
 
-Marketing Cloud, Data Cloud, Agentforce, 실제 결제 및 외부 API 연동은 이번 MVP 범위에 포함하지 않으며 Future Scope로 관리합니다.
+### Phase 2 — MVP 고도화 + B2B Expansion (진행 중, 2026-08-15 ~)
 
-새로운 아이디어가 나오더라도 MVP 범위를 벗어나면 바로 구현하지 않고 Future Scope로 기록합니다.
+Phase 2는 **B2B Collaboration/Sponsorship만을 의미하지 않습니다.** 아래 두 방향을 함께 포함합니다.
+
+**1. MVP 고도화**
+
+Phase 1 B2C Fan 360 MVP의 안정화, 세부 기능 보완, 필요한 UX/데이터/자동화 개선을 계속합니다. 구체적인 개발 프로세스(브랜치 전략 등)는 `02_TEAM_GUIDE.md`를 따릅니다.
+
+**2. B2B Collaboration / Sponsorship Expansion**
+
+Phase 1에서 구축한 Fan 360 데이터를 기반으로 제휴 및 스폰서 영업 영역으로 확장합니다. Cloud Alpacas는 팬이 증가하고 있지만 구단 재정 운영상 적자 상황이라, 새로운 스폰서/제휴사를 발굴해야 합니다. 기존 Fan 360을 버리는 것이 아니라, 그 위에 새로운 흐름을 더하는 것입니다.
+
+핵심 흐름:
+
+> Fan 360 Data → Fan 분석/그룹화 → 제휴·스폰서 후보 발굴 → Lead → Account/Contact → Opportunity → 단기 Collaboration → Product/Quote/Campaign → Collaboration 성과 분석 → 장기 Partnership/Sponsorship
+
+B2B 영역의 상세 Story, Persona, Object, Field, 역할 분담은 확정되는 대로 `00_STORY.md`, `01_PROJECT.md`, `03_SYSTEM.md`, `02_TEAM_GUIDE.md`에 각각 반영합니다.
+
+### Future Scope (Phase 2에서도 아직 하지 않는 것)
+
+Marketing Cloud, Data Cloud, Agentforce, 실제 결제 및 외부 API/AWS 기반 실시간 데이터 연동 등은 Phase 2 범위에도 포함하지 않으며 Future Scope로 관리합니다.
+
+새로운 아이디어가 나오더라도 현재 Phase(1 또는 2) 범위를 벗어나면 바로 구현하지 않고 Future Scope로 기록합니다.
 
 ---
 

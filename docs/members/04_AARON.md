@@ -1,3 +1,58 @@
+# 아론
+
+## [P2] Current Role
+
+🏢 **Account + Contact**. Business Analyst / Demo Experience Lead 역할
+(`02_TEAM_GUIDE.md §1`)은 유지하되, Phase 2에서는 **공식 관계가 형성된 파트너사
+정보(Account)와 담당자(Contact)** 영역을 End-to-End로 담당한다
+(`02_TEAM_GUIDE.md §11`) — Demo Story/Data 기획 역할도 계속 유지한다.
+
+## [P2] Mission
+
+Lead가 전환된 이후의 파트너사 정보(Account)와 담당자(Contact)를 관리하고,
+협업 현황(Active Collaboration/Total Collab Value)이 한눈에 보이도록 만든다
+(`01_PROJECT.md §6.1`, `03_SYSTEM.md §7 K`).
+
+## [P2] Ownership
+
+- Account(Sponsor/Partner RecordType)
+- Contact(Partner Contact RecordType)
+- Account 집계 필드(Active Collaboration/Total Collab Value) — 구현 방식 TBD
+  (`03_SYSTEM.md §7 K`)
+- `04_DEMO.md`/`docs/data/DEMO_DATA_STANDARD.md` — Demo Story/Data 기획은
+  계속 유지
+
+## [P2] End-to-End Responsibility
+
+Requirement(Wireframe Account 화면) → Business/Domain 이해(`01_PROJECT.md §6.2`
+Fan Person Account와의 공존 이슈 포함) → Salesforce Object/Field(Account/Contact는
+Standard 확정, 집계 필드는 TBD) → Admin → Demo Data → Flow/Automation(필요 시) →
+Dev(필요 시) → 화면 → QA
+
+## [P2] Shared Scenario
+
+혜준의 Lead Convert 결과를 받아 Account/Contact를 관리하고, 은영의 Opportunity에
+연결한다(`02_TEAM_GUIDE.md §13`).
+
+## [P2] Collaboration
+
+- **혜준**: Lead→Account 전환 시점을 맞춘다.
+- **은영**: Account 하위 Opportunity가 정확히 연결되는지 확인한다.
+- **사라**: Demo Data 규모(`04_DEMO.md §10`) 조율은 Phase 1과 동일하게 계속한다.
+
+## [P2] TBD / Decision Needed
+
+- Account 집계 필드(`03_SYSTEM.md §7 K`) — Opportunity-Account가 표준 Lookup
+  관계라 Roll-up 가능 여부 기술 확인 필요
+
+> 화요일 회의 전까지 Roll-up/Formula 여부를 확정된 것으로 문서화하지 않는다.
+
+---
+
+## [P1] Previous Role & Contribution
+
+> Phase 1(B2C Fan 360 MVP)에서 아론이 실제로 수행한 역할과 기여를 보존한 History다.
+
 # Mission
 
 > **"이루키의 이야기가 청중에게 설득력 있게 전달되도록 만든다."**

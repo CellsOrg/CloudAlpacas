@@ -90,7 +90,11 @@ Task·체크리스트·진행률을 관리하는 문서는 아니다.
 
 ---
 
-## 공통 템플릿
+## [P1] 공통 템플릿 (Phase 1)
+
+Phase 1(B2C Fan 360 MVP) 기간 동안 모든 멤버 문서가 따른 템플릿이다 — History로
+보존한다. 각 멤버 문서 하단 `[P1] Previous Role & Contribution` 이하가 이 템플릿
+그대로다.
 
 ```markdown
 # Mission
@@ -112,6 +116,37 @@ Task·체크리스트·진행률을 관리하는 문서는 아니다.
 # Learning Path
 # 🤝 협업 포인트
 ```
+
+---
+
+## [P2] 공통 템플릿 (Phase 2)
+
+Phase 2(B2C 고도화 + B2B Collaboration/Sponsorship Expansion)부터는 각 멤버
+문서 **최상단**에 아래 템플릿을 추가한다 — Phase 1 템플릿을 대체하는 것이 아니라,
+"지금 무엇을 담당하는가"를 먼저 보여주고 그 아래에 Phase 1 History를 그대로
+이어붙이는 구조다.
+
+```markdown
+# [이름]
+
+## [P2] Current Role
+## [P2] Mission
+## [P2] Ownership
+## [P2] End-to-End Responsibility
+## [P2] Shared Scenario
+## [P2] Collaboration
+## [P2] TBD / Decision Needed
+
+---
+
+## [P1] Previous Role & Contribution
+
+(Phase 1 템플릿 전체를 그대로 보존)
+```
+
+`[P2] TBD / Decision Needed`는 `docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md`의
+화요일 회의 결과가 나오기 전까지는 임의로 채우지 않는다 — 확정된 기술 구조인
+것처럼 쓰지 않는다.
 
 ---
 

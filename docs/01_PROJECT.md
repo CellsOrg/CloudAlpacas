@@ -170,6 +170,23 @@ flowchart LR
 
 **새로 등장한 명사:** Sponsorship Package(제공 권리 패키지), Proposal(제안서). Renewal은 2.3과 공유.
 
+### 2.7 [P2] Phase 2 확장 — Fan Insight → 후보 발굴 (B2B Collaboration/Sponsorship)
+
+> 이 섹션은 §2.6을 대체하지 않는다. §2.6은 "이미 접촉 대상이 정해진 이후, 어떻게 제안·계약하는가"를 다뤘고, 이 섹션은 그보다 **앞단계 — "애초에 누구에게 접촉할지 어떻게 찾아내는가"**를 다룬다(`00_STORY.md` §8 Phase 2 Story 기반). Cloud Alpacas는 팬이 늘고 있지만 구단 재정 운영상 적자 상황이라, 이 앞단계 없이 "스폰서 발굴"만으로는 후보를 무작위로 찾는 것과 다르지 않다.
+
+```mermaid
+flowchart LR
+    FI["Fan Insight<br/>(Fan 360 데이터 분석)"] --> PC["팬층 특성 발견"]
+    PC --> FH["Business Fit 가설<br/>(어떤 기업과 궁합이 좋은가)"]
+    FH --> CD["후보 발굴<br/>(Candidate Discovery)"]
+    CD --> L["잠재 후보 관리<br/>(Lead)"]
+    L -->|접촉 성사| B["스폰서 발굴<br/>(Sponsor, Partner Contact) — §2.6 이어짐"]
+```
+
+**새로 등장한 명사:** Fan Insight(팬층 분석 결과), Business Fit 가설, Candidate Discovery(후보 발굴), Lead(잠재 후보). 이 네 개념은 §2.6의 "스폰서 발굴" 앞에 붙는 새로운 단계이며, §2.6 이후(제안→계약→실행→성과→재계약)는 그대로 이어진다. Fan Insight, Business Fit 가설, Candidate Discovery는 새 저장 Entity가 아니라 §4의 기존 Fan Analytics Entity(Attendance Record, Engagement Signal, Fan Activity Pattern 등)를 활용하는 **분석 과정**이다 — Lead만 §4에 새 Entity로 추가한다.
+
+> **왜 Fan 360이 이 흐름의 출발점인가?** Phase 1에서 만든 Fan 360 데이터(관심사, 구매·관람 행동, Engagement, Fan Value 등)가 없으면 "어떤 기업이 우리 팬과 맞는지"를 판단할 근거가 없다. B2B가 별도의 독립된 CRM이 아니라 **기존 Fan 360을 Business Development에 활용하는 확장**이라는 점이 여기서 드러난다(`00_STORY.md` §8.2): **B2C Fan Activity → Fan 360 Insight → B2B Business Decision**.
+
 ---
 
 ## 3. 기존 Domain Model과 비교
@@ -248,7 +265,9 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 
 ## 4. Business Entity 목록 (Workflow 기준 개정판)
 
-각 행에 소속 Domain을 표시했다. `신규`는 이번 Workflow 분석에서 추가된 Entity다.
+각 행에 소속 Domain을 표시했다. `신규`는 이번 Workflow 분석에서 추가된 Entity다. `[P2]`는
+이번 Phase 2 B2B 확장(§2.7)에서 추가된 Entity다. Salesforce Object 구현 여부는 아직
+확정되지 않았다(§6.11 참고, TBD).
 
 ### 👤 Person
 
@@ -266,6 +285,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | Cloud Alpacas | 구단 본체 | 전 Domain 공통 |
 | Sponsor | 스폰서 조직 | Partnership |
 | Partner | 협업/제휴 조직 (라이선스사 등 유형 포괄) | Partnership |
+| **[P2] Lead** | 아직 관계가 형성되지 않은 잠재 제휴/스폰서 후보(Fan Insight 기반 가설 단계) — Object 여부 TBD(§6.11) | Partnership |
 
 ### 🎫 Product
 
@@ -318,6 +338,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | **Benefit Redemption** `신규` | 혜택을 실제로 사용/검증한 사건 | Marketing / Operations / Partnership |
 | **Renewal** `신규` | 멤버십 갱신, 스폰서 재계약 | Operations / Partnership |
 | **Proposal** `신규` | 계약 전 스폰서십 제안 기록 | Partnership |
+| **[P2] Collaboration** | Opportunity가 성사된 뒤 실행하는 단기 협업 활동(공동 캠페인·굿즈·이벤트 등 — 예시이며 미확정). Campaign 재사용 가능성 — §6.11 | Partnership |
 | Sponsor Contract | 스폰서십 계약 (라이선스 계약 포함, §3.3) | Partnership |
 | Settlement | 정산 | Partnership |
 
@@ -412,6 +433,19 @@ graph TD
     PS --> ST["Settlement / Campaign Performance /<br/>Sponsor Performance"]
 ```
 
+### [P2] Partnership 축 — Phase 2 확장: Fan Insight → 후보 발굴
+
+```mermaid
+graph TD
+    F["Person Account<br/>(Fan)"] --> FI["Fan 360 Analytics<br/>(Engagement/Fan Value/Attendance 등)"]
+    FI -->|팬층 특성 발견| FH[Business Fit 가설]
+    FH -->|후보 발굴| L["Lead<br/>(잠재 후보, Object 여부 TBD)"]
+    L -->|접촉 성사| P["Partner<br/>(Sponsor 포함) — 위 Partnership 축으로 연결"]
+```
+
+> 이 다이어그램은 위 Partnership 축의 시작점(`Partner`) **앞에 붙는** 새로운 흐름이다. 기존
+> Partnership 축 다이어그램은 수정하지 않는다.
+
 **Workflow가 새로 확인해준 관계:**
 
 - `Inquiry`는 이제 Case 그 자체로 끝나지 않고, 반드시 `Ticket Purchase` / `Membership Enrollment` /
@@ -448,6 +482,8 @@ graph TD
 | Benefit Redemption | Custom Object |
 | Renewal | Custom Object 또는 기존 Contract/Enrollment의 상태 변경 (§6.7) |
 | Proposal | Standard Opportunity (계약 전 단계) |
+| **[P2] Lead** | Standard Lead 또는 Account(비활성 상태) — Object 여부 미확정(§6.11 참고, TBD) |
+| **[P2] Collaboration** | Campaign 재사용 가능성(§3.3 기존 결정과 연계) 또는 별도 Object — 미확정(§6.11 참고, TBD) |
 | Sponsor Contract | Standard Contract |
 | Settlement | Custom Object |
 | Ballpark / Section / Gate | Custom Object |
@@ -693,6 +729,46 @@ Demo 범위에서는 채널이 단순할 가능성이 높아 필드로 시작해
 확정(실제 발송 리스트)이 다르다는 뜻이다. 이 둘을 모두 저장할지, 확정 단계만 저장할지(세분화는
 Report로 훑어보고 최종 확정 리스트만 Object로 남기기)도 팀이 고를 수 있는 절충안이다.
 
+### 6.11 [P2] Lead vs Proposal — Phase 2 B2B Business 관점 재검토
+
+> 이 섹션은 §6.2~6.10과 형식은 같지만 성격이 다르다 — 기존 Object를 새로 고르는 것이 아니라,
+> **새로 필요해진 개념(Lead)이 기존 개념(Proposal)과 어떻게 다른지**를 Business 관점에서 정리한
+> 것이다. Salesforce Object 구현은 확정하지 않는다.
+
+**기존 이해 (§2.6, §6.1)**
+
+Proposal은 "계약 전 제안 기록"으로, 이미 접촉·관계가 있는 상대에게 제안서를 보내는 단계였다.
+Salesforce Mapping도 이미 Proposal → Opportunity로 제안되어 있었다 — 즉 Proposal은 사실상
+협상 진행 중인 Opportunity의 다른 이름에 가까웠다.
+
+**Phase 2에서 드러난 공백**
+
+`00_STORY.md` §8 Phase 2 Story는 "아직 아무 관계도 없는 잠재 기업을 Fan 데이터로 세운 가설로
+처음 찾아내는" 단계에서 시작한다. 이 단계는 기존 Proposal/Opportunity가 다루지 않던 영역이다 —
+Opportunity는 "진행 중인 딜"을 표현하는 데 강하지만, "아직 딜이 아닌, 검증 전 가설 단계 후보"를
+표현하기엔 무겁다(§6.5의 Opportunity 성격 설명과 같은 이유).
+
+**재정의**
+
+- **Lead** = 아직 관계가 없는, 가설 단계의 잠재 후보. Fan Insight로 세운 Business Fit 가설(§2.7)에서 나온다.
+- **Proposal** = Lead가 아니다. 실제 접촉이 성사되어 Opportunity가 진행되는 동안 오가는 제안 내용(문서/활동)이며, 기존 정의(§2.6·§6.1)를 그대로 유지한다.
+- **Opportunity** = 성사 여부를 다투는 협상 단계.
+- **Collaboration** = Opportunity가 Won된 뒤 실제로 실행하는 활동. §3.3의 기존 결정("Collaboration Campaign → Campaign으로 통합")과 연결되므로, Campaign을 그대로 재사용할 가능성이 높다.
+
+**우리 프로젝트에서 고민해야 하는 점**
+
+Lead를 Salesforce 표준 Lead Object로 만들지, 아니면 후보 수가 적은 초기 단계에서는 비활성
+상태의 Account로 관리할지는 아직 결정하지 않았다 — Decision 003의 "Standard First, Custom
+When Needed" 원칙을 여기에도 적용할지는 `03_SYSTEM.md`에서 팀이 판단한다. Collaboration도
+마찬가지로 Campaign을 그대로 쓸지, Phase 2 전용 필드/RecordType이 필요할지는 미정이다.
+
+> **TBD / Team Decision Needed**
+> - Lead를 Object로 만들지 여부
+> - Collaboration을 Campaign RecordType으로 표현할지, 별도 Object로 만들지
+> - Business Fit 가설을 어떤 데이터(Fan Segment/Engagement/Fan Value 등)로 판단할지 —
+>   Decision 009가 제안했던 "마케팅 발송 대상 그룹" 개념이 아직 구현되지 않았다는 점도
+>   함께 고려해야 한다.
+
 ---
 
 ## 7. 마무리 — Business → Domain → Salesforce 사고 흐름 요약
@@ -713,3 +789,39 @@ Report로 훑어보고 최종 확정 리스트만 Object로 남기기)도 팀이
 다음 단계(`03_SYSTEM.md` — Salesforce Object, Data Model, Architecture, ERD, Flow)로 넘어가기 전에,
 §6의 각 "우리 프로젝트에서 고민해야 하는 점"에 대한 팀의 판단을 먼저 확정하는 것을 권한다 — 특히
 §6.5(Order vs Opportunity)와 §6.3(Product2 여부)은 서로 연결되어 있어 함께 결정하는 것이 좋다.
+
+---
+
+## 8. [P2] Phase 2 — B2B Collaboration/Sponsorship Business Workflow
+
+> 이 섹션은 §1~§7(Phase 1 B2C 중심 분석)을 대체하지 않는다. `00_STORY.md` §8/§9의 Phase 2
+> Story를 Business → Domain → Workflow 수준으로 구체화한 것이며, Salesforce Object/Field
+> 설계는 다루지 않는다(→ `03_SYSTEM.md`). B2B는 별도의 독립 CRM이 아니라 **기존 Fan 360을
+> Business Development에 활용하는 확장**이다:
+>
+> **B2C Fan Activity → Fan 360 Insight → B2B Business Decision**
+
+### 8.1 Business Workflow 표
+
+| 단계 | Business Question | 담당자 | Input | Action | Output | 다음 단계 |
+|---|---|---|---|---|---|---|
+| 1. Fan Insight | 우리 팬은 누구이고 어떤 특성을 가지는가? | 이 매니저 | Fan 360 데이터(Engagement, Fan Value, 관람·구매 행동, 관심사 — §2.1~2.4의 기존 Fan 데이터를 그대로 활용) | 팬층 특성 분석 | 팬층 특성 인사이트 | 2 |
+| 2. Partner Candidate Discovery | 이 팬층과 잘 맞는 기업/브랜드는 어디인가? | 이 매니저 | 팬층 특성 인사이트 | Business Fit 가설 수립 → 후보 리스트업 | 후보 기업 리스트(가설 단계) | 3 |
+| 3. Prospect / Lead | 이 후보에 접촉을 시작할 가치가 있는가? | 이 매니저 | 후보 기업 리스트 | 우선순위 판단, 접촉 시도 | Lead(§4·§6.11 — Object 여부 TBD) | 4 (접촉 성사 시) |
+| 4. Account / Contact | 누구를 상대로 논의를 이어가는가? | 이 매니저 | 접촉 성사된 Lead | 기업/담당자 정보 관리 | Sponsor/Partner(§4 기존) + Partner Contact(§4 기존) | 5 |
+| 5. Opportunity | 실제로 제휴/스폰서십을 추진할 것인가? | 이 매니저 | Account/Contact + Fit 가설 | 제안 논의·조건 협상 | Proposal(§4·§6.11 기존, 재정의) → Opportunity Won/Lost | 6 (Won 시) |
+| 6. Short-term Collaboration | 장기 계약 전에 효과를 어떻게 검증하는가? | 이 매니저 | 성사된 Opportunity | 단기 Collaboration 기획·실행(예: 공동 캠페인, 굿즈, 이벤트 — 예시이며 미확정) | Collaboration(§4·§6.11 — Object 여부 TBD) | 7 |
+| 7. Performance / Evaluation | 이 Collaboration이 실제 효과가 있었는가? | 이 매니저 | Collaboration 결과(팬 반응·참여·구매·Engagement — KPI TBD) | 성과 분석 | 지속 여부 판단 근거 | 8 |
+| 8. Long-term Partnership/Sponsorship | 이 관계를 장기 계약으로 발전시킬 것인가? | 이 매니저 | 성과 분석 결과 | 장기 제안 또는 중단/재검토(Decision Point) | Sponsor Contract(§4 기존) 또는 관계 종료·보류 | 종료 또는 기존 Renewal(§4 기존) 흐름 재사용 |
+
+### 8.2 이 표가 기존 §2.6/§4/§5/§6과 맺는 관계
+
+- **1~3단계**(Fan Insight → Candidate Discovery → Lead)는 §2.6에 없던 새로운 앞단계다(§2.7에서 다이어그램으로 표현).
+- **4~8단계**(Account/Contact → Opportunity → Collaboration → Performance → Partnership/Sponsorship)는 §2.6·§4·§6.1의 기존 Entity(Sponsor, Partner, Partner Contact, Proposal, Sponsor Contract, Renewal, Settlement)를 그대로 재사용하거나(§6.11에서 재정의한 대로), Collaboration처럼 새로 추가된 Entity로 채워진다.
+- 이 표는 "이 매니저가 실제 업무에서 무엇을 하는가"를 Business 언어로 보여주는 것이 목적이며, Salesforce 기능명을 기준으로 작성하지 않았다.
+
+### 8.3 아직 확정하지 않은 것
+
+§6.11의 TBD 목록과 동일하다 — Lead/Collaboration의 Object 구현 여부, Business Fit 판단에
+쓸 실제 Fan 데이터 항목, Collaboration 실패 시 재검토 기준. 이 판단들은 `03_SYSTEM.md`·
+`05_DECISIONS.md`에서 팀이 확정한다.
