@@ -1,0 +1,26 @@
+<template>
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <div class="dh-title">세그먼트 기회</div>
+            <div class="dh-sub">대상 세그먼트를 확인하고 대표 팬의 Fan 360 데이터를 검토한 뒤 다음 행동을 결정하세요</div>
+        </div>
+
+        <div class="dashboard-body">
+            <!-- 좌측: 세그먼트 카드 -->
+            <div class="col-left">
+                <c-segment-opportunities onfanselect={handleFanSelect}></c-segment-opportunities>
+            </div>
+
+            <!-- 우측: Fan 360 -->
+            <div class="col-right">
+                <template if:true={showDemoNotice}>
+                    <div class="demo-notice">
+                        이 세그먼트는 데모 준비 중입니다.<br>
+                        <strong>멤버십 전환 완료 팬</strong>의 <strong>대표 팬 검토</strong>를 눌러보세요.
+                    </div>
+                </template>
+                <c-fan360-summary selected-fan-id={selectedFanId}></c-fan360-summary>
+            </div>
+        </div>
+    </div>
+</template>
