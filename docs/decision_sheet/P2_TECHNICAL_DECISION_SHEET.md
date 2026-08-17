@@ -3,6 +3,24 @@
 > Working Document — 화요일 회의용. Source of Truth 아님(하단 "Decision 반영 규칙" 참고).
 > 근거 문서: `CLAUDE.md`, `00_STORY.md` §8/§9, `01_PROJECT.md` §2.7/§8, `03_SYSTEM.md §7`(A~K), `05_DECISIONS.md`(특히 Decision 003/005/006/009/015/016)
 
+## 0. Review Order — 회의 진행 순서
+
+메인으로 여는 문서는 이 파일 하나다. 나머지는 필요할 때만 참고한다. **Excel이 Object Map / Relationship Map의 Source of Truth다 — 여기 MD에서 다시 설명하지 않는다.**
+
+| # | 단계 | 여는 곳 |
+|---|---|---|
+| 1 | Story | `00_STORY.md` |
+| 2 | Scenario | SCN-B2B-001(Hello Kitty Collaboration) — `P2_DUMMY_DATA_MASTER.md §3` |
+| 3 | Excel Object Map | `🦙 CloudAlpacas - 메타데이터 기록 [B2B 확장]` 구글시트 → "Phase 2 Object Map (Dashboard)" 탭 — 전체 Object / P1 Reuse 여부 / 현재 존재 여부 / Relationship |
+| 4 | Excel Member Sheets | 같은 구글시트 → `01_SARA` ~ `05_SEUNGWOO` 탭 — 각자 이미 있는 것 / 내가 만들 것 |
+| 5 | 필요한 Technical Decision | 이 문서 §2(A~K) 중 **정말 협의가 필요한 것만** 빠르게 결정 |
+| 6 | Dummy Data / Data Contract | `P2_DUMMY_DATA_MASTER.md`(실제 값) + `P2_DATA_CONTRACT.md`(Owner/Related Record — 결정 이후 실행 기준) |
+| 7 | 작업 시작 | 각자 Excel Member Sheet 아래쪽 "내가 추가로 만들어야 할 것"부터 |
+
+> `P2_WEEKEND_PM_WORKBOOK.md`는 주말 작업이 끝나 더 이상 이 흐름에 없다(개인 PM 기록으로 보관, 아래 §6 참고).
+
+---
+
 ## 1. 회의 정보
 
 | 항목 | 내용 |
@@ -66,4 +84,4 @@
 >
 > 회의에서 결정되지 않은 항목은 임의로 확정하지 않고 TBD로 유지한다.
 
-**반영 순서**: `Decision Sheet → 05_DECISIONS.md → 01_PROJECT.md / 03_SYSTEM.md → ERD / Flow / Implementation`
+**반영 순서**: `Decision Sheet → 05_DECISIONS.md → 03_SYSTEM.md → 02_TEAM_GUIDE.md / members/ → 04_DEMO.md → data/DEMO_DATA_STANDARD.md`(전체 체크리스트는 `P2_WEEKEND_PM_WORKBOOK.md §7 "집에 돌아온 후"` 참고, `01_PROJECT.md`도 필요 시 함께 반영)

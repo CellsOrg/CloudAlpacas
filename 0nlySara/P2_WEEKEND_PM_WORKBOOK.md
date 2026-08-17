@@ -1,5 +1,7 @@
 # 🦙 Cloud Alpacas — P2 Weekend PM Workbook
 
+> **개인 PM 작업 기록으로 보관 (2026-08-17).** 주말 작업이 끝나 화요일 회의 메인 문서에서는 더 이상 쓰지 않는다 — 회의는 `docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md` 하나로 진행한다. 이 문서의 결정 초안·시나리오 서사는 `docs/decision_sheet/P2_DUMMY_DATA_MASTER.md`, `P2_DATA_CONTRACT.md`에 이미 정리되어 있으므로 내용을 다시 복사하지 않았다 — 개인 작업 이력이 필요할 때만 연다. (`docs/.gitignore` 대상 폴더로 이동했으므로 git에는 더 이상 추적되지 않는다.)
+
 > 화요일 의사결정 회의 전까지 **노트북 없이 모바일에서** B2B Phase 2의 공통 기준을 정리하는 PM 작업 노트입니다.
 >
 > **원칙:** 확정은 `✅`, 논의 중은 `⭐️ TBD`. Salesforce Object/Field/Flow는 화요일 전 임의 확정하지 않습니다.

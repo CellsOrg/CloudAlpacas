@@ -1,8 +1,10 @@
 # DEMO_DATASETS.md — 이루키의 Demo 시나리오 데이터셋
 
 > 이 문서는 `04_DEMO.md`의 Scene 순서를 그대로 따라가며, **이루키 한 사람의 여정을
-> 실제 레코드 값으로** 채운다. 선수·상품·경기 같은 배경 데이터는 `SAMPLE_DATA.md`를
+> 실제 레코드 값으로** 채운다. 선수·상품·경기 같은 배경 데이터는 `SAMPLE_DATA_v2_1.md`를
 > 참고한다(중복 방지, CLAUDE.md §7). Object/Field 정의는 `03_SYSTEM.md`를 따른다.
+> (구 `SAMPLE_DATA.md`는 2026-08-17 `docs/data/archive/`로 이동됨 — 내용은
+> `SAMPLE_DATA_v2_1.md`에 포함되어 있다.)
 >
 > 담당: 아론, 검증: 혜준. Demo 리허설 전 이 값 그대로 Org에 적재한다(승우 협업).
 

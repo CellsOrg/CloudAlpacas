@@ -1,5 +1,9 @@
 # Cloud Alpacas — P2 Data Contract
 
+> **회의 메인 문서가 아니다.** 화요일 회의는 `P2_TECHNICAL_DECISION_SHEET.md` 하나로
+> 진행하고, 이 문서는 결정 이후 **실제 구현 단계에서 Owner / Related Record / Handoff를
+> 확인하는 실행 기준**으로 연다(Review Order 6번).
+>
 > "공통 영역 회의에서 확정해야 하는 건 Object 자체보다 **Relationship과 데이터의
 > 주인**이다" — 이 문서는 그 결정을 기록하는 곳이다. `03_SYSTEM.md`가 "Object가
 > 무엇인가"를 정의한다면, 이 문서는 **"그 Object의 실제 레코드를 누가 만들고, 다른

@@ -1,5 +1,7 @@
 # Cloud Alpacas — Org 구축용 더미 데이터 예시
 
+> **Archived (2026-08-17).** 이 문서의 내용은 같은 날 이후 작성된 `docs/data/SAMPLE_DATA_v2_1.md`에 더 완결된 형태로 포함되어 있다. 새 작업은 `SAMPLE_DATA_v2_1.md`를 참고할 것 — 이 파일은 삭제하지 않고 기록용으로만 보관한다.
+
 > `CloudAlpacas_메타데이터_기록.xlsx` Object 시트 기준. **의존 관계(생성 순서)대로** 정렬했습니다 —
 > 위에서부터 순서대로 입력하면 Lookup/Master-Detail 참조가 끊기지 않습니다.
 > 🆕 표시는 지난 논의에서 새로 추가된 Object/Field라 기존 `SAMPLE_DATA.md`/`DEMO_DATASETS.md`엔
