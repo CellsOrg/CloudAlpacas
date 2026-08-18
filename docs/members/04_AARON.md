@@ -17,8 +17,10 @@ Lead가 전환된 이후의 파트너사 정보(Account)와 담당자(Contact)�
 
 - Account(Sponsor/Partner RecordType)
 - Contact(Partner Contact RecordType)
-- Account 집계 필드(Active Collaboration/Total Collab Value) — 구현 방식 TBD
-  (`03_SYSTEM.md §7 K`)
+- Account 집계 필드(Active Collaboration/Total Collab Value) — **On Hold**로
+  확정(`03_SYSTEM.md §7 K`, `05_DECISIONS.md` Decision 018-K) — Roll-up 가능
+  여부 기술 확인 전까지는 구현하지 않는다. Demo에서 이 집계에 의존하는 화면은
+  없다(`04_DEMO.md §9`)
 - `04_DEMO.md`/`docs/data/DEMO_DATA_STANDARD.md` — Demo Story/Data 기획은
   계속 유지
 
@@ -42,10 +44,12 @@ Dev(필요 시) → 화면 → QA
 
 ## [P2] TBD / Decision Needed
 
-- Account 집계 필드(`03_SYSTEM.md §7 K`) — Opportunity-Account가 표준 Lookup
-  관계라 Roll-up 가능 여부 기술 확인 필요
+- Account 집계 필드(`03_SYSTEM.md §7 K`) — 2026-08-18 회의에서 **On Hold로
+  확정**됐다. Opportunity-Account가 표준 Lookup 관계라 Roll-up 가능 여부
+  기술 확인이 아직 남아 있어, Option A(Roll-up)/B(Report) 중 하나를 임의로
+  선택하지 않는다.
 
-> 화요일 회의 전까지 Roll-up/Formula 여부를 확정된 것으로 문서화하지 않는다.
+> 다음 회의에서 기술 확인 결과가 나올 때까지 이 항목은 계속 TBD다.
 
 ---
 

@@ -17,13 +17,19 @@ Partner Candidate Discovery)로 끊기지 않고 이어지게 만든다(`00_STOR
 
 ## [P2] Ownership
 
-- **Data**: Person Account(`Gender__c`/`Birthdate` 포함), `Current_Segment__c`/
+- **P1 Reuse**: Person Account(`Gender__c`/`Birthdate` 포함), `Current_Segment__c`/
   `Engagement_Level__c`/`Fan_Value_Tier__c` 3축, `Fan_Activity_Pattern__c`,
-  `Engagement_Signal__c`(`03_SYSTEM.md §2.1`)
-- **Screen(TBD)**: Fan Insight/Fan Grouping 화면 — Standard Report/Report Type
-  으로 할지 Custom LWC로 할지 미확정(`03_SYSTEM.md §7 J`)
-- **B2C↔B2B 연결 지점**: Fan Insight 결과가 Collab360/Partner Candidate 발굴의
-  입력이 되는 지점 전체
+  `Engagement_Signal__c`(`03_SYSTEM.md §2.1`) — 이미 존재하는 Field를 Fan
+  Insight 분석에 그대로 활용한다
+- **Screen(확정)**: Fan Insight/Fan Grouping 화면 — **Standard Report + Report
+  Type + Dashboard**로 확정(`03_SYSTEM.md §7 J`, `05_DECISIONS.md` Decision
+  018-J). 별도 Custom Object/LWC 없음
+- **B2B에 새로 연동되는 것**: Target Segment(Picklist, `§7 G`, 값 목록 TBD),
+  Segment Match(Agentforce Matching, `§7 H`) — Fan Insight 결과가 혜준의 Lead
+  Candidate 발굴로 이어지는 지점
+- **B2C↔B2B 연결 지점**: Fan Insight 결과가 Collab360/Lead(Candidate 단계)
+  발굴의 입력이 되는 지점 전체 — Partner Candidate는 별도 Object가 아니라
+  Lead로 흡수됐다(Decision 018-A)
 
 ## [P2] End-to-End Responsibility
 
@@ -44,12 +50,15 @@ Candidate Discovery 입력이 된다(`02_TEAM_GUIDE.md §13`).
 
 ## [P2] TBD / Decision Needed
 
-- Fan Insight 화면 구현 방식(`03_SYSTEM.md §7 J`)
-- Target Segment 저장 방식(`§7 G`)
-- Segment Match 계산 주체(`§7 H`, 혜준과 공동 결정)
+2026-08-18 회의로 큰 방향은 모두 확정됐다(`05_DECISIONS.md` Decision 018).
+남은 것은 세부 값뿐이다.
 
-> 위 항목은 화요일 Technical Decision 회의(`docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md`)
-> 전까지 확정된 것으로 간주하지 않는다.
+- Target Segment Picklist의 실제 값 목록(`§7 G`)
+- Agentforce Segment Match의 상세 구성(`§7 H`, 혜준과 공동, Decision 017 TBD와 동일)
+
+> 위 항목은 여전히 임의로 확정하지 않는다 — Fan Insight 화면 구현 방식(Report/
+> Dashboard)과 Segment Match의 계산 주체(Agentforce)는 이미 확정됐으므로 더 이상
+> 이 목록에 포함하지 않는다.
 
 ---
 

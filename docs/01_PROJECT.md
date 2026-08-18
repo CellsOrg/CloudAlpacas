@@ -285,7 +285,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | Cloud Alpacas | 구단 본체 | 전 Domain 공통 |
 | Sponsor | 스폰서 조직 | Partnership |
 | Partner | 협업/제휴 조직 (라이선스사 등 유형 포괄) | Partnership |
-| **[P2] Lead** | 아직 관계가 형성되지 않은 잠재 제휴/스폰서 후보(Fan Insight 기반 가설 단계) — Object 여부 TBD(§6.11) | Partnership |
+| **[P2] Lead** | 아직 관계가 형성되지 않은 잠재 제휴/스폰서 후보(Fan Insight 기반 가설 단계). **표준 Lead Object 사용 확정**(§6.11, `05_DECISIONS.md` Decision 018-A) — Lead Status를 세분화해 Candidate 단계까지 표현하며, 정확한 Status Label은 TBD | Partnership |
 
 ### 🎫 Product
 
@@ -338,7 +338,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | **Benefit Redemption** `신규` | 혜택을 실제로 사용/검증한 사건 | Marketing / Operations / Partnership |
 | **Renewal** `신규` | 멤버십 갱신, 스폰서 재계약 | Operations / Partnership |
 | **Proposal** `신규` | 계약 전 스폰서십 제안 기록 | Partnership |
-| **[P2] Collaboration** | Opportunity가 성사된 뒤 실행하는 단기 협업 활동(공동 캠페인·굿즈·이벤트 등 — 예시이며 미확정). Campaign 재사용 가능성 — §6.11 | Partnership |
+| **[P2] Collaboration** | Opportunity가 성사된 뒤 실행하는 단기 협업 활동(공동 캠페인·굿즈·이벤트 등 — 예시이며 미확정). **Campaign의 Record Type으로 구현 확정**(별도 Object 아님, §6.11, `05_DECISIONS.md` Decision 018-D) | Partnership |
 | Sponsor Contract | 스폰서십 계약 (라이선스 계약 포함, §3.3) | Partnership |
 | Settlement | 정산 | Partnership |
 
@@ -439,7 +439,7 @@ graph TD
 graph TD
     F["Person Account<br/>(Fan)"] --> FI["Fan 360 Analytics<br/>(Engagement/Fan Value/Attendance 등)"]
     FI -->|팬층 특성 발견| FH[Business Fit 가설]
-    FH -->|후보 발굴| L["Lead<br/>(잠재 후보, Object 여부 TBD)"]
+    FH -->|후보 발굴| L["Lead<br/>(잠재 후보, Status로 Candidate 단계 표현)"]
     L -->|접촉 성사| P["Partner<br/>(Sponsor 포함) — 위 Partnership 축으로 연결"]
 ```
 
@@ -755,16 +755,15 @@ Opportunity는 "진행 중인 딜"을 표현하는 데 강하지만, "아직 딜
 - **Opportunity** = 성사 여부를 다투는 협상 단계.
 - **Collaboration** = Opportunity가 Won된 뒤 실제로 실행하는 활동. §3.3의 기존 결정("Collaboration Campaign → Campaign으로 통합")과 연결되므로, Campaign을 그대로 재사용할 가능성이 높다.
 
-**우리 프로젝트에서 고민해야 하는 점**
+**우리 프로젝트에서 고민해야 하는 점(2026-08-18 회의로 대부분 해결됨)**
 
-Lead를 Salesforce 표준 Lead Object로 만들지, 아니면 후보 수가 적은 초기 단계에서는 비활성
-상태의 Account로 관리할지는 아직 결정하지 않았다 — Decision 003의 "Standard First, Custom
-When Needed" 원칙을 여기에도 적용할지는 `03_SYSTEM.md`에서 팀이 판단한다. Collaboration도
-마찬가지로 Campaign을 그대로 쓸지, Phase 2 전용 필드/RecordType이 필요할지는 미정이다.
+2026-08-18 Technical Decision 회의에서 Lead는 **표준 Lead Object**로(Status 세분화로
+Partner Candidate까지 흡수), Collaboration은 **Campaign의 Record Type**으로 구현하기로
+확정했다(`03_SYSTEM.md` §7.2 A·D, `05_DECISIONS.md` Decision 018-A·D) — Decision 003의
+"Standard First, Custom When Needed" 원칙을 그대로 적용한 결과다.
 
-> **TBD / Team Decision Needed**
-> - Lead를 Object로 만들지 여부
-> - Collaboration을 Campaign RecordType으로 표현할지, 별도 Object로 만들지
+> **TBD / Team Decision Needed (남은 것)**
+> - Lead Status의 정확한 Picklist Label(Candidate 단계를 어떤 값으로 표현할지)
 > - Business Fit 가설을 어떤 데이터(Fan Segment/Engagement/Fan Value 등)로 판단할지 —
 >   Decision 009가 제안했던 "마케팅 발송 대상 그룹" 개념이 아직 구현되지 않았다는 점도
 >   함께 고려해야 한다.
@@ -807,10 +806,10 @@ When Needed" 원칙을 여기에도 적용할지는 `03_SYSTEM.md`에서 팀이 
 |---|---|---|---|---|---|---|
 | 1. Fan Insight | 우리 팬은 누구이고 어떤 특성을 가지는가? | 이 매니저 | Fan 360 데이터(Engagement, Fan Value, 관람·구매 행동, 관심사 — §2.1~2.4의 기존 Fan 데이터를 그대로 활용) | 팬층 특성 분석 | 팬층 특성 인사이트 | 2 |
 | 2. Partner Candidate Discovery | 이 팬층과 잘 맞는 기업/브랜드는 어디인가? | 이 매니저 | 팬층 특성 인사이트 | Business Fit 가설 수립 → 후보 리스트업 | 후보 기업 리스트(가설 단계) | 3 |
-| 3. Prospect / Lead | 이 후보에 접촉을 시작할 가치가 있는가? | 이 매니저 | 후보 기업 리스트 | 우선순위 판단, 접촉 시도 | Lead(§4·§6.11 — Object 여부 TBD) | 4 (접촉 성사 시) |
+| 3. Prospect / Lead | 이 후보에 접촉을 시작할 가치가 있는가? | 이 매니저 | 후보 기업 리스트 | 우선순위 판단, 접촉 시도 | Lead(§4·§6.11 — 표준 Lead Object 확정, Status Label TBD) | 4 (접촉 성사 시) |
 | 4. Account / Contact | 누구를 상대로 논의를 이어가는가? | 이 매니저 | 접촉 성사된 Lead | 기업/담당자 정보 관리 | Sponsor/Partner(§4 기존) + Partner Contact(§4 기존) | 5 |
 | 5. Opportunity | 실제로 제휴/스폰서십을 추진할 것인가? | 이 매니저 | Account/Contact + Fit 가설 | 제안 논의·조건 협상 | Proposal(§4·§6.11 기존, 재정의) → Opportunity Won/Lost | 6 (Won 시) |
-| 6. Short-term Collaboration | 장기 계약 전에 효과를 어떻게 검증하는가? | 이 매니저 | 성사된 Opportunity | 단기 Collaboration 기획·실행(예: 공동 캠페인, 굿즈, 이벤트 — 예시이며 미확정) | Collaboration(§4·§6.11 — Object 여부 TBD) | 7 |
+| 6. Short-term Collaboration | 장기 계약 전에 효과를 어떻게 검증하는가? | 이 매니저 | 성사된 Opportunity | 단기 Collaboration 기획·실행(예: 공동 캠페인, 굿즈, 이벤트 — 예시이며 미확정) | Collaboration(§4·§6.11 — Campaign Record Type으로 구현 확정) | 7 |
 | 7. Performance / Evaluation | 이 Collaboration이 실제 효과가 있었는가? | 이 매니저 | Collaboration 결과(팬 반응·참여·구매·Engagement — KPI TBD) | 성과 분석 | 지속 여부 판단 근거 | 8 |
 | 8. Long-term Partnership/Sponsorship | 이 관계를 장기 계약으로 발전시킬 것인가? | 이 매니저 | 성과 분석 결과 | 장기 제안 또는 중단/재검토(Decision Point) | Sponsor Contract(§4 기존) 또는 관계 종료·보류 | 종료 또는 기존 Renewal(§4 기존) 흐름 재사용 |
 
@@ -822,6 +821,14 @@ When Needed" 원칙을 여기에도 적용할지는 `03_SYSTEM.md`에서 팀이 
 
 ### 8.3 아직 확정하지 않은 것
 
-§6.11의 TBD 목록과 동일하다 — Lead/Collaboration의 Object 구현 여부, Business Fit 판단에
-쓸 실제 Fan 데이터 항목, Collaboration 실패 시 재검토 기준. 이 판단들은 `03_SYSTEM.md`·
-`05_DECISIONS.md`에서 팀이 확정한다.
+§6.11의 TBD 목록과 동일하다 — Lead Status의 정확한 Picklist Label, Business Fit 판단에
+쓸 실제 Fan 데이터 항목, Collaboration 실패 시 재검토 기준. Lead/Collaboration의 Object
+구현 여부 자체는 2026-08-18 회의로 확정됐다(`03_SYSTEM.md` §7.2 A·D,
+`05_DECISIONS.md` Decision 018-A·D). 남은 판단들은 `03_SYSTEM.md`·`05_DECISIONS.md`에서
+팀이 계속 확정한다.
+
+> **8/21 구현 범위**: 위 표의 1~6단계(Fan Insight → Business Fit → Candidate Discovery →
+> Lead → Account/Contact → Opportunity → Collaboration 시작/"진행 중")까지가 8/21
+> 구현 범위다. 7~8단계(Performance/Evaluation, 장기 Partnership/Sponsorship)는 이
+> 표가 전체 Business Workflow를 설명하기 위해 남겨둔 것이며, 실제 구현은 Future
+> Scope다(`04_DEMO.md` §7, `00_STORY.md` §8.4).

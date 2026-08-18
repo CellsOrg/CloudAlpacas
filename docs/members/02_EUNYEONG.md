@@ -15,16 +15,20 @@ Lead가 Account/Contact로 전환된 뒤 실제 협업 거래(Opportunity)가 St
 
 ## [P2] Ownership
 
-- Opportunity(Stage Kanban, Amount/CloseDate/Probability)
-- Expected Benefit 필드(단기/중기/장기) — 구조 TBD(`03_SYSTEM.md §7 F`)
+- **P1/Standard Reuse**: Opportunity(Stage Kanban, Amount/CloseDate/Probability) —
+  Standard Object 그대로 사용
+- **P2 확정**: Expected Benefit 필드 — **단기/중기/장기 3개 필드로 분리**
+  (`03_SYSTEM.md §7 F`, `05_DECISIONS.md` Decision 018-F). 정확한 API Name은
+  아직 미확정(TBD) — Org 반영 시 확정
+- Target Segment(Picklist, `§7 G`, 값 목록 TBD)도 Opportunity에 함께 들어간다
 - OpportunityLineItem(Product 연결, 승우 협업)
 
 ## [P2] End-to-End Responsibility
 
 Requirement(Wireframe Opportunity Detail/Stage Kanban) → Business/Domain
 이해(`01_PROJECT.md §8`) → Salesforce Object/Field(Opportunity는 Standard 확정,
-Expected Benefit은 TBD) → Admin → Demo Data → Flow/Automation(필요 시) →
-Dev(필요 시) → 화면 → QA
+Expected Benefit은 3개 필드 구조로 확정·API Name만 TBD) → Admin → Demo Data →
+Flow/Automation(필요 시) → Dev(필요 시) → 화면 → QA
 
 ## [P2] Shared Scenario
 
@@ -40,10 +44,13 @@ Product/Quote/Campaign과 연결하며, 최종적으로 Performance/장기 Partn
 
 ## [P2] TBD / Decision Needed
 
-- Expected Benefit 필드 구조(`03_SYSTEM.md §7 F`)
-- Target Segment 저장 방식이 Opportunity에 미치는 영향(`§7 G`, 사라·혜준과 공동)
+Expected Benefit 필드 구조(F)와 Target Segment 저장 방식(G)은 확정됐다
+(`05_DECISIONS.md` Decision 018-F·G). 남은 것은 세부 값뿐이다.
 
-> 화요일 회의 전까지는 필드 구조를 확정된 것으로 문서화하지 않는다.
+- Expected Benefit 3개 필드의 정확한 API Name
+- Target Segment Picklist의 실제 값 목록(사라·혜준과 공동)
+
+> 위 두 항목은 여전히 임의로 확정하지 않는다.
 
 ---
 

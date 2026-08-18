@@ -738,6 +738,10 @@ Org 연결 후 아래 10개 항목을 최종 대조한다.
 > **Draft → Team Discussion → Decision Record → Final Architecture**
 >
 > 따라서 이 문서의 ⭐️ 항목은 현재 구현 지시사항이 아닙니다.
+>
+> ---
+>
+> **✅ 2026-08-18 Update**: 화요일 Technical Decision 회의에서 아래 A~K 중 **K(Account 집계)를 제외한 전부**가 확정되었다(`05_DECISIONS.md` Decision 017·018). 각 항목 하단의 "**Status**" 줄에 결정 결과를 반영했다 — Option 설명 자체(장단점 비교)는 회의 배경으로 남겨두기 위해 그대로 두었다. **B(AI Matching)는 Draft 단계의 추천(A/B)이 아니라 Agentforce(Option C)로 결정**되었고, 이는 CLAUDE.md §5 Future Scope의 좁은 범위 예외다(Decision 017 참고). 상세 구현 방식(Agentforce 설정, Status Label, API Name 등)은 여전히 추가 설계가 필요한 부분과 이미 확정된 방향을 구분해 각 항목에 표시했다.
 
 ### 7.1 [P2] ✅ CONFIRMED
 
@@ -749,7 +753,7 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 - **Product2 / PricebookEntry** — Sponsorship Package 표현에 재사용(Ticket/Membership/Goods와 동일 패턴)
 - **Campaign(Object 자체)** — 신규 Object 없이 기존 Campaign 재사용(§3.3 기존 결정과 일치). 단, RecordType 여부는 아래 §7.2 D 참고
 - **Performance/Evaluation(방향)** — Custom Object를 만들지 않고 Report/Dashboard로 접근하는 방향 자체는 확정(세부 리포트 설계는 §7.2 참고)
-- **Standard First 원칙 재확인** — 이번 검토에서 Custom Object 후보는 `Partner_Candidate__c` 단 하나뿐이며, 이마저도 아래에서 논의 대상으로 남김(Decision 003·006과 일치)
+- **Standard First 원칙 재확인** — 이번 검토에서 유일한 Custom Object 후보였던 `Partner_Candidate__c`도 2026-08-18 회의에서 **Lead로 흡수하기로 결정**되어(§7.2 A, Decision 018-A), Phase 2 B2B 영역에 신규 Custom Object는 만들지 않는다(Decision 003·006과 일치)
 
 ### 7.2 [P2] ⭐️ DRAFT / TEAM DISCUSSION REQUIRED
 
@@ -793,7 +797,18 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > **화요일 결정 질문**: "Partner Candidate는 실제 영업 관리 대상인가, 아니면
 > Fan 데이터를 분석해서 발견한(아직 영업 전 단계의) 후보 기업인가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option B — Lead로 흡수한다.** 별도 `Partner_Candidate__c`
+> Custom Object는 만들지 않는다. 대신 **Lead의 Status를 세분화해 Candidate 단계까지
+> 관리한다** — Candidate(분석상 후보) → Lead(접촉 시작) → Qualified/후속 단계 →
+> Conversion(Account/Contact/Opportunity 전환)이라는 하나의 흐름을 Lead Status
+> 값만으로 표현한다.
+>
+> **정확한 Status Picklist Label은 이번 회의에서 확정하지 않았다(TBD)** — 표준
+> Lead.Status의 기본값(Open - Not Contacted 등)을 그대로 쓸지, Candidate 단계를
+> 표현할 값을 추가할지는 Org 반영 시 별도로 확정한다. 임의의 Label을 지금 문서에
+> 확정 값으로 적지 않는다.
+>
+> **Status: ✅ CONFIRMED — Option B (05_DECISIONS.md Decision 018-A)**
 
 #### B. AI Matching
 
@@ -834,14 +849,28 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 >   Phase 2 범위를 크게 벗어난다. 데이터/프롬프트/평가 기준 설계가 추가로
 >   필요하다.
 >
-> **현재 추천**: Option A 또는 B로 Phase 2 MVP를 검토한다. Option C(실제
+> **현재 추천(Draft 시점)**: Option A 또는 B로 Phase 2 MVP를 검토한다. Option C(실제
 > Agentforce 기반 AI Matching)는 별도 Decision 없이는 지금 구현하지 않는다 —
 > CLAUDE.md의 기존 Future Scope 원칙을 그대로 따른다.
 >
 > **화요일 결정 질문**: "우리가 화요일 이후 만들려는 것은 실제 Matching
 > Engine인가, 아니면 먼저 B2B 업무 흐름을 증명하는 Prototype인가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option C — Agentforce를 사용한다.** Draft 시점의
+> 추천(Option A/B)과 다른 방향으로 결정됐다 — CLAUDE.md §5는 원래 Agentforce를
+> Phase 2에서도 Future Scope로 못박아뒀지만, 이번 회의에서 **AI Matching(및 아래
+> §H Segment Match·§I Recommendation Reason)에 한해 예외적으로 Phase 2 범위에
+> 포함**하기로 했다 — CLAUDE.md §5도 이 예외를 반영해 함께 갱신했다
+> (`05_DECISIONS.md` Decision 017, Business Decision).
+>
+> AI Matching 자동화 구현은 혜준 파트가 담당한다. **"Agentforce를 실제로 어떤
+> 방식으로 구성하는가"(프롬프트, 데이터 소스, 평가 기준 등)의 상세 기술 설계는
+> 이번 회의에서 확정하지 않았다(TBD)** — 이 Draft 문서의 Option C 설명(장단점)은
+> 여전히 유효한 참고 자료이지만, 실제 구성 방식은 추가 설계가 필요하다. Demo에서
+> 산리오가 자연스럽게 후보로 도출되려면 Scenario/Dummy Data가 Fan Insight와
+> Business Fit 가설(`00_STORY.md` §8.3)을 충분히 뒷받침해야 한다.
+>
+> **Status: ✅ CONFIRMED — Option C, Agentforce (05_DECISIONS.md Decision 017) — 상세 구현 TBD**
 
 #### C. Quote
 
@@ -880,7 +909,12 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > **화요일 결정 질문**: "제안서를 표준 문서(PDF)로 만들어 이력 관리할 필요가
 > 실제로 있는가, 아니면 Opportunity 안에서 텍스트로 관리해도 충분한가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option A — Standard Quote(Quote + QuoteLineItem)를
+> 사용한다.** Custom Object로 만들지 않는다. §7.1에서 이미 확정된 "Product2/
+> PricebookEntry = Sponsorship Package 재사용" 방향이 선결 조건을 충족하므로
+> 그대로 진행한다.
+>
+> **Status: ✅ CONFIRMED — Option A, Standard Quote (05_DECISIONS.md Decision 018-C)**
 
 #### D. Campaign vs Collaboration
 
@@ -910,14 +944,20 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > - 단점: RecordType 기반 필터링/레이아웃 분리가 안 되어, Campaign이 많아지면
 >   B2C/B2B가 섞여 보일 수 있다.
 >
-> **현재 추천**: Wireframe 자체가 Option B(단순 필드) 형태로 그려져 있고,
+> **현재 추천(Draft 시점)**: Wireframe 자체가 Option B(단순 필드) 형태로 그려져 있고,
 > Decision 006의 "필요한 만큼만" 원칙에도 더 맞아 Option B를 우선 검토
 > 추천한다. RecordType은 Campaign 수가 실제로 많아졌을 때 재검토한다.
 >
 > **화요일 결정 질문**: "지금 시점에 Campaign을 B2C/B2B로 화면·리스트에서
 > 분리해서 봐야 할 만큼 수가 많아질 것으로 예상되는가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option A — Campaign Record Type으로 구현한다.**
+> Draft 시점의 추천(Option B)과 다른 방향으로 결정됐다 — 별도 `Collaboration__c`
+> Custom Object나 단순 Lookup 필드가 아니라, Campaign에 RecordType(B2B
+> Collaboration)을 추가해 표현한다. Collaboration은 Campaign의 Record Type
+> 그 자체이며, 별도 Object가 아니다.
+>
+> **Status: ✅ CONFIRMED — Option A, Campaign Record Type (05_DECISIONS.md Decision 018-D)**
 
 #### E. Lead Score
 
@@ -952,7 +992,14 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > **화요일 결정 질문**: "Lead Score를 실제 숫자로 계산/표시할 것인가, 아니면
 > Hot/Warm/Cold 같은 단순 등급으로 충분한가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option B — 신규 `Lead_Score__c`(Number) 필드를
+> 사용한다.** 표준 `Rating`은 원래 목적(Hot/Warm/Cold)대로 그대로 남긴다.
+> 실제 Field Type(정확히 Number인지 Percent인지 등)/값 범위/계산 방식은
+> 기존 문서·Org 상태를 확인한 뒤 반영한다 — 이번 회의는 "숫자 전용 필드를
+> 새로 만든다"는 방향만 확정했다(P2_B2B_ORG_BASELINE.md 기준 Org에는 아직
+> 이 필드가 존재하지 않는다).
+>
+> **Status: ✅ CONFIRMED — Option B, `Lead_Score__c` (05_DECISIONS.md Decision 018-E)**
 
 #### F. Expected Benefit (단기/중기/장기)
 
@@ -979,7 +1026,14 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > **화요일 결정 질문**: "기대 효과를 단기/중기/장기로 항상 구분해서 관리할
 > 것인가, 자유 서술로 충분한가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option A — 개별 필드 3개(단기/중기/장기)로
+> 분리한다.** 담당자가 각각을 직접 작성하는 구조다. 위 Option A 설명에 예시로
+> 든 `Short_Term_Benefit__c` 등은 **아직 확정된 API Name이 아니라 예시일
+> 뿐이다** — Org에는 이 필드들이 존재하지 않으므로(P2_B2B_ORG_BASELINE.md
+> 기준), 실제 API Name은 반영 시점에 확정한다. 이미 정의된 API Name이
+> 없다면 임의로 새 이름을 확정 값처럼 기록하지 않는다.
+>
+> **Status: ✅ CONFIRMED — Option A, 필드 3개 (05_DECISIONS.md Decision 018-F) — 정확한 API Name TBD**
 
 #### G. Target Segment
 
@@ -1008,7 +1062,13 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > **화요일 결정 질문**: "Target Segment 값을 몇 가지로 미리 정해둘 수 있는가,
 > 아니면 매번 새로운 조합이 나올 것인가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option A — Picklist로 구현한다.** 실제 Picklist
+> 값 목록은 이번 회의에서 확정되지 않았다(TBD) — "10~30대 여성 팬"처럼
+> `00_STORY.md`/Dummy Data에 예시로 등장한 표현은 아직 공식 Picklist 값으로
+> 확정된 것이 아니다. 기존 결정·문서에 정의된 값이 없으므로, 값 목록은 Org
+> 반영 시 팀이 최소한으로 정한다(새 값을 지금 임의로 추가하지 않는다).
+>
+> **Status: ✅ CONFIRMED — Option A, Picklist (05_DECISIONS.md Decision 018-G) — Picklist 값 TBD**
 
 #### H. Segment Match
 
@@ -1029,14 +1089,19 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > - 단점: 계산 규칙을 먼저 합의해야 한다 — `Engagement_Score__c` 계산 공식이
 >   아직 TBD인 것과 같은 이유로 시간이 걸릴 수 있다.
 >
-> **현재 추천**: §B(AI Matching)의 결정과 세트로 묶어서 판단한다 — Rule-based로
-> 간다면 Segment Match도 Formula/Flow로, Sample Data로 간다면 당분간 수동
-> 입력으로 시작한다.
+> **현재 추천(Draft 시점)**: §B(AI Matching)의 결정과 세트로 묶어서 판단한다 —
+> Rule-based로 간다면 Segment Match도 Formula/Flow로, Sample Data로 간다면
+> 당분간 수동 입력으로 시작한다.
 >
 > **화요일 결정 질문**: "Segment Match를 지금 규칙으로 계산할 수 있는가, 아니면
 > 아직 기준이 정해지지 않았는가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Agentforce Matching으로 구현한다.** §B(AI
+> Matching)가 Agentforce로 결정됨에 따라 세트로 묶여 결정됐다 — Option A(수동
+> 입력)도 Option B(Flow/Formula)도 아니라, §B의 Agentforce가 Segment Match
+> 값을 함께 산출하는 구조다. 실제 계산 로직/구성 방식은 §B와 동일하게 TBD다.
+>
+> **Status: ✅ CONFIRMED — Agentforce Matching (05_DECISIONS.md Decision 018-H, §B와 연동) — 상세 구현 TBD**
 
 #### I. Recommendation Reason
 
@@ -1057,13 +1122,17 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > - 장점: 즉시 시작 가능, 별도 로직이 불필요하다.
 > - 단점: 담당자마다 품질이 다를 수 있다.
 >
-> **현재 추천**: AI Matching(§B)이 Option B(Demo Sample)로 결정된다면
+> **현재 추천(Draft 시점)**: AI Matching(§B)이 Option B(Demo Sample)로 결정된다면
 > Recommendation Reason도 Option B(수동)로 시작하는 것이 자연스럽다 — 두
 > 결정을 같이 묶어서 판단한다.
 >
 > **화요일 결정 질문**: §B(AI Matching)와 동일.
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option A — 자동 생성 Long Text로 구현한다.** §B의
+> Agentforce Matching 결과를 근거로 Recommendation Reason 문장을 자동으로
+> 채운다. 문장 생성 로직의 상세 설계는 §B와 마찬가지로 TBD다.
+>
+> **Status: ✅ CONFIRMED — Option A, 자동 생성 Long Text (05_DECISIONS.md Decision 018-I, §B와 연동) — 상세 구현 TBD**
 
 #### J. Fan Insight / Fan Grouping — 화면 구현 방식
 
@@ -1098,7 +1167,13 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > **화요일 결정 질문**: "화요일 이후 Demo에서 Wireframe과 똑같은 화면이 꼭
 > 필요한가, 아니면 표준 Report로 데이터 흐름만 증명해도 충분한가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **✅ 결정 (2026-08-18)**: **Option A — 기존 추천대로 진행한다.** 별도 Fan
+> Insight Custom Object를 만들지 않고, Standard Report + Report Type +
+> Dashboard로 구현한다. Wireframe 수준의 화면(Option B)이 꼭 필요하다고
+> 판단되면 그때 다시 검토한다(Decision 008 "표준 우선, 필요할 때만 개발"
+> 원칙 유지).
+>
+> **Status: ✅ CONFIRMED — Option A, Report/Dashboard (05_DECISIONS.md Decision 018-J)**
 
 #### K. Account `Active Collaboration` / `Total Collaboration Value`
 
@@ -1129,17 +1204,28 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > **화요일 결정 질문**: "이 두 숫자를 Account 화면에 실시간 필드로 꼭 보여줘야
 > 하는가, 아니면 별도 리포트에서 확인해도 되는가?"
 >
-> **Status: DRAFT — NOT FINAL**
+> **⏸ 결정 (2026-08-18)**: **보류(On Hold).** Option A/B 어느 쪽도 확정하지
+> 않는다 — Opportunity-Account Roll-up 가능 여부에 대한 기술 확인이 아직
+> 남아 있다. 다음 회의에서 다시 다룬다.
+>
+> **Status: ⏸ ON HOLD / TBD — 미확정 (05_DECISIONS.md Decision 018-K)**
 
 ### 7.3 [P2] 🔵 FUTURE SCOPE
 
 현재 Phase 2에서 구현하지 않는 것. 기존 `CLAUDE.md` §5가 이미 Future Scope로
 지정한 항목을 Draft 기능으로 슬쩍 끌어오지 않는다.
 
-- **Agentforce 기반 실제 AI Matching**(§7.2 B Option C) — CLAUDE.md §5 Future
-  Scope
+> **✅ 2026-08-18 Update**: §7.2 B(AI Matching)는 Draft 시점에는 Future Scope
+> 항목이었지만, 2026-08-18 회의에서 **AI Matching·Segment Match·Recommendation
+> Reason에 한해** Phase 2 범위로 승격됐다(`05_DECISIONS.md` Decision 017,
+> CLAUDE.md §5 갱신). 아래 목록은 이 예외를 반영해 갱신한 것이다 — Agentforce의
+> 다른 활용(Fan Summary 등, Decision 008)은 여전히 Future Scope다.
+
+- **Agentforce의 AI Matching/Segment Match/Recommendation Reason 외 활용**
+  (예: Fan Summary, Next Best Action 설명 — Decision 008) — CLAUDE.md §5
+  Future Scope
 - Marketing Cloud / Data Cloud 활용
 - 실제 외부 API / AWS 기반 실시간 데이터 연동(Candidate Discovery의 외부 기업
   데이터 조회 포함)
-- 위 항목은 화요일 회의에서도 "지금 구현할지"를 논의하지 않는다 — 이미
+- 위 항목은 2026-08-18 회의에서도 "지금 구현할지"를 논의하지 않았다 — 여전히
   CLAUDE.md에서 확정된 범위 밖이다

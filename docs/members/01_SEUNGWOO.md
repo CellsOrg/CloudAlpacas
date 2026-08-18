@@ -9,27 +9,33 @@
 
 ## [P2] Mission
 
-Sponsorship Package를 Product2로 표현하고, 제안서를 Quote로 관리할지(TBD),
-Collaboration 실행을 Campaign으로 표현할지 결정하고 구축한다
-(`01_PROJECT.md §6.11`, `03_SYSTEM.md §7 C·D`).
+Sponsorship Package를 Product2로 표현하고, 제안서를 **Standard Quote**로
+관리하며, Collaboration 실행을 **Campaign Record Type**으로 표현해 구축한다
+(`01_PROJECT.md §6.11`, `03_SYSTEM.md §7 C·D`, `05_DECISIONS.md` Decision 018-C·D).
 
 ## [P2] Ownership
 
-- Product2(Sponsorship Package RecordType, TBD) / PricebookEntry
-- Quote / QuoteLineItem — 사용 여부 TBD(`03_SYSTEM.md §7 C`)
-- Campaign — Collaboration 연결 방식(RecordType vs Lookup) TBD(`§7 D`)
+- **P1 Reuse**: Product2 / PricebookEntry(Ticket/Membership/Goods/Season Pass
+  RecordType은 이미 존재) — Sponsorship Package는 이 위에 RecordType을 추가하는
+  방식으로 확장
+- **P2 확정**: Standard Quote/QuoteLineItem 사용(`§7 C`), Campaign에 Collaboration
+  Record Type 추가(`§7 D`) — 별도 `Collaboration__c` Custom Object나 Lookup
+  필드가 아니다
+- **P2 신규 작업**: Sponsorship Package Product2 RecordType 신설, Quote 생성 흐름
+  구축, Campaign Collaboration RecordType 신설
 
 ## [P2] End-to-End Responsibility
 
 Requirement(Wireframe Opportunity Detail의 Product/Quote/Campaign) →
-Business/Domain 이해(`01_PROJECT.md §6.11`) → Salesforce Object/Field(TBD) →
-Admin → Demo Data → Flow/Automation(필요 시) → Dev(필요 시) → 화면 → QA — 기존
-Phase 1과 동일한 흐름을 Product/Quote/Campaign 영역에 적용한다.
+Business/Domain 이해(`01_PROJECT.md §6.11`) → Salesforce Object/Field(Quote/
+Campaign RecordType 확정, 세부 Field는 구축하며 확인) → Admin → Demo Data →
+Flow/Automation(필요 시) → Dev(필요 시) → 화면 → QA — 기존 Phase 1과 동일한
+흐름을 Product/Quote/Campaign 영역에 적용한다.
 
 ## [P2] Shared Scenario
 
-은영의 Opportunity가 진행되는 동안 **Product 라인업과 Quote(TBD)를 확정**하고,
-**Campaign으로 실행을 연결**한다(`02_TEAM_GUIDE.md §13`).
+은영의 Opportunity가 진행되는 동안 **Product 라인업과 Standard Quote를 확정**하고,
+**Campaign(Collaboration Record Type)으로 실행을 연결**한다(`02_TEAM_GUIDE.md §13`).
 
 ## [P2] Collaboration
 
@@ -38,11 +44,16 @@ Phase 1과 동일한 흐름을 Product/Quote/Campaign 영역에 적용한다.
 
 ## [P2] TBD / Decision Needed
 
-- Quote 사용 여부(`03_SYSTEM.md §7 C`) — Sponsorship Package=Product2 확정이 선행
-- Campaign RecordType vs Lookup(`§7 D`)
+Quote 사용 여부(C)와 Campaign RecordType vs Lookup(D)은 확정됐다. 남은 것은
+구현 세부사항뿐이다.
 
-> 화요일 회의에서 승우가 우선 판단해야 하는 두 항목이다. 회의 전까지 확정된 것으로
-> 문서화하지 않는다.
+- Sponsorship Package Product2 RecordType의 정확한 이름/필드
+- Campaign Collaboration RecordType 신설 시, Org에 이미 존재하는 비활성
+  RecordType(`Partner-Led Campaign`)을 재사용할지 새로 만들지 — Cloud Alpacas가
+  만든 것인지 Salesforce 데모 템플릿인지 미확인이라 화요일 회의에서도 확정하지
+  않았다
+
+> 위 두 항목은 여전히 임의로 확정하지 않는다.
 
 ---
 

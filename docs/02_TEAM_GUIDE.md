@@ -289,14 +289,15 @@ Phase 2는 "PM이 모든 것을 대신 만드는 구조"가 아니다. **사라�
 | 은영 | 💼 Opportunity | Collaboration Opportunity | Opportunity, Stage, Benefit |
 | 승우 | 🎁 Product + Quote + Campaign | Collaboration Product / Quote / Campaign | Product, Quote, Campaign |
 
-> ⚠️ 위 역할은 현재 Phase 2 작업 방향의 초안이며, 화요일 Technical Decision
-> (`03_SYSTEM.md §7`, `docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md` A~K)에서
-> 바뀔 수 있는 항목은 TBD/⭐️로 표시한다. 특히 **Partner Candidate 구현 방식, AI
-> Matching, Quote, Campaign vs Collaboration, Lead Score, Expected Benefit,
-> Target Segment, Segment Match, Recommendation Reason, Fan Insight 화면,
-> Account 집계**는 아직 확정된 기술 구조가 아니다 — 각 담당자 문서(`docs/members/`)
-> 에도 동일하게 TBD로 표시한다. 이 표는 §17의 Phase 1→Phase 2 변화 요약과 함께
-> 읽는다.
+> ✅ 위 역할 배정 자체(누가 무엇을 담당하는가)은 바뀌지 않았다. 2026-08-18
+> Technical Decision 회의(`03_SYSTEM.md §7`, `05_DECISIONS.md` Decision
+> 017·018)에서 **Partner Candidate → Lead 흡수, AI Matching/Segment
+> Match/Recommendation Reason = Agentforce, Quote = Standard Quote,
+> Campaign vs Collaboration = Campaign Record Type, Lead Score =
+> `Lead_Score__c`, Expected Benefit = 필드 3개, Target Segment = Picklist,
+> Fan Insight = Report/Dashboard**가 확정됐다 — 각 담당자 문서
+> (`docs/members/`)도 이 결과에 맞춰 갱신했다. **Account 집계 필드만 여전히
+> On Hold(TBD)**다(§7 K). 이 표는 §17의 Phase 1→Phase 2 변화 요약과 함께 읽는다.
 
 ---
 
@@ -365,9 +366,11 @@ Feature QA → Integration QA → End-to-End Demo QA
 
 ## 16. [P2] Decision / TBD
 
-화요일 회의에서 결정해야 하는 기술 항목(A~K)과 그 배경·Option은
-`docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md`에서 관리한다(중복 방지,
-이 문서에는 결과가 각 역할에 주는 영향만 정리한다).
+기술 항목(A~K)은 2026-08-18 회의에서 K를 제외하고 모두 확정됐다
+(`05_DECISIONS.md` Decision 017·018). 각 항목의 배경·Option 비교는
+`docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md`(회의 전 Working
+Document)에서 계속 참고할 수 있다(중복 방지, 이 문서에는 결과가 각 역할에
+주는 영향만 정리한다).
 
 | Decision | 영향받는 역할 |
 |---|---|

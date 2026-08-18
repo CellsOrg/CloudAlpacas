@@ -11,27 +11,39 @@ Lead 영역을 End-to-End로 담당**한다(`02_TEAM_GUIDE.md §11`) — 화면�
 
 Fan Insight 결과를 바탕으로 제휴 후보를 발굴·관리하는 Collab360 화면과, 실제
 영업 파이프라인 진입점인 Lead를 설계하고 구축한다(`00_STORY.md §8.3`,
-`01_PROJECT.md §2.7`).
+`01_PROJECT.md §2.7`). 2026-08-18 회의로 이 영역의 핵심 결정(A/B/E/H/I) 5개
+전부 확정됐다(`05_DECISIONS.md` Decision 017·018) — 이제 설계 판단보다 실제
+구축이 중심이다.
 
 ## [P2] Ownership
 
-- Partner Candidate — Object 여부 TBD(`03_SYSTEM.md §7 A`)
-- Lead(Standard Lead) — Lead Score 필드 형태 TBD(`§7 E`)
-- AI Matching 방식 — Rule-based/Demo Sample/미확정(`§7 B`)
-- Segment Match / Recommendation Reason(`§7 H·I`)
+- **확정**: Partner Candidate는 별도 Object가 아니라 **Lead로 흡수** —
+  Lead Status를 세분화해 Candidate 단계까지 표현(`§7 A`, Decision 018-A). 정확한
+  Status Picklist Label은 TBD
+- **확정**: Lead Score = 신규 `Lead_Score__c`(Number) 필드(`§7 E`, Decision
+  018-E) — 표준 `Rating`을 대체하는 것이 아니라 별개 필드
+- **확정**: AI Matching = **Agentforce**(`§7 B`, Decision 017) — Rule-based나
+  Demo Sample이 아니다. 혜준 파트의 자동화 구현 영역
+- **확정**: Segment Match = Agentforce Matching(`§7 H`), Recommendation Reason
+  = Agentforce 결과 기반 자동 생성 Long Text(`§7 I`) — 둘 다 B의 Agentforce
+  구현에 종속
+- **TBD(상세 구현)**: Agentforce의 실제 구성(프롬프트/데이터 소스/평가 기준),
+  Lead Status Picklist Label — 이번 회의는 "무엇을 쓸지"만 확정했고 "어떻게
+  구성할지"는 아직이다
 
 ## [P2] End-to-End Responsibility
 
 Requirement(Wireframe Collab360/Lead 화면) → Business/Domain 이해
-(`01_PROJECT.md §2.7`) → Salesforce Object/Field(TBD) → Admin → Demo Data →
-Flow/Automation(TBD) → Dev(LWC 필요 시, TBD) → 화면 → QA — Phase 1에서는 QA
-비중이 컸다면, Phase 2에서는 Requirement/Data/Automation까지 직접 담당하는 것이
+(`01_PROJECT.md §2.7`) → Salesforce Object/Field(Lead 확정, `Lead_Score__c`
+확정 — Status Label만 TBD) → Admin → Demo Data → Flow/Automation(Agentforce
+구성 TBD) → Dev(LWC 필요 시, TBD) → 화면 → QA — Phase 1에서는 QA 비중이
+컸다면, Phase 2에서는 Requirement/Data/Automation까지 직접 담당하는 것이
 가장 큰 차이다.
 
 ## [P2] Shared Scenario
 
-사라의 Fan Insight를 받아 Partner Candidate를 발굴하고, 승인된 후보를 Lead로
-등록한 뒤 아론에게 넘긴다(Lead Convert, `02_TEAM_GUIDE.md §13`).
+사라의 Fan Insight를 받아 Agentforce Matching으로 후보를 발굴하고, Lead(Status로
+Candidate 단계 표현)에 등록한 뒤 아론에게 넘긴다(Lead Convert, `02_TEAM_GUIDE.md §13`).
 
 ## [P2] Collaboration
 
@@ -40,14 +52,16 @@ Flow/Automation(TBD) → Dev(LWC 필요 시, TBD) → 화면 → QA — Phase 1�
 
 ## [P2] TBD / Decision Needed
 
-- A. Partner Candidate(`03_SYSTEM.md §7 A`)
-- B. AI Matching(`§7 B`)
-- E. Lead Score(`§7 E`)
-- H. Segment Match(`§7 H`)
-- I. Recommendation Reason(`§7 I`)
+A/B/E/H/I는 모두 확정됐다(`05_DECISIONS.md` Decision 017·018). 남은 것은 구현
+세부사항뿐이다.
 
-> 화요일 회의에서 혜준이 가장 많은 항목(A/B/E/H/I)을 직접 판단해야 한다 — 회의
-> 전까지 임의로 Standard/Custom을 확정하지 않는다.
+- Lead Status의 정확한 Picklist Label(Candidate 단계 표현 방식)
+- Agentforce AI Matching/Segment Match/Recommendation Reason의 상세 기술 구성
+  (프롬프트, 참조 데이터, 평가 방식 — Decision 017 TBD와 동일)
+- `Lead_Score__c`의 정확한 값 범위/계산 방식
+
+> 위 항목은 여전히 임의로 확정하지 않는다 — "Lead로 간다"·"Agentforce를 쓴다"는
+> 방향은 확정됐지만, "정확히 어떻게"는 구축하면서 채워간다.
 
 ---
 

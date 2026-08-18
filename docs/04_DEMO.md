@@ -174,12 +174,14 @@ Demo가 자연스럽게 이어지려면 아래 데이터가 **미리 준비**되
 Phase 1 Demo와 현재 Demo는 목적이 다르다. Phase 1 Demo(§1~§6)는 그대로 보존하고,
 아래는 별도의 새 Demo Plan이다.
 
-| | Phase 1 Demo (§1~§6, 완료) | 현재 Demo (§7~, DRAFT) |
+| | Phase 1 Demo (§1~§6, 완료) | 현재 Demo (§7~, 8/21 목표) |
 |---|---|---|
 | 목적 | B2C Fan 360 MVP를 8/14에 발표 | B2C 고도화 + B2B가 실제로 하나의 Story로 이어지는지 검증 |
 | Persona | 김매니저 · 이루키 | 김매니저(B2C) + **이 매니저**(B2B) |
-| 흐름 | Fan App Event → Salesforce Customer 360 → Fan Profile/Timeline → Recommendation → Flow/Slack | B2C Fan 360 고도화 → Fan Insight/Fan Grouping → B2B Partner Candidate Discovery → Lead → Account/Contact → Opportunity → Product/Quote → Campaign/Collaboration → Performance → 장기 Partnership/Sponsorship 판단 |
-| 기술 상태 | 확정(Decision 001~014) | 상당 부분 DRAFT(`03_SYSTEM.md §7` A~K, 화요일 회의 전) |
+| 흐름 | Fan App Event → Salesforce Customer 360 → Fan Profile/Timeline → Recommendation → Flow/Slack | B2C Fan 360 고도화 → Fan Insight/Business Fit → Candidate Discovery → Lead → Account/Contact → Opportunity → Collaboration 시작("진행 중")까지 (§8.1 참고) |
+| 기술 상태 | 확정(Decision 001~014) | **K(Account 집계)를 제외하고 확정**(`03_SYSTEM.md §7` A~K, 2026-08-18 회의 — `05_DECISIONS.md` Decision 017·018) |
+
+> **8/21 Scope**: 8/21까지 구현하는 범위는 "Fan 360에서 발견한 신호를 실제 Collaboration으로 연결하고 Collaboration을 시작하는 과정"이다 — Fan Insight → Business Fit/Candidate Discovery → Lead → Account/Contact → Opportunity → Collaboration → **"Collaboration 진행 중"**까지가 End Point다. Collaboration 성과 평가, 성공/실패 KPI 판단, 재검토/관계 종료, 장기 Partnership/Sponsorship 전환은 8/21 이후 Future Scope다(§12).
 
 ---
 
@@ -191,11 +193,16 @@ Demo는 "화면을 다 보여주는 것"이 아니라, **하나의 Business Stor
 **B2C**: 김매니저가 Fan 360에서 팬을 이해한다 → Fan의 행동/Engagement/Fan Value를
 확인한다 → Fan Grouping/Fan Insight를 확인한다.
 
-**B2B**: 이 매니저가 Fan Insight를 확인한다 → 어떤 팬층이 Cloud Alpacas와 함께
-성장하고 있는지 발견한다 → 그 팬층과 궁합이 좋은 기업/브랜드 후보를 찾는다 → 후보를
-Lead로 관리한다 → Account/Contact로 관계를 발전시킨다 → Opportunity를 만든다 →
-Collaboration/Campaign을 실행한다 → 성과를 확인한다 → 장기 Partnership/Sponsorship으로
-발전시킬지 판단한다.
+**B2B (8/21 Scope)**: 이 매니저가 Fan Insight를 확인한다 → 어떤 팬층이 Cloud Alpacas와
+함께 성장하고 있는지 발견한다 → 그 팬층과 궁합이 좋은 기업/브랜드 후보를 찾는다
+(Business Fit/Candidate Discovery) → 후보를 Lead로 관리한다(Status로 Candidate 단계
+표현) → Account/Contact로 관계를 발전시킨다 → Opportunity를 만든다 → Collaboration
+(Campaign Record Type)을 시작한다 — **여기까지, "Collaboration 진행 중" 상태까지가
+8/21 End Point다.**
+
+**B2B (Future Scope, 8/21 이후)**: Collaboration 성과를 확인한다 → 성공/실패 KPI로
+판단한다 → 재검토하거나 관계를 종료한다 → 장기 Partnership/Sponsorship으로 발전시킬지
+판단한다. 이 구간은 이번 8/21 구현 범위에 포함하지 않는다(`00_STORY.md` §8.4).
 
 ---
 
@@ -203,21 +210,24 @@ Collaboration/Campaign을 실행한다 → 성과를 확인한다 → 장기 Par
 
 각 화면을 "보여주는 것"이 아니라 **이 사람이 이 질문을 가지고 이 화면에 들어갔을 때,
 무엇을 보고, 무슨 판단을 하고, 다음 Action으로 넘어가는가**를 기준으로 정리한다.
-⭐️ 표시는 `03_SYSTEM.md §7`에서 아직 Technical Decision이 확정되지 않은 부분이다.
+⭐️ 표시는 `03_SYSTEM.md §7`에서 아직 Technical Decision이 확정되지 않은 부분이다
+(2026-08-18 회의 이후로는 K/Account 집계 관련 항목에만 남는다). 🔵 표시는 8/21
+구현 범위 밖(Future Scope)인 Scene이다.
 
 | Scene | Persona | Business Question | Action | Salesforce Result | 화면에서 확인할 것 | Required Data |
 |---|---|---|---|---|---|---|
 | B2C-1. 팬 전체 조망 | 김매니저 | 우리 팬은 지금 어떤 상태인가? | Fan 360 Dashboard 조회 | Person Account 필드 기반 분포 | Current Segment/Engagement Level/Fan Value 분포 | 여러 세그먼트에 걸친 Fan 다수(§10 참고) |
-| B2C-2. Fan Insight/Grouping ⭐️ | 김매니저 → 이 매니저 | 특정 팬층이 뚜렷한 특징을 보이는가? | Report/Report Type 조회(연령대×성별×관심사×Engagement) | 그룹별 집계 결과 | "○○명, 최근 3개월 증가율, 선호 카테고리" 같은 요약 | `Gender__c`/`Birthdate`/`Favorite_Player__c`/`Engagement_Signal__c` 채워진 Fan 다수 — 화면 구현 방식은 `03_SYSTEM.md §7 J` TBD |
-| B2B-1. Business Fit 가설 | 이 매니저 | 이 팬층과 궁합 좋은 기업은? | Insight 확인 후 가설 수립(사람의 판단) | 없음(자동화 아님) | 후보 기업 리스트(가설 단계) | B2C-2의 Fan Insight 결과 |
-| B2B-2. Partner Candidate ⭐️ | 이 매니저 | 실제로 접촉할 가치가 있는 후보인가? | 후보 등록/조회 | 후보 레코드(Object 형태 TBD) | 후보 점수·근거 | `03_SYSTEM.md §7 A`(Partner Candidate) 결정 대기 |
-| B2B-3. Lead | 이 매니저 | 이 후보에게 접촉을 시작하는가? | Lead 생성, Status 변경 | Lead 레코드 | Lead List/Detail, Lead Score(⭐️ `§7 E`) | 후보 기업 정보 |
-| B2B-4. Account/Contact 전환 | 이 매니저 | 누구와 논의를 이어가는가? | Convert Lead | Account+Contact(+Opportunity) 생성 | Account Detail, Related Contacts | 전환된 Lead |
-| B2B-5. Opportunity | 이 매니저 | 이 제휴를 추진할 것인가? | Stage 변경(Kanban) | Opportunity Stage 진행 | Stage Kanban, Amount, Probability | Opportunity, Product(Sponsorship Package) |
-| B2B-6. Product/Quote ⭐️ | 이 매니저 | 무엇을, 얼마에 제안하는가? | 라인업 확정, 제안서 준비 | Product 연결(+Quote는 `§7 C` TBD) | Products Related List(+Quote는 TBD) | Sponsorship Package(Product2) |
-| B2B-7. Collaboration/Campaign ⭐️ | 이 매니저 | 실제로 무엇을 함께 실행하는가? | Campaign 생성/연결 | Campaign 레코드 | Campaign Related List | Campaign — RecordType vs Lookup은 `§7 D` TBD |
-| B2B-8. Performance | 이 매니저 | 효과가 있었는가? | Report/Dashboard 조회 | 성과 지표 | Pipeline/Won Revenue/전환 지표 | Order/Campaign 성과 데이터 |
-| B2B-9. 장기 Partnership 판단 | 이 매니저 | 장기 계약으로 발전시킬 것인가? | Opportunity Closed Won → 장기 계약 검토 | Account 상태 변화(Active Partner) | Account Detail, Sponsor Contract(TBD) | 성과 데이터 + Sponsor Contract 개념(§4 기존, Object 구현 TBD) |
+| B2C-2. Fan Insight/Grouping | 김매니저 → 이 매니저 | 특정 팬층이 뚜렷한 특징을 보이는가? | Report/Report Type 조회(연령대×성별×관심사×Engagement) | 그룹별 집계 결과 | "○○명, 최근 3개월 증가율, 선호 카테고리" 같은 요약 | `Gender__c`/`Birthdate`/`Favorite_Player__c`/`Engagement_Signal__c` 채워진 Fan 다수 — 화면 구현은 Report/Dashboard로 확정(`03_SYSTEM.md §7 J`) |
+| B2B-1. Business Fit 가설 | 이 매니저 | 이 팬층과 궁합 좋은 기업은? | Insight 확인 → Agentforce Matching(Segment Match·Recommendation Reason 자동 생성) | 없음(Agentforce가 근거 문장 생성, 상세 구현 TBD) | 후보 기업 리스트(가설 단계) + 추천 근거 | B2C-2의 Fan Insight 결과, `03_SYSTEM.md §7 B/H/I` |
+| B2B-2. Candidate → Lead | 이 매니저 | 실제로 접촉할 가치가 있는 후보인가? | Lead 생성(Status로 Candidate 단계 표현), Status 변경 | Lead 레코드 | Lead List/Detail, Lead Score(`Lead_Score__c`, `§7 E`) | 후보 기업 정보 — 별도 Partner Candidate Object 없음(Lead로 흡수, `§7 A`) |
+| B2B-3. Account/Contact 전환 | 이 매니저 | 누구와 논의를 이어가는가? | Convert Lead | Account+Contact(+Opportunity) 생성 | Account Detail, Related Contacts | 전환된 Lead |
+| B2B-4. Opportunity | 이 매니저 | 이 제휴를 추진할 것인가? | Stage 변경(Kanban) | Opportunity Stage 진행, Expected Benefit(단기/중기/장기, `§7 F`)·Target Segment(Picklist, `§7 G`) | Stage Kanban, Amount, Probability | Opportunity, Product(Sponsorship Package) |
+| B2B-5. Product/Quote | 이 매니저 | 무엇을, 얼마에 제안하는가? | 라인업 확정, Standard Quote 생성 | Product 연결 + Quote/QuoteLineItem | Products Related List, Quote Related List | Sponsorship Package(Product2) — Quote 사용 확정(`§7 C`) |
+| B2B-6. Collaboration 시작 | 이 매니저 | 실제로 무엇을 함께 실행하는가? | Campaign 생성(RecordType=Collaboration) | Campaign 레코드("Collaboration 진행 중") | Campaign Related List | Campaign RecordType 확정(`§7 D`) — **8/21 End Point** |
+| 🔵 B2B-7. Performance *(Future Scope)* | 이 매니저 | 효과가 있었는가? | Report/Dashboard 조회 | 성과 지표 | Pipeline/Won Revenue/전환 지표 | Order/Campaign 성과 데이터 — 8/21 범위 밖(§12) |
+| 🔵 B2B-8. 장기 Partnership 판단 *(Future Scope)* | 이 매니저 | 장기 계약으로 발전시킬 것인가? | Opportunity Closed Won → 장기 계약 검토 | Account 상태 변화(Active Partner) | Account Detail, Sponsor Contract(TBD) | 성과 데이터 + Sponsor Contract 개념(§4 기존, Object 구현 TBD) — 8/21 범위 밖(§12) |
+
+> Account의 `Active Collaboration`/`Total Collaboration Value` 집계 필드(`§7 K`)는 여전히 On Hold다 — 위 Scene 중 이 집계에 의존하는 화면은 없다.
 
 ---
 
@@ -268,8 +278,25 @@ Cross-Object 일관성, 담당자, Freeze 절차)은 `docs/data/DEMO_DATA_STANDA
 
 ## 12. [P2] Future Scope / 미확정 사항
 
-- Partner Candidate Object 여부, AI Matching 방식, Quote 사용 여부, Collaboration
-  구현 방식 등은 `03_SYSTEM.md §7`의 화요일 회의 결과를 따른다.
+**2026-08-18 회의로 확정된 것** (더 이상 미확정 아님, `03_SYSTEM.md §7`·`05_DECISIONS.md` Decision 017/018 참고):
+Partner Candidate → Lead 흡수, AI Matching/Segment Match/Recommendation Reason = Agentforce,
+Standard Quote 사용, Collaboration = Campaign Record Type, Lead Score(`Lead_Score__c`),
+Expected Benefit 3분할, Target Segment Picklist, Fan Insight = Report/Dashboard.
+
+**8/21 구현 범위 밖 — Future Scope (§7, §8)**:
+
+- **Collaboration 성과 평가** — 팬 반응·참여·구매 데이터를 근거로 한 성과 분석
+- **성공/실패 KPI 판단 기준** — Collaboration의 성공 기준 자체가 아직 정의되지 않음(TBD)
+- **성과가 좋지 않을 때의 재검토/관계 종료** — 판단 절차·기준 모두 TBD
+- **장기 Partnership/Sponsorship 전환** — Sponsor Contract 등 후속 Object/Field 설계 포함
+
+**여전히 미확정인 것**:
+
+- Account `Active Collaboration`/`Total Collaboration Value` 집계 필드(`03_SYSTEM.md §7 K`) — On Hold
+- Lead Status의 정확한 Picklist Label(Candidate 단계 표현 방식)
+- Expected Benefit 필드의 정확한 API Name
+- Target Segment Picklist의 실제 값 목록
+- Agentforce AI Matching/Segment Match/Recommendation Reason의 상세 기술 구성(프롬프트·데이터 소스 등)
 - 발표 일정·시간은 아직 확정되지 않았다.
 - Fan Data 실제 증분(§10 Recommended/Ideal)은 팀이 실제로 만들지 결정한 뒤 진행한다
   — 이번 문서는 규모만 제안했을 뿐 실제 Dummy Data를 생성하지 않았다.

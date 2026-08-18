@@ -983,3 +983,146 @@ Decision 005 자체를 수정하면 "그때 결정이 틀렸다"는 뜻으로 �
   다시 설계할 대상"이라는 성격으로 바뀐다 — 다만 이 Decision은 `03_SYSTEM.md`를
   직접 수정하지 않으며, 실제 반영은 이후 `03_SYSTEM.md` 개정 작업에서 이루어진다.
 - Decision 005 본문은 이 Decision이 참조만 할 뿐 어떤 문구도 변경하지 않는다.
+
+---
+
+## Decision 017 — [P2] Business Decision: Agentforce AI Matching을 Phase 2 범위로 예외 편입 (CLAUDE.md §5 Future Scope 갱신)
+
+**상태**: 확정
+**기록일**: 2026-08-18
+
+### 배경
+
+`CLAUDE.md` §5는 "Marketing Cloud, Data Cloud, Agentforce... 등은 Phase 2 범위에도
+포함하지 않으며 Future Scope로 관리한다"고 명시하고 있었고, `03_SYSTEM.md` §7.2 B·§7.3도
+이 원칙을 그대로 따라 "Agentforce 기반 실제 AI Matching은 CLAUDE.md §5 Future Scope이며
+화요일 회의에서도 논의 대상이 아니다"라고 Draft 단계에 못박아뒀다(`docs/decision_sheet/
+P2_TECHNICAL_DECISION_SHEET.md`도 동일하게 "Option C: Agentforce는 이번 결정 대상
+아님"이라고 사전에 명시). 그런데 2026-08-18 Technical Decision 회의에서 팀은 B2B
+Candidate 발굴의 AI Matching을 **Agentforce로 구현하기로 결정**했다 — 이는 기존
+CLAUDE.md의 명시적 범위 제한과 정면으로 충돌하는 결정이므로, 이 Decision으로 별도
+기록해 CLAUDE.md의 Future Scope 원칙 자체를 좁은 범위에서 갱신한다.
+
+### 결정
+
+1. **CLAUDE.md §5 Future Scope에서 Agentforce를 전면 제외하지 않는다.** 원칙은
+   유지하되, **B2B AI Matching(Segment Match·Recommendation Reason 자동 생성
+   포함)에 한해 예외적으로 Phase 2 범위에 포함**한다.
+2. 이 예외는 좁게 적용한다 — Agentforce의 다른 활용(예: Decision 008이 언급한 Fan
+   Summary, Next Best Action 설명 등)은 여전히 Future Scope다. Decision 008 본문은
+   수정하지 않는다.
+3. AI Matching Agentforce 구현은 혜준 파트(자동화 구현 영역)가 담당한다.
+4. **"Agentforce를 실제로 어떤 방식으로 구성하는가"(프롬프트, 데이터 소스, 평가
+   기준 등)의 상세 기술 설계는 이 Decision이 확정하지 않는다(TBD)** — 이 Decision은
+   "Agentforce를 쓴다"는 범위·방향만 확정하며, 실제 구성은 `03_SYSTEM.md`에서 추가로
+   설계한다.
+5. Demo에서 Sanrio(산리오)가 자연스럽게 후보로 도출되려면, Scenario/Dummy Data가
+   Fan Insight와 Business Fit 가설(`00_STORY.md` §8.3)을 충분히 뒷받침해야 한다 —
+   이는 Agentforce 자체의 정확도가 아니라 데이터 설계의 책임이다.
+
+### 이유
+
+- CLAUDE.md §7은 "AI가 다른 제안을 하더라도 공식 문서(Source of Truth)가 우선"이라고
+  명시한다 — 그런데 이번에는 반대로 **팀의 공식 의사결정(화요일 회의)이 기존 공식
+  문서(CLAUDE.md)의 범위 제한과 충돌**하는 상황이었다. 이런 경우 문서를 몰래 어기지
+  않고, CLAUDE.md 자체를 예외 조항과 함께 갱신하고 그 근거를 Decision으로 남기는
+  것이 "문서 간 충돌 없음"이라는 원칙(CLAUDE.md §7)에 맞는 처리 방식이다.
+- 예외를 "AI Matching"으로 좁게 한정한 이유는, CLAUDE.md §5의 Future Scope 원칙
+  자체(Marketing Cloud/Data Cloud/외부 API 연동 등을 지금 벌이지 않는다)가 여전히
+  유효하기 때문이다 — 이번 결정이 "Agentforce는 이제 전부 써도 된다"는 뜻으로
+  오해되지 않도록, 범위를 명확히 좁혀 기록한다.
+- 상세 기술 설계를 TBD로 남긴 이유는, "Agentforce를 쓴다"는 방향 결정과 "어떻게
+  구성하는가"라는 구현 결정은 서로 다른 질문이기 때문이다 — Decision 015가
+  Lead/Collaboration의 Object 여부와 상세 Field를 분리했던 것과 같은 원칙이다.
+
+### 영향
+
+- `CLAUDE.md` §5 Future Scope 문단이 이 Decision을 근거로 갱신됐다 — "Agentforce는
+  원칙적으로 Future Scope이나, B2B AI Matching에 한해 예외"라는 문구를 추가했다.
+- `03_SYSTEM.md` §7.2 B(AI Matching)·§7.2 H(Segment Match)·§7.2 I(Recommendation
+  Reason)·§7.3(Future Scope)이 이 Decision을 근거로 "확정" 상태로 갱신됐다.
+- Decision 008 본문(Agentforce를 은영의 장기 역할로만 남기고 Fan Summary 등은
+  Future Scope로 분류한 결정)은 수정하지 않는다 — 그 결정은 여전히 유효하며, 이
+  Decision은 그 예외를 AI Matching 범위에서만 추가하는 것이다.
+
+### TBD (아직 확정하지 않은 것)
+
+- Agentforce AI Matching의 실제 기술 구성(프롬프트, 참조 데이터, 평가/검증 방식)
+- Segment Match·Recommendation Reason이 Agentforce로부터 실제로 어떻게 값을
+  받아오는지(Flow/Apex 연동 방식)
+
+---
+
+## Decision 018 — [P2] Technical Decision: Phase 2 B2B Technical Decision Sheet A~K 확정
+
+**상태**: 확정 (K 항목은 보류)
+**기록일**: 2026-08-18
+
+### 배경
+
+`03_SYSTEM.md` §7.2는 2026-08-15 시점에 Wireframe과 Business 분석을 근거로 11개
+항목(A~K)을 Draft로 남겨두고 "화요일 팀 회의에서 논의 후 Technical Decision으로
+확정한다"고 예고했다(Decision 015·016 이후 이어지는 작업). 2026-08-18(화요일) Phase 2
+Technical Decision 회의에서 이 11개 항목을 모두 논의했고, K를 제외한 10개 항목을
+확정했다. B(AI Matching)는 "Agentforce를 Phase 2 범위에 포함해도 되는가"라는
+CLAUDE.md 범위 제한과 직결된 질문이라, 그 **범위 승인**은 Business Decision으로
+분리해 [[Decision 017]]에 별도 기록했다. 이 Decision(018)은 B를 포함해 A~K
+전체의 **기술 구현 선택**(무엇을 골랐는가)을 한 표에 모아 기록한다 — 두 Decision은
+같은 B를 다른 질문("써도 되는가" vs "무엇을 골랐는가")으로 다룰 뿐, 서로 다른 내용을
+중복 기록하지 않는다.
+
+### 결정
+
+| ID | 결정 항목 | 확정 내용 | 비고 |
+|---|---|---|---|
+| A | Partner Candidate | **Lead로 흡수** — 별도 Custom Object(`Partner_Candidate__c`) 없음. Lead Status를 세분화해 Candidate 단계까지 표현(Candidate → Lead → Qualified/후속 단계 → Conversion → Account/Contact → Opportunity) | 정확한 Status Picklist Label은 TBD |
+| B | AI Matching | **Agentforce**로 구현 — Rule-based/Demo Sample 대신 채택 | 범위 승인(왜 Agentforce를 써도 되는지)은 [[Decision 017]] 참고 — 이 표는 "무엇을 선택했는지"만 기록한다. 상세 구현 TBD |
+| C | Quote | **Standard Quote(Quote + QuoteLineItem) 사용** — Custom Object 아님 | Sponsorship Package(Product2) 확정이 선결 조건이었으며 이미 충족됨(§7.1) |
+| D | Campaign vs Collaboration | **Campaign의 Record Type**으로 구현 — 별도 `Collaboration__c` Custom Object 없음 | Draft 시점 추천(단순 Lookup 필드)과 다른 방향으로 결정 |
+| E | Lead Score | 신규 `Lead_Score__c`(Number) 필드 신설 — 표준 `Rating`은 원래 목적대로 유지 | 정확한 Type/값 범위는 Org 반영 시 확정 |
+| F | Expected Benefit | 개별 필드 3개(단기/중기/장기)로 분리 | 정확한 API Name은 미확정(TBD), 임의 확정 금지 |
+| G | Target Segment | Picklist로 구현 | 실제 Picklist 값 목록은 미확정(TBD) |
+| H | Segment Match | **Agentforce Matching**으로 구현([[Decision 017]]과 연동) | 상세 구현 TBD |
+| I | Recommendation Reason | 자동 생성 Long Text([[Decision 017]]의 Agentforce Matching 결과 근거)로 구현 | 상세 구현 TBD |
+| J | Fan Insight / Fan Grouping 화면 | 기존 방향(Option A) 유지 — Standard Report + Report Type + Dashboard, 별도 Custom Object 없음 | Draft 시점 추천과 동일한 방향으로 확정 |
+| K | Account 집계 필드(`Active Collaboration`/`Total Collaboration Value`) | **보류(On Hold)** — Option A(Roll-up)/B(Report) 어느 쪽도 확정하지 않음 | Opportunity-Account Roll-up 가능 여부 기술 확인 후 재논의 |
+
+### 이유
+
+- A(Lead 흡수)는 Decision 003의 "Standard First, Custom When Needed" 원칙을 그대로
+  적용한 결과다 — Candidate와 Lead가 별도 생명주기를 가져야 할 근거가 이번 회의
+  시점에는 확인되지 않았다.
+- D(Campaign Record Type)는 Draft 시점의 추천(단순 Lookup 필드)을 뒤집은 결정이다
+  — B2C/B2B Campaign을 화면·리스트에서 분리해서 볼 필요가 실제로 있다고 팀이
+  판단했기 때문이다(정확한 근거는 회의록 별도 보관, 이 문서는 결과만 기록한다).
+- E(Lead Score)는 정성적 표준 `Rating`과 정량적 점수를 같은 필드에 섞지 않는다는
+  Decision 009·010의 원칙을 그대로 이어받은 결정이다.
+- F(Expected Benefit 3분할)·G(Target Segment Picklist)·J(Fan Insight Report/
+  Dashboard)는 모두 Draft 시점의 추천과 동일한 방향으로 확정됐다 — 이번 회의는
+  기존 분석이 타당했음을 재확인한 것에 가깝다.
+- K를 보류한 이유는, Opportunity-Account가 표준 Lookup 관계라 Roll-up Summary
+  자체가 기술적으로 가능한지 확인되지 않았기 때문이다 — 확인 없이 Option A를
+  확정하면 나중에 되돌려야 할 위험이 있다(CLAUDE.md §5 MVP 원칙 — 확정하지 않은
+  것을 확정된 것처럼 만들지 않는다).
+
+### 영향
+
+- `03_SYSTEM.md` §7.1·§7.2(A~K)·§7.3이 이 Decision을 근거로 "DRAFT — NOT FINAL"에서
+  "CONFIRMED"(K는 "ON HOLD")로 갱신됐다.
+- `01_PROJECT.md` §4(Lead/Collaboration Entity 설명)·§6.11(TBD 목록)·§8.1(Business
+  Workflow 표)·§8.3이 A·D의 확정 내용을 반영해 갱신됐다.
+- `04_DEMO.md` §7~§9·§12가 이 표를 근거로 Scene 목록의 ⭐️ 표시를 정리하고, 8/21
+  구현 범위(Fan Insight → Collaboration 시작까지)와 Future Scope(Performance·KPI·
+  재검토/종료·장기 전환)를 명확히 구분했다.
+- `docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md`는 회의용 Working Document이며
+  Source of Truth가 아니므로(문서 자체 §5) 이 Decision이 공식 기록이다 — 그 문서는
+  수정하지 않는다.
+
+### TBD (아직 확정하지 않은 것)
+
+- Lead Status의 정확한 Picklist Label(Candidate 단계 표현 방식)
+- `Lead_Score__c`의 정확한 Type/값 범위/계산 방식
+- Expected Benefit 3개 필드의 정확한 API Name
+- Target Segment Picklist의 실제 값 목록
+- Segment Match·Recommendation Reason의 Agentforce 상세 구현([[Decision 017]] TBD와 동일)
+- Account 집계 필드(K) 전체 — Option A/B 모두 미확정
