@@ -9,27 +9,42 @@ Lead 영역을 End-to-End로 담당**한다(`02_TEAM_GUIDE.md §11`) — 화면�
 
 ## [P2] Mission
 
-Fan Insight 결과를 바탕으로 제휴 후보를 발굴·관리하는 Collab360 화면과, 실제
-영업 파이프라인 진입점인 Lead를 설계하고 구축한다(`00_STORY.md §8.3`,
-`01_PROJECT.md §2.7`). 2026-08-18 회의로 이 영역의 핵심 결정(A/B/E/H/I) 5개
-전부 확정됐다(`05_DECISIONS.md` Decision 017·018) — 이제 설계 판단보다 실제
-구축이 중심이다.
+기업 DB(약 100개)를 대상으로 한 Agentforce Matching/Top 10 추천 화면(Collab360)과,
+실제 Outbound 영업 파이프라인 진입점인 Lead를 설계하고 구축한다(`00_STORY.md §8.3`,
+`01_PROJECT.md §2.7`). 2026-08-18 Technical Decision 회의로 이 영역의 핵심 결정
+(A/B/E/H/I) 5개 전부 확정됐고(`05_DECISIONS.md` Decision 017·018), 같은 날 이후
+멘토링으로 대표 시나리오가 **d'Alba(달바)**로, 중심축이 **Sponsorship Sales
+Pipeline**으로 갱신됐다(Decision 019) — 이제 설계 판단보다 실제 구축이 중심이다.
 
 ## [P2] Ownership
 
 - **확정**: Partner Candidate는 별도 Object가 아니라 **Lead로 흡수** —
-  Lead Status를 세분화해 Candidate 단계까지 표현(`§7 A`, Decision 018-A). 정확한
-  Status Picklist Label은 TBD
+  Lead Status를 세분화해 후보/접촉/검토/Qualified 단계까지 표현(`§7 A`, Decision
+  018-A). 정확한 Status Picklist Label은 TBD
 - **확정**: Lead Score = 신규 `Lead_Score__c`(Number) 필드(`§7 E`, Decision
   018-E) — 표준 `Rating`을 대체하는 것이 아니라 별개 필드
 - **확정**: AI Matching = **Agentforce**(`§7 B`, Decision 017) — Rule-based나
-  Demo Sample이 아니다. 혜준 파트의 자동화 구현 영역
+  Demo Sample이 아니다. 기업 DB(약 100개)를 대상으로 Top 10을 추천한다. 혜준
+  파트의 자동화 구현 영역
 - **확정**: Segment Match = Agentforce Matching(`§7 H`), Recommendation Reason
   = Agentforce 결과 기반 자동 생성 Long Text(`§7 I`) — 둘 다 B의 Agentforce
   구현에 종속
 - **TBD(상세 구현)**: Agentforce의 실제 구성(프롬프트/데이터 소스/평가 기준),
-  Lead Status Picklist Label — 이번 회의는 "무엇을 쓸지"만 확정했고 "어떻게
-  구성할지"는 아직이다
+  Lead Status Picklist Label, 기업 DB(약 100개)의 Salesforce Object 구현 형태
+  — 이번 회의는 "무엇을 쓸지"만 확정했고 "어떻게 구성할지"는 아직이다
+
+> **⚠️ 가장 중요한 구분 — Agentforce Fit/Recommendation Score ≠ `Lead_Score__c`**
+> (2026-08-18 멘토링, Decision 019). 혜준이 직접 다루는 두 값이 서로 다른
+> 개념이라는 점을 항상 구분해야 한다.
+>
+> | | Agentforce Fit/Recommendation Score | `Lead_Score__c` |
+> |---|---|---|
+> | 질문 | 팬덤과 이 기업이 잘 맞는가? | 이 Lead가 실제 계약까지 이어질 가능성이 높은가? |
+> | 근거 | Fan 360 데이터(Segment Match 등) | 담당자 권한, 접촉 이력, 미팅 반응, 예산 등 |
+> | 산출 시점 | Lead가 되기 전(기업 DB 추천 단계) | Lead가 된 이후(Qualification 단계) |
+>
+> 예: d'Alba는 Agentforce Fit Score 92(예시)로 추천됐지만, 실제 Outbound 접촉 후
+> `Lead_Score__c`는 78(예시)일 수 있다 — 두 값을 하나로 합치거나 같은 필드에 넣지 않는다.
 
 ## [P2] End-to-End Responsibility
 

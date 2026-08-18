@@ -744,6 +744,18 @@ Org 연결 후 아래 10개 항목을 최종 대조한다.
 > ---
 >
 > **✅ 2026-08-18 Update**: 화요일 Technical Decision 회의에서 아래 A~K 중 **K(Account 집계)를 제외한 전부**가 확정되었다(`05_DECISIONS.md` Decision 017·018). 각 항목 하단의 "**Status**" 줄에 결정 결과를 반영했다 — Option 설명 자체(장단점 비교)는 회의 배경으로 남겨두기 위해 그대로 두었다. **B(AI Matching)는 Draft 단계의 추천(A/B)이 아니라 Agentforce(Option C)로 결정**되었고, 이는 CLAUDE.md §5 Future Scope의 좁은 범위 예외다(Decision 017 참고). 상세 구현 방식(Agentforce 설정, Status Label, API Name 등)은 여전히 추가 설계가 필요한 부분과 이미 확정된 방향을 구분해 각 항목에 표시했다.
+>
+> **✅ 2026-08-18 멘토링 Update (같은 날 이후 세션)**: 같은 날 진행된 멘토링에서 Phase 2
+> B2B의 Business 방향이 "Collaboration 중심"에서 **"Sponsorship Sales/Pipeline
+> 중심"**으로 크게 갱신됐다(`05_DECISIONS.md` Decision 019, `00_STORY.md` §8). 위
+> A~K의 **기술 선택(Object/Field) 자체는 바뀌지 않는다** — Lead=Standard Lead,
+> Quote=Standard Quote, Campaign=Collaboration Record Type, `Lead_Score__c`
+> 모두 그대로 유효하다. 바뀐 것은 **이 기술 요소들이 표현하는 Business 흐름의
+> 중심**이다: 대표 시나리오가 Sanrio → **d'Alba**로, 흐름의 종착점이
+> "Collaboration 진행 중"이 아니라 **Sponsorship Opportunity/Contract/
+> Pipeline**으로 이동했다. 또한 **Agentforce Fit/Recommendation Score와
+> `Lead_Score__c`는 서로 다른 개념**이라는 점이 이번에 명확히 구분됐다 — §B, §E,
+> §H, §I에 반영했다.
 
 ### 7.1 [P2] ✅ CONFIRMED
 
@@ -869,8 +881,22 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > 방식으로 구성하는가"(프롬프트, 데이터 소스, 평가 기준 등)의 상세 기술 설계는
 > 이번 회의에서 확정하지 않았다(TBD)** — 이 Draft 문서의 Option C 설명(장단점)은
 > 여전히 유효한 참고 자료이지만, 실제 구성 방식은 추가 설계가 필요하다. Demo에서
-> 산리오가 자연스럽게 후보로 도출되려면 Scenario/Dummy Data가 Fan Insight와
-> Business Fit 가설(`00_STORY.md` §8.3)을 충분히 뒷받침해야 한다.
+> d'Alba(달바)가 자연스럽게 후보로 도출되려면 Scenario/Dummy Data가 Fan Insight와
+> 팬덤 광고 가치 가설(`00_STORY.md` §8.3)을 충분히 뒷받침해야 한다.
+>
+> **✅ 2026-08-18 멘토링 추가 (Decision 019)**: Agentforce Matching의 입력은
+> **기업 DB(약 100개, 실제 기업 정보 기반)**다 — 가상 기업만 생성하지 않고
+> 실제 기업 데이터를 활용하며, 출처로 DART Open API 활용을 방향으로 검토 중이다
+> (TBD). Agentforce는 이 기업 DB와 Fan 360 Insight를 매칭해 **Top 10을
+> 추천**하고, 추천마다 Recommendation Reason을 생성한다. **이 기업 DB를
+> Salesforce에서 어떤 형태로 관리할지(예: Lead Status=Candidate로 표현할지,
+> Salesforce 밖의 외부 데이터 소스로 유지할지)는 확정하지 않았다(TBD)** — 임의로
+> 새 Custom Object/Field를 만들지 않는다.
+>
+> **⚠️ 중요 — Agentforce Fit/Recommendation Score ≠ Lead Score**: Agentforce가
+> 산출하는 값(§H Segment Match, §I Recommendation Reason)은 "팬덤과 기업의
+> Fit"을 나타내고, `Lead_Score__c`(§E)는 "실제 영업/계약 가능성"을 나타낸다 —
+> 완전히 다른 축이다. §E에서 자세히 다룬다.
 >
 > **Status: ✅ CONFIRMED — Option C, Agentforce (05_DECISIONS.md Decision 017) — 상세 구현 TBD**
 
@@ -1001,7 +1027,20 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > 새로 만든다"는 방향만 확정했다(P2_B2B_ORG_BASELINE.md 기준 Org에는 아직
 > 이 필드가 존재하지 않는다).
 >
-> **Status: ✅ CONFIRMED — Option B, `Lead_Score__c` (05_DECISIONS.md Decision 018-E)**
+> **⚠️ 2026-08-18 멘토링 명확화 (Decision 019) — `Lead_Score__c` ≠ Agentforce Fit/Recommendation Score**:
+> 이 둘을 같은 의미로 혼용한 표현이 이전 문서에 있었다면 모두 이 정의로 대체한다.
+>
+> | | Agentforce Fit/Recommendation Score(§B, §H, §I) | `Lead_Score__c`(이 섹션) |
+> |---|---|---|
+> | 질문 | 우리 팬덤과 이 기업이 잘 맞는가? | 이 Lead가 실제 계약까지 이어질 가능성이 높은가? |
+> | 근거 | Fan 360 데이터, Target Segment, Segment Match | 담당자의 의사결정 권한, 직무/역할, 접촉 이력, 메시지/미팅 반응, 예산/구매 가능성 등 |
+> | 산출 주체 | Agentforce가 2단계(기업 DB 추천)에서 자동 산출 | 이 매니저/영업 담당자가 실제 영업 활동을 거쳐 판단 |
+> | 산출 시점 | Lead가 되기 전(추천 단계) | Lead가 된 이후(Qualification 단계) |
+>
+> Fit이 높다고 곧바로 `Lead_Score__c`가 높은 것은 아니다 — 두 값 모두 Lead
+> 레코드와 관련될 수 있지만 별개 필드/별개 축이며, 하나로 통합하지 않는다.
+>
+> **Status: ✅ CONFIRMED — Option B, `Lead_Score__c` (05_DECISIONS.md Decision 018-E, Decision 019)**
 
 #### F. Expected Benefit (단기/중기/장기)
 
@@ -1103,6 +1142,10 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > 입력)도 Option B(Flow/Formula)도 아니라, §B의 Agentforce가 Segment Match
 > 값을 함께 산출하는 구조다. 실제 계산 로직/구성 방식은 §B와 동일하게 TBD다.
 >
+> **⚠️ Segment Match(이 필드) ≠ `Lead_Score__c`(§E)** — Segment Match는 Agentforce가
+> 산출하는 "팬덤-기업 Fit" 값이고, `Lead_Score__c`는 실제 영업 담당자가 판단하는
+> "계약 가능성" 값이다. 자세한 구분표는 §E 참고.
+>
 > **Status: ✅ CONFIRMED — Agentforce Matching (05_DECISIONS.md Decision 018-H, §B와 연동) — 상세 구현 TBD**
 
 #### I. Recommendation Reason
@@ -1180,6 +1223,12 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 #### K. Account `Active Collaboration` / `Total Collaboration Value`
 
 > ⭐️ **TEAM DISCUSSION REQUIRED**
+>
+> **✅ 2026-08-18 멘토링 참고**: Phase 2가 Sponsorship Sales/Pipeline 중심으로
+> 재정의되면서(Decision 019), 이 필드명(`Active Collaboration`/`Total
+> Collaboration Value`)도 실제로 만들 때는 `Active Sponsorship`/`Total
+> Sponsorship Value` 등으로 바뀔 가능성이 있다 — 다만 K 자체가 여전히 On Hold이므로
+> 지금 필드명을 확정하지 않는다. Option 설명은 원래 이름을 그대로 보존한다.
 >
 > **Option A — Roll-up Summary / Formula**
 > - 무엇을 의미하는지: 쉽게 말하면 "Account 밑에 달린 Opportunity들을

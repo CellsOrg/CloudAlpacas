@@ -1,6 +1,11 @@
 # 🦙 Cloud Alpacas — P2 Weekend PM Workbook
 
-> **개인 PM 작업 기록으로 보관 (2026-08-17).** 주말 작업이 끝나 화요일 회의 메인 문서에서는 더 이상 쓰지 않는다 — 회의는 `docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md` 하나로 진행한다. 이 문서의 결정 초안·시나리오 서사는 `docs/decision_sheet/P2_DUMMY_DATA_MASTER.md`, `P2_DATA_CONTRACT.md`에 이미 정리되어 있으므로 내용을 다시 복사하지 않았다 — 개인 작업 이력이 필요할 때만 연다. (`docs/.gitignore` 대상 폴더로 이동했으므로 git에는 더 이상 추적되지 않는다.)
+> ## ⚠️ Weekend PM Working Document — archived / no longer SoT
+>
+> 이 문서는 공식 Source of Truth가 아니다. 최신 확정 내용은 `docs/05_DECISIONS.md`
+> (Decision 017~019)와 `docs/03_SYSTEM.md §7`을 따른다.
+
+> **개인 PM 작업 기록으로 보관 (2026-08-17).** 주말 작업이 끝나 화요일 회의 메인 문서에서는 더 이상 쓰지 않는다 — 회의는 `docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md` 하나로 진행한다. 이 문서의 결정 초안·시나리오 서사는 `docs/decision_sheet/P2_DUMMY_DATA_MASTER.md`, `P2_DATA_CONTRACT.md`에 이미 정리되어 있으므로 내용을 다시 복사하지 않았다 — 개인 작업 이력이 필요할 때만 연다. **이미 `0nlySara/`(개인 작업 영역, `.gitignore`로 git 미추적)에 위치해 있어 별도 이동이 필요하지 않다.**
 
 > 화요일 의사결정 회의 전까지 **노트북 없이 모바일에서** B2B Phase 2의 공통 기준을 정리하는 PM 작업 노트입니다.
 >

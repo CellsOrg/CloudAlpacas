@@ -3,15 +3,18 @@
 ## [P2] Current Role
 
 🎁 **Product + Quote + Campaign**. Salesforce Builder 역할(`02_TEAM_GUIDE.md §1`)은
-유지하되, Phase 2에서는 B2B Collaboration의 "무엇을, 얼마에, 어떤 캠페인으로
+유지하되, Phase 2에서는 B2B Sponsorship Sales의 "무엇을, 얼마에, 어떤 캠페인으로
 실행하는가" 구간(Product/Quote/Campaign)을 End-to-End로 담당한다
 (`02_TEAM_GUIDE.md §11`).
 
 ## [P2] Mission
 
-Sponsorship Package를 Product2로 표현하고, 제안서를 **Standard Quote**로
-관리하며, Collaboration 실행을 **Campaign Record Type**으로 표현해 구축한다
+Sponsorship Package(구장 광고, 전광판/펜스 광고, SNS 노출, Brand Day 등)를
+Product2로 표현하고, 제안서를 **Standard Quote**로 관리하며, 필요 시
+Collaboration 실행을 **Campaign Record Type**으로 표현해 구축한다
 (`01_PROJECT.md §6.11`, `03_SYSTEM.md §7 C·D`, `05_DECISIONS.md` Decision 018-C·D).
+대표 예시는 d'Alba(달바) Sponsorship 시나리오다(Decision 019,
+`data/P2_DUMMY_DATA_MASTER.md §3`).
 
 ## [P2] Ownership
 

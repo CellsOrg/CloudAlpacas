@@ -170,22 +170,24 @@ flowchart LR
 
 **새로 등장한 명사:** Sponsorship Package(제공 권리 패키지), Proposal(제안서). Renewal은 2.3과 공유.
 
-### 2.7 [P2] Phase 2 확장 — Fan Insight → 후보 발굴 (B2B Collaboration/Sponsorship)
+### 2.7 [P2] Phase 2 확장 — Fan Insight → 기업 Matching → Outbound Lead (B2B Sponsorship Sales)
 
-> 이 섹션은 §2.6을 대체하지 않는다. §2.6은 "이미 접촉 대상이 정해진 이후, 어떻게 제안·계약하는가"를 다뤘고, 이 섹션은 그보다 **앞단계 — "애초에 누구에게 접촉할지 어떻게 찾아내는가"**를 다룬다(`00_STORY.md` §8 Phase 2 Story 기반). Cloud Alpacas는 팬이 늘고 있지만 구단 재정 운영상 적자 상황이라, 이 앞단계 없이 "스폰서 발굴"만으로는 후보를 무작위로 찾는 것과 다르지 않다.
+> **2026-08-18 멘토링으로 갱신**(`05_DECISIONS.md` Decision 019). 이 섹션은 §2.6을 대체하지 않는다. §2.6은 "이미 접촉 대상이 정해진 이후, 어떻게 제안·계약하는가"를 다뤘고, 이 섹션은 그보다 **앞단계 — "애초에 누구에게 접촉할지 어떻게 찾아내는가"**를 다룬다(`00_STORY.md` §8 Phase 2 Story 기반). Cloud Alpacas는 팬이 늘고 있지만 구단 재정 운영상 적자 상황이라, 이 앞단계 없이 "스폰서 발굴"만으로는 후보를 무작위로 찾는 것과 다르지 않다.
 
 ```mermaid
 flowchart LR
-    FI["Fan Insight<br/>(Fan 360 데이터 분석)"] --> PC["팬층 특성 발견"]
-    PC --> FH["Business Fit 가설<br/>(어떤 기업과 궁합이 좋은가)"]
-    FH --> CD["후보 발굴<br/>(Candidate Discovery)"]
-    CD --> L["잠재 후보 관리<br/>(Lead)"]
-    L -->|접촉 성사| B["스폰서 발굴<br/>(Sponsor, Partner Contact) — §2.6 이어짐"]
+    FI["Fan Insight<br/>(Fan 360 데이터 분석)"] --> AV["팬덤의 광고 가치 발견<br/>(Beauty/Lifestyle/F&B 관심 등)"]
+    AV --> CDB["기업 DB<br/>(약 100개, 실제 기업 정보 기반)"]
+    CDB --> AM["Agentforce Matching<br/>→ Top 10 추천 + Recommendation Reason"]
+    AM -->|Outbound 대상 선정| L["Lead<br/>(Status로 후보/접촉/검토/Qualified 표현)"]
+    L -->|Lead Qualification 통과| B["스폰서 발굴<br/>(Sponsor, Partner Contact) — §2.6 이어짐"]
 ```
 
-**새로 등장한 명사:** Fan Insight(팬층 분석 결과), Business Fit 가설, Candidate Discovery(후보 발굴), Lead(잠재 후보). 이 네 개념은 §2.6의 "스폰서 발굴" 앞에 붙는 새로운 단계이며, §2.6 이후(제안→계약→실행→성과→재계약)는 그대로 이어진다. Fan Insight, Business Fit 가설, Candidate Discovery는 새 저장 Entity가 아니라 §4의 기존 Fan Analytics Entity(Attendance Record, Engagement Signal, Fan Activity Pattern 등)를 활용하는 **분석 과정**이다 — Lead만 §4에 새 Entity로 추가한다.
+**새로 등장한 명사:** Fan Insight(팬층 분석 결과), 기업 DB(약 100개 기업 정보), Agentforce Matching(Fit/Recommendation Score 산출), Lead(Outbound 영업 대상). 이 개념들은 §2.6의 "스폰서 발굴" 앞에 붙는 새로운 단계이며, §2.6 이후(제안→계약→실행→성과→재계약)는 그대로 이어진다. Fan Insight는 새 저장 Entity가 아니라 §4의 기존 Fan Analytics Entity(Attendance Record, Engagement Signal, Fan Activity Pattern 등)를 활용하는 **분석 과정**이다 — Lead만 §4에 새 Entity로 추가한다. **기업 DB(약 100개)를 Salesforce에서 어떤 형태로 관리할지(Lead Status=Candidate로 표현할지, 별도 외부 데이터 소스로 유지하다 Top 10만 Lead로 승격할지)는 아직 확정하지 않았다(TBD)** — 임의로 새 Object/Field를 만들지 않는다.
 
-> **왜 Fan 360이 이 흐름의 출발점인가?** Phase 1에서 만든 Fan 360 데이터(관심사, 구매·관람 행동, Engagement, Fan Value 등)가 없으면 "어떤 기업이 우리 팬과 맞는지"를 판단할 근거가 없다. B2B가 별도의 독립된 CRM이 아니라 **기존 Fan 360을 Business Development에 활용하는 확장**이라는 점이 여기서 드러난다(`00_STORY.md` §8.2): **B2C Fan Activity → Fan 360 Insight → B2B Business Decision**.
+> **Agentforce Fit/Recommendation Score ≠ Lead Score**: Agentforce Matching이 산출하는 것은 "우리 팬덤과 이 기업이 잘 맞는가"(Fan 360 데이터 기반)이고, Lead Score는 "이 Lead가 실제 계약까지 이어질 가능성이 높은가"(담당자 권한, 접촉 이력, 예산 등 실제 영업 활동 기반)다. 두 값은 서로 다른 시점, 다른 근거로 산출되는 별개 개념이다 — §6.11에서 더 자세히 다룬다.
+
+> **왜 Fan 360이 이 흐름의 출발점인가?** Phase 1에서 만든 Fan 360 데이터(관심사, 구매·관람 행동, Engagement, Fan Value 등)가 없으면 "어떤 기업이 우리 팬덤에 광고 가치가 있는지"를 판단할 근거가 없다. B2B가 별도의 독립된 CRM이 아니라 **기존 Fan 360을 Sponsorship Sales에 활용하는 확장**이라는 점이 여기서 드러난다(`00_STORY.md` §8.2): **B2C Fan Activity → Fan 360 Insight → B2B Sponsorship Sales Decision**.
 
 ---
 
@@ -285,7 +287,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | Cloud Alpacas | 구단 본체 | 전 Domain 공통 |
 | Sponsor | 스폰서 조직 | Partnership |
 | Partner | 협업/제휴 조직 (라이선스사 등 유형 포괄) | Partnership |
-| **[P2] Lead** | 아직 관계가 형성되지 않은 잠재 제휴/스폰서 후보(Fan Insight 기반 가설 단계). **표준 Lead Object 사용 확정**(§6.11, `05_DECISIONS.md` Decision 018-A) — Lead Status를 세분화해 Candidate 단계까지 표현하며, 정확한 Status Label은 TBD | Partnership |
+| **[P2] Lead** | Agentforce가 기업 DB(약 100개)에서 추천한 후보 중 **실제 Outbound 영업 대상으로 선정된** 기업/스폰서 후보. **표준 Lead Object 사용 확정**(§6.11, `05_DECISIONS.md` Decision 018-A) — Lead Status를 세분화해 후보/접촉/검토/Qualified 단계까지 표현하며, 정확한 Status Label은 TBD. **단순 "추천 기업 목록"이 아니다** — Agentforce의 추천(Fit/Recommendation Score)과 Lead Score(실제 계약 가능성)는 서로 다른 개념이다(§2.7, §6.11) | Partnership |
 
 ### 🎫 Product
 
@@ -307,7 +309,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 |---|---|---|
 | Ticket Policy | 경기·좌석·등급별 판매 정책과 가격 | Operations |
 | Membership Tier | 멤버십 등급별 가격·혜택 구성 | Operations |
-| Sponsorship Package | 스폰서에게 제공 가능한 권리 목록 | Partnership |
+| Sponsorship Package | 스폰서에게 제공 가능한 권리 목록(예: 구장 광고, 전광판/펜스 광고, 공식 SNS 노출, Brand Day, 프로모션, Collaboration Goods 등 — "무엇을 얼마에 판매하는가", `00_STORY.md` §8.3 Step 6) | Partnership |
 | Eligibility Rule | 구매/혜택 이용 자격 조건 | Operations |
 
 ### ⚾ Event
@@ -338,7 +340,7 @@ Workflow에 명사로 등장한다고 전부 Entity가 되는 것은 아니다. 
 | **Benefit Redemption** `신규` | 혜택을 실제로 사용/검증한 사건 | Marketing / Operations / Partnership |
 | **Renewal** `신규` | 멤버십 갱신, 스폰서 재계약 | Operations / Partnership |
 | **Proposal** `신규` | 계약 전 스폰서십 제안 기록 | Partnership |
-| **[P2] Collaboration** | Opportunity가 성사된 뒤 실행하는 단기 협업 활동(공동 캠페인·굿즈·이벤트 등 — 예시이며 미확정). **Campaign의 Record Type으로 구현 확정**(별도 Object 아님, §6.11, `05_DECISIONS.md` Decision 018-D) | Partnership |
+| **[P2] Collaboration** | Opportunity가 성사된 뒤 필요 시 실행하는 단기 협업 활동(공동 캠페인·굿즈·이벤트 등 — 예시이며 미확정). **Campaign의 Record Type으로 구현 확정**(별도 Object 아님, §6.11, `05_DECISIONS.md` Decision 018-D). Phase 2 B2B Sales Pipeline의 중심 개념은 아니며, Sponsorship Opportunity/Contract가 중심이다(§2.7, §8, Decision 019) | Partnership |
 | Sponsor Contract | 스폰서십 계약 (라이선스 계약 포함, §3.3) | Partnership |
 | Settlement | 정산 | Partnership |
 
@@ -433,14 +435,15 @@ graph TD
     PS --> ST["Settlement / Campaign Performance /<br/>Sponsor Performance"]
 ```
 
-### [P2] Partnership 축 — Phase 2 확장: Fan Insight → 후보 발굴
+### [P2] Partnership 축 — Phase 2 확장: Fan Insight → 기업 Matching → Outbound Lead
 
 ```mermaid
 graph TD
     F["Person Account<br/>(Fan)"] --> FI["Fan 360 Analytics<br/>(Engagement/Fan Value/Attendance 등)"]
-    FI -->|팬층 특성 발견| FH[Business Fit 가설]
-    FH -->|후보 발굴| L["Lead<br/>(잠재 후보, Status로 Candidate 단계 표현)"]
-    L -->|접촉 성사| P["Partner<br/>(Sponsor 포함) — 위 Partnership 축으로 연결"]
+    FI -->|팬덤 광고 가치 발견| CDB["기업 DB(약 100개)"]
+    CDB -->|Agentforce Matching| TOP["Top 10 추천<br/>(Fit/Recommendation Score)"]
+    TOP -->|Outbound 대상 선정| L["Lead<br/>(Status로 후보/접촉/검토/Qualified 표현,<br/>Lead Score는 Fit Score와 별개)"]
+    L -->|Qualified| P["Partner<br/>(Sponsor 포함) — 위 Partnership 축으로 연결"]
 ```
 
 > 이 다이어그램은 위 Partnership 축의 시작점(`Partner`) **앞에 붙는** 새로운 흐름이다. 기존
@@ -482,8 +485,8 @@ graph TD
 | Benefit Redemption | Custom Object |
 | Renewal | Custom Object 또는 기존 Contract/Enrollment의 상태 변경 (§6.7) |
 | Proposal | Standard Opportunity (계약 전 단계) |
-| **[P2] Lead** | Standard Lead 또는 Account(비활성 상태) — Object 여부 미확정(§6.11 참고, TBD) |
-| **[P2] Collaboration** | Campaign 재사용 가능성(§3.3 기존 결정과 연계) 또는 별도 Object — 미확정(§6.11 참고, TBD) |
+| **[P2] Lead** | **Standard Lead 확정**(`05_DECISIONS.md` Decision 018-A) — Status로 후보/접촉/검토/Qualified 단계 표현, 정확한 Status Label은 TBD |
+| **[P2] Collaboration** | **Campaign Record Type으로 구현 확정**(`05_DECISIONS.md` Decision 018-D) — 별도 Object 아님. Sponsorship Opportunity가 성사된 뒤 필요 시 실행하는 수단이며, Phase 2 B2B Sales Pipeline의 중심 Entity는 아니다(§2.7, §8) |
 | Sponsor Contract | Standard Contract |
 | Settlement | Custom Object |
 | Ballpark / Section / Gate | Custom Object |
@@ -748,12 +751,22 @@ Salesforce Mapping도 이미 Proposal → Opportunity로 제안되어 있었다 
 Opportunity는 "진행 중인 딜"을 표현하는 데 강하지만, "아직 딜이 아닌, 검증 전 가설 단계 후보"를
 표현하기엔 무겁다(§6.5의 Opportunity 성격 설명과 같은 이유).
 
-**재정의**
+**재정의 (2026-08-18 멘토링으로 Lead 개념 재확인 — `05_DECISIONS.md` Decision 019)**
 
-- **Lead** = 아직 관계가 없는, 가설 단계의 잠재 후보. Fan Insight로 세운 Business Fit 가설(§2.7)에서 나온다.
+- **Lead** = Agentforce가 기업 DB(약 100개)에서 추천한 후보 중, **실제 Outbound 영업 대상으로
+  선정된** 잠재 스폰서/광고주. Fan Insight → 기업 DB → Agentforce Matching(§2.7)을 거쳐 나온다.
+  **단순한 "추천 기업 목록"이 아니다** — Agentforce의 추천 자체는 아직 Lead가 아니고, 영업
+  대상으로 선정되어 Lead Status가 부여된 순간부터 Lead다.
+- **Fan Fit/Recommendation Score(Agentforce) ≠ Lead Score**: 이 둘을 같은 의미로 혼용하지
+  않는다.
+  - Fan Fit/Recommendation Score = "우리 팬덤과 이 기업이 잘 맞는가"(Fan 360 데이터 기반,
+    Agentforce가 산출)
+  - Lead Score = "이 Lead가 실제 계약까지 이어질 가능성이 높은가"(담당자 의사결정 권한,
+    직무/역할, 접촉 이력, 메시지/미팅 반응, 예산/구매 가능성 등 실제 영업 활동 기반)
+  - 두 값 모두 Lead 레코드와 관련될 수 있지만, 산출 시점과 근거가 다른 별개의 축이다.
 - **Proposal** = Lead가 아니다. 실제 접촉이 성사되어 Opportunity가 진행되는 동안 오가는 제안 내용(문서/활동)이며, 기존 정의(§2.6·§6.1)를 그대로 유지한다.
-- **Opportunity** = 성사 여부를 다투는 협상 단계.
-- **Collaboration** = Opportunity가 Won된 뒤 실제로 실행하는 활동. §3.3의 기존 결정("Collaboration Campaign → Campaign으로 통합")과 연결되므로, Campaign을 그대로 재사용할 가능성이 높다.
+- **Opportunity** = 성사 여부를 다투는 협상 단계(예: Advertising Sponsorship, F&B Partnership, Campaign Partnership).
+- **Collaboration** = Opportunity가 Won된 뒤 필요 시 실행하는 활동. §3.3의 기존 결정("Collaboration Campaign → Campaign으로 통합")과 연결되며, Campaign Record Type으로 확정됐다(Decision 018-D). 다만 Phase 2 B2B Sales Pipeline의 중심 개념은 아니다 — 중심은 Opportunity → Sponsorship Package/Quote → Contract/Revenue다.
 
 **우리 프로젝트에서 고민해야 하는 점(2026-08-18 회의로 대부분 해결됨)**
 
@@ -791,44 +804,53 @@ Partner Candidate까지 흡수), Collaboration은 **Campaign의 Record Type**으
 
 ---
 
-## 8. [P2] Phase 2 — B2B Collaboration/Sponsorship Business Workflow
+## 8. [P2] Phase 2 — B2B Sponsorship Sales Business Workflow
 
-> 이 섹션은 §1~§7(Phase 1 B2C 중심 분석)을 대체하지 않는다. `00_STORY.md` §8/§9의 Phase 2
+> **2026-08-18 멘토링으로 이 섹션 전체가 갱신됐다**(`05_DECISIONS.md` Decision 019). 이
+> 섹션은 §1~§7(Phase 1 B2C 중심 분석)을 대체하지 않는다. `00_STORY.md` §8/§9의 Phase 2
 > Story를 Business → Domain → Workflow 수준으로 구체화한 것이며, Salesforce Object/Field
 > 설계는 다루지 않는다(→ `03_SYSTEM.md`). B2B는 별도의 독립 CRM이 아니라 **기존 Fan 360을
-> Business Development에 활용하는 확장**이다:
+> Sponsorship Sales에 활용하는 확장**이다:
 >
-> **B2C Fan Activity → Fan 360 Insight → B2B Business Decision**
+> **B2C Fan Activity → Fan 360 Insight → B2B Sponsorship Sales Decision**
 
 ### 8.1 Business Workflow 표
 
 | 단계 | Business Question | 담당자 | Input | Action | Output | 다음 단계 |
 |---|---|---|---|---|---|---|
-| 1. Fan Insight | 우리 팬은 누구이고 어떤 특성을 가지는가? | 이 매니저 | Fan 360 데이터(Engagement, Fan Value, 관람·구매 행동, 관심사 — §2.1~2.4의 기존 Fan 데이터를 그대로 활용) | 팬층 특성 분석 | 팬층 특성 인사이트 | 2 |
-| 2. Partner Candidate Discovery | 이 팬층과 잘 맞는 기업/브랜드는 어디인가? | 이 매니저 | 팬층 특성 인사이트 | Business Fit 가설 수립 → 후보 리스트업 | 후보 기업 리스트(가설 단계) | 3 |
-| 3. Prospect / Lead | 이 후보에 접촉을 시작할 가치가 있는가? | 이 매니저 | 후보 기업 리스트 | 우선순위 판단, 접촉 시도 | Lead(§4·§6.11 — 표준 Lead Object 확정, Status Label TBD) | 4 (접촉 성사 시) |
-| 4. Account / Contact | 누구를 상대로 논의를 이어가는가? | 이 매니저 | 접촉 성사된 Lead | 기업/담당자 정보 관리 | Sponsor/Partner(§4 기존) + Partner Contact(§4 기존) | 5 |
-| 5. Opportunity | 실제로 제휴/스폰서십을 추진할 것인가? | 이 매니저 | Account/Contact + Fit 가설 | 제안 논의·조건 협상 | Proposal(§4·§6.11 기존, 재정의) → Opportunity Won/Lost | 6 (Won 시) |
-| 6. Short-term Collaboration | 장기 계약 전에 효과를 어떻게 검증하는가? | 이 매니저 | 성사된 Opportunity | 단기 Collaboration 기획·실행(예: 공동 캠페인, 굿즈, 이벤트 — 예시이며 미확정) | Collaboration(§4·§6.11 — Campaign Record Type으로 구현 확정) | 7 |
-| 7. Performance / Evaluation | 이 Collaboration이 실제 효과가 있었는가? | 이 매니저 | Collaboration 결과(팬 반응·참여·구매·Engagement — KPI TBD) | 성과 분석 | 지속 여부 판단 근거 | 8 |
-| 8. Long-term Partnership/Sponsorship | 이 관계를 장기 계약으로 발전시킬 것인가? | 이 매니저 | 성과 분석 결과 | 장기 제안 또는 중단/재검토(Decision Point) | Sponsor Contract(§4 기존) 또는 관계 종료·보류 | 종료 또는 기존 Renewal(§4 기존) 흐름 재사용 |
+| 1. Fan Insight | 우리 팬은 누구이고 어떤 광고 가치를 가지는가? | 이 매니저 | Fan 360 데이터(Engagement, Fan Value, 관람·구매 행동, 관심사 — §2.1~2.4의 기존 Fan 데이터를 그대로 활용) | 팬덤 광고 가치 분석 | 팬층 특성 인사이트(예: 뷰티/라이프스타일/F&B 관심) | 2 |
+| 2. 기업 DB / Agentforce Matching | 이 팬덤과 광고 가치가 높은 기업은 어디인가? | Agentforce | 팬층 특성 인사이트 + 기업 DB(약 100개) | Fit Matching → Top 10 추천 + Recommendation Reason | 추천 후보 목록(Fit/Recommendation Score, 아직 Lead 아님) | 3 |
+| 3. Outbound Lead 선정 | 이 추천 후보 중 실제 영업을 시작할 곳은 어디인가? | 이 매니저 | 추천 후보 목록 | 우선순위 판단, Outbound 접촉 시도 | Lead(§4·§6.11 — 표준 Lead Object 확정, Status Label TBD) | 4 |
+| 4. Lead Qualification / Lead Score | 이 Lead가 실제 계약까지 이어질 가능성이 높은가? | 이 매니저 | 접촉 이력, 담당자 반응, 예산 정보 등 | 실제 영업 활동 기반 Lead Score 평가(Agentforce Fit Score와 별개, §6.11) | Qualified Lead | 5 (Qualified 시) |
+| 5. Account / Contact | 누구를 상대로 논의를 이어가는가? | 이 매니저 | Qualified Lead | 기업/담당자 정보 관리(Lead Convert) | Sponsor/Partner(§4 기존) + Partner Contact(§4 기존) | 6 |
+| 6. Opportunity | 실제로 스폰서십을 추진할 것인가? | 이 매니저 | Account/Contact | 제안 논의·조건 협상 | Opportunity(예: Advertising Sponsorship, F&B Partnership) Won/Lost | 7 (Won 시) |
+| 7. Sponsorship Package / Quote / Negotiation | 무엇을, 얼마에 판매하는가? | 이 매니저 | 성사 중인 Opportunity | Sponsorship Package(구장 광고, 전광판/펜스 광고, SNS 노출, Brand Day 등) 제안, 협상 | Quote, Closed Won/Lost | 8 (Won 시) |
+| 8. Contract / Sponsorship Revenue | 계약이 실제 매출로 이어졌는가? | 이 매니저 | Closed Won Opportunity | 계약 체결 | Sponsor Contract(§4 기존), Revenue 발생 | 9 |
+| 9. Pipeline / Revenue Dashboard | 목표 매출 대비 얼마나 부족한가? | 이 매니저 | 전체 Opportunity/Contract 현황 | Pipeline·Stage별 현황, 목표 대비 부족 금액 확인 | 추가 Outbound 필요 여부 판단(2단계로 순환) | Future: Performance/Evaluation |
+
+> Collaboration(공동 캠페인·굿즈·이벤트 등)은 6~7단계 사이에서 Opportunity Won 이후
+> 실행 수단으로 필요하면 쓰일 수 있다(Campaign Record Type, Decision 018-D) — 다만 이
+> 표에서 별도 필수 단계로 명시하지 않는다. Phase 2 Sales Pipeline의 중심은 Opportunity →
+> Sponsorship Package/Quote → Contract/Revenue다.
 
 ### 8.2 이 표가 기존 §2.6/§4/§5/§6과 맺는 관계
 
-- **1~3단계**(Fan Insight → Candidate Discovery → Lead)는 §2.6에 없던 새로운 앞단계다(§2.7에서 다이어그램으로 표현).
-- **4~8단계**(Account/Contact → Opportunity → Collaboration → Performance → Partnership/Sponsorship)는 §2.6·§4·§6.1의 기존 Entity(Sponsor, Partner, Partner Contact, Proposal, Sponsor Contract, Renewal, Settlement)를 그대로 재사용하거나(§6.11에서 재정의한 대로), Collaboration처럼 새로 추가된 Entity로 채워진다.
+- **1~4단계**(Fan Insight → 기업 DB/Agentforce Matching → Outbound Lead → Lead Qualification)는 §2.6에 없던 새로운 앞단계다(§2.7에서 다이어그램으로 표현).
+- **5~8단계**(Account/Contact → Opportunity → Sponsorship Package/Quote → Contract)는 §2.6·§4·§6.1의 기존 Entity(Sponsor, Partner, Partner Contact, Sponsorship Package, Sponsor Contract)를 그대로 재사용한다(§6.11에서 재정의한 대로).
+- 9단계(Pipeline/Revenue Dashboard)는 새로 추가된 관점이다 — 개별 Opportunity가 아니라 **전체 현황을 집계해서 보는** 단계이며, Salesforce 구현은 Report/Dashboard 기반으로 검토한다(`03_SYSTEM.md` §7).
 - 이 표는 "이 매니저가 실제 업무에서 무엇을 하는가"를 Business 언어로 보여주는 것이 목적이며, Salesforce 기능명을 기준으로 작성하지 않았다.
 
 ### 8.3 아직 확정하지 않은 것
 
-§6.11의 TBD 목록과 동일하다 — Lead Status의 정확한 Picklist Label, Business Fit 판단에
-쓸 실제 Fan 데이터 항목, Collaboration 실패 시 재검토 기준. Lead/Collaboration의 Object
-구현 여부 자체는 2026-08-18 회의로 확정됐다(`03_SYSTEM.md` §7.2 A·D,
+§6.11의 TBD 목록과 동일하다 — Lead Status의 정확한 Picklist Label, 팬덤 광고 가치 판단에
+쓸 실제 Fan 데이터 항목, 기업 DB(약 100개)의 Salesforce 구현 형태, Pipeline/Revenue
+Dashboard의 구체적인 지표·계산식. Lead/Collaboration의 Object 구현 여부 자체는
+2026-08-18 Technical Decision 회의로 확정됐다(`03_SYSTEM.md` §7.2 A·D,
 `05_DECISIONS.md` Decision 018-A·D). 남은 판단들은 `03_SYSTEM.md`·`05_DECISIONS.md`에서
 팀이 계속 확정한다.
 
-> **8/21 구현 범위**: 위 표의 1~6단계(Fan Insight → Business Fit → Candidate Discovery →
-> Lead → Account/Contact → Opportunity → Collaboration 시작/"진행 중")까지가 8/21
-> 구현 범위다. 7~8단계(Performance/Evaluation, 장기 Partnership/Sponsorship)는 이
-> 표가 전체 Business Workflow를 설명하기 위해 남겨둔 것이며, 실제 구현은 Future
-> Scope다(`04_DEMO.md` §7, `00_STORY.md` §8.4).
+> **구현 범위**: 위 표의 1~6단계(Fan Insight → 기업 DB/Agentforce Matching → Outbound
+> Lead → Lead Qualification → Account/Contact → Opportunity)까지가 핵심 구현 범위이며,
+> 7~8단계(Sponsorship Package/Quote/Negotiation, Contract)까지 이어지는 것이 Phase 2
+> Demo 목표다(`00_STORY.md` §7, `04_DEMO.md` §7). 계약 이후 성과 분석·재검토·장기
+> 재계약(9단계 이후)은 Future Scope다(`00_STORY.md` §8.4).

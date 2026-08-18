@@ -43,7 +43,7 @@
 
 ---
 
-## 3. Data Contract Table — SCN-B2B-001: Hello Kitty Collaboration
+## 3. Data Contract Table — SCN-B2B-001: d'Alba Sponsorship
 
 > `P2_DUMMY_DATA_MASTER.md` §3에 있던 값을 그대로 쓰되, Owner와 Related Record를
 > 명시해서 "누가 만들고 누가 참조하는지"를 표로 고정한다. 실제 작업 시트는 이 표
@@ -51,22 +51,22 @@
 
 | Owner | Scenario ID | Object | Record Name | Related Record (참조만, 재생성 금지) |
 |---|---|---|---|---|
-| **A. 사라** | SCN-B2B-001 | Person Account × 8 | 이하은, 최유진, 강수아, 윤지아, 임소연, 오예린, 황서현, 송다인 | *(시작점 — 참조 없음)* |
-| **A. 사라** | SCN-B2B-001 | Report | "10~30대 여성 팬 Fan Insight" | 위 8명 Person Account 집계 |
-| **B. 혜준** | SCN-B2B-001 | Lead | 산리오코리아 (김하나) | A의 Fan Insight Report — *Lookup 연결이 아니라 Description에 근거만 기록* (`[SCN-B2B-001] 10~30대 여성 팬층 × 문태양 굿즈 구매율/SNS 반응률 Fit 가설`) |
-| **C. 아론** | SCN-B2B-001 | Account | 산리오코리아 | B의 Lead 산리오코리아 (Lead Convert 결과 — **새로 만들지 않고 Convert로 생성**) |
-| **C. 아론** | SCN-B2B-001 | Contact | 김하나 | C 자신의 Account 산리오코리아 |
-| **D. 은영** | SCN-B2B-001 | Opportunity | 산리오코리아 × Cloud Alpacas — Hello Kitty Collaboration 2027 | C의 Account 산리오코리아 (`AccountId` Lookup) |
-| **E. 승우** | SCN-B2B-001 | Product2 | Hello Kitty 콜라보 굿즈 세트 | D의 Opportunity에 Product Line Item으로 연결 |
-| **E. 승우** | SCN-B2B-001 | Quote | Hello Kitty Collaboration 2027 Quote | D의 Opportunity (`OpportunityId` Lookup, Wireframe 확정) |
-| **E. 승우** | SCN-B2B-001 | QuoteLineItem | Hello Kitty 콜라보 굿즈 세트 | E 자신의 Quote + E 자신의 Product2 (동일 Product2를 Opportunity Line Item과 Quote Line Item 양쪽에 재사용) |
-| **E. 승우** | SCN-B2B-001 | Campaign | Hello Kitty Collaboration Campaign | D의 Opportunity (`Primary Campaign Source`로 연결). Campaign 자체는 **Record Type = Collaboration**으로 생성(Decision 018-D 확정 — RecordType 방식) |
-| **E. 승우** | SCN-B2B-001 | CampaignMember × 8 | 위 8명 | A의 Person Account 8명 + E 자신의 Campaign |
+| **A. 사라** | SCN-B2B-001 | Person Account × 11 | 이하은, 최유진, 강수아, 윤지아, 임소연, 오예린, 황서현, 송다인, 전하율, 곽나연, 노아름 | *(시작점 — 참조 없음)* |
+| **A. 사라** | SCN-B2B-001 | Report | "10~30대 여성 팬 Fan Insight" | 위 11명 Person Account 집계 |
+| **B. 혜준** | SCN-B2B-001 | Lead | d'Alba(달바) (김하나) | A의 Fan Insight Report — *Lookup 연결이 아니라 Description에 근거만 기록* (`[SCN-B2B-001] 10~30대 여성 팬층 × 뷰티/라이프스타일 관심 신호(SNS 반응률) 기반 Fit 가설`) |
+| **C. 아론** | SCN-B2B-001 | Account | d'Alba(달바) | B의 Lead d'Alba(달바) (Lead Convert 결과 — **새로 만들지 않고 Convert로 생성**) |
+| **C. 아론** | SCN-B2B-001 | Contact | 김하나 | C 자신의 Account d'Alba(달바) |
+| **D. 은영** | SCN-B2B-001 | Opportunity | d'Alba(달바) × Cloud Alpacas — Advertising Sponsorship | C의 Account d'Alba(달바) (`AccountId` Lookup) |
+| **E. 승우** | SCN-B2B-001 | Product2 | d'Alba 전광판 광고+Brand Day 패키지 | D의 Opportunity에 Product Line Item으로 연결 |
+| **E. 승우** | SCN-B2B-001 | Quote | d'Alba Sponsorship Quote | D의 Opportunity (`OpportunityId` Lookup, Wireframe 확정) |
+| **E. 승우** | SCN-B2B-001 | QuoteLineItem | d'Alba 전광판 광고+Brand Day 패키지 | E 자신의 Quote + E 자신의 Product2 (동일 Product2를 Opportunity Line Item과 Quote Line Item 양쪽에 재사용) |
+| **E. 승우** | SCN-B2B-001 | Campaign | d'Alba Sponsorship Campaign | D의 Opportunity (`Primary Campaign Source`로 연결). Campaign 자체는 **Record Type = Collaboration**으로 생성(Decision 018-D 확정 — RecordType 방식) |
+| **E. 승우** | SCN-B2B-001 | CampaignMember × 11 | 위 11명 | A의 Person Account 11명 + E 자신의 Campaign |
 
 ### 읽는 법 (예시)
 
-> D(은영)가 Opportunity를 만들 때, "산리오코리아"라는 Account를 새로 만들면 안 된다.
-> 반드시 **C(아론)가 이미 만들어 둔 산리오코리아 Account를 검색해서 Lookup으로
+> D(은영)가 Opportunity를 만들 때, "d'Alba(달바)"라는 Account를 새로 만들면 안 된다.
+> 반드시 **C(아론)가 이미 만들어 둔 d'Alba(달바) Account를 검색해서 Lookup으로
 > 연결**해야 한다. 만약 C가 아직 Account를 안 만들었다면, D는 자기 Opportunity를
 > 못 만드는 게 정상이다 — 이게 "순서대로 이어 쓴다"는 의미다.
 
@@ -81,36 +81,36 @@
 
 ### Step 1 — A(사라) → B(혜준)
 
-**내가(A) 하는 일**: Person Account 8명(이하은 외 7명)에 `Gender__c`/`Birthdate`/`Favorite_Player__c` 입력 → "10~30대 여성 팬 Fan Insight" Report 생성.
+**내가(A) 하는 일**: Person Account 11명(이하은 외 10명)에 `Gender__c`/`Birthdate`/`Favorite_Player__c` 입력 → "10~30대 여성 팬 Fan Insight" Report 생성.
 
-**다음 사람(B)이 하는 일**: 이 Report를 열어보고, Lead를 **새로 만든다**(A의 Report는 Lookup 대상이 아니라 "근거 자료"이기 때문). Lead.Company = `산리오코리아`, Lead.Description에 `[SCN-B2B-001] 10~30대 여성 팬층 × 문태양 굿즈 구매율/SNS 반응률 Fit 가설`을 적어서, 나중에 아무나 이 Lead를 열어봐도 "왜 이 Lead가 생겼는지" A의 근거를 바로 알 수 있게 한다.
+**다음 사람(B)이 하는 일**: 이 Report를 열어보고, Lead를 **새로 만든다**(A의 Report는 Lookup 대상이 아니라 "근거 자료"이기 때문). Lead.Company = `d'Alba(달바)`, Lead.Description에 `[SCN-B2B-001] 10~30대 여성 팬층 × 뷰티/라이프스타일 관심 신호(SNS 반응률) 기반 Fit 가설`을 적어서, 나중에 아무나 이 Lead를 열어봐도 "왜 이 Lead가 생겼는지" A의 근거를 바로 알 수 있게 한다.
 
 ### Step 2 — B(혜준) → C(아론)
 
-**내가(B) 하는 일**: Lead(산리오코리아) 정보를 다 채운 뒤, **Convert 버튼**을 누른다. 직접 Account를 만들지 않는다.
+**내가(B) 하는 일**: Lead(d'Alba(달바)) 정보를 다 채운 뒤, **Convert 버튼**을 누른다. 직접 Account를 만들지 않는다.
 
-**다음 사람(C)이 하는 일**: Convert로 자동 생성된 Account/Contact를 **찾아서** 부족한 표준 필드(Industry, Website 등)를 채운다. **여기서 새 Account를 또 만들면 안 된다** — Convert가 만든 그 Account가 유일한 산리오코리아 레코드여야 한다.
+**다음 사람(C)이 하는 일**: Convert로 자동 생성된 Account/Contact를 **찾아서** 부족한 표준 필드(Industry, Website 등)를 채운다. **여기서 새 Account를 또 만들면 안 된다** — Convert가 만든 그 Account가 유일한 d'Alba(달바) 레코드여야 한다.
 
 ### Step 3 — C(아론) → D(은영)
 
-**내가(C) 하는 일**: Account(산리오코리아)의 Industry, Description 등을 채우고, Contact(김하나)에 Title/Email을 채운다.
+**내가(C) 하는 일**: Account(d'Alba(달바))의 Industry, Description 등을 채우고, Contact(김하나)에 Title/Email을 채운다.
 
-**다음 사람(D)이 하는 일**: Opportunity를 새로 만들 때, `Account Name` 항목에 "산리오"라고 **검색해서** C가 만든 Account를 선택한다(직접 타이핑 금지 — 오타 나면 새 Account가 생겨버림). Opportunity.`OpportunityContactRole`에도 C의 Contact(김하나)를 검색해서 연결한다.
+**다음 사람(D)이 하는 일**: Opportunity를 새로 만들 때, `Account Name` 항목에 "d'Alba"라고 **검색해서** C가 만든 Account를 선택한다(직접 타이핑 금지 — 오타 나면 새 Account가 생겨버림). Opportunity.`OpportunityContactRole`에도 C의 Contact(김하나)를 검색해서 연결한다.
 
 ### Step 4 — D(은영) → E(승우)
 
-**내가(D) 하는 일**: Opportunity(산리오코리아 × Cloud Alpacas — Hello Kitty Collaboration 2027) 생성, StageName/Amount/CloseDate 입력.
+**내가(D) 하는 일**: Opportunity(d'Alba(달바) × Cloud Alpacas — Advertising Sponsorship) 생성, StageName/Amount/CloseDate 입력.
 
 **다음 사람(E)이 하는 일**: 세 가지를 D의 Opportunity 하나에 전부 연결한다.
-1. **Product Line Item** — Opportunity 하위 Related List에서 Product2(Hello Kitty 콜라보 굿즈 세트)를 검색해서 추가
+1. **Product Line Item** — Opportunity 하위 Related List에서 Product2(d'Alba 전광판 광고+Brand Day 패키지)를 검색해서 추가
 2. **Quote** — 같은 Opportunity를 `OpportunityId`로 지정해 Quote 생성, QuoteLineItem에 같은 Product2를 다시 검색해서 추가(1번과 동일 Product2 재사용, 새로 만들지 않음)
 3. **Campaign** — Campaign 생성 후, D의 Opportunity를 `Primary Campaign Source`로 지정
 
 ### Step 5 — E(승우) → A(사라) *(마지막, 처음 담당자에게 돌아옴)*
 
-**내가(E) 하는 일**: Campaign(Hello Kitty Collaboration Campaign) 완성.
+**내가(E) 하는 일**: Campaign(d'Alba Sponsorship Campaign) 완성.
 
-**다음 사람(A)이 하는 일**: E의 Campaign에 CampaignMember로 **자신의 8명**(이하은 외 7명)을 추가한다 — 새 대상을 찾지 않고 Step 1에서 자기가 이미 만든 그 8명을 그대로 재사용한다. 이후 Campaign Member 반응률 Report로 전체 체인이 실제로 연결됐는지 마지막 검증을 한다.
+**다음 사람(A)이 하는 일**: E의 Campaign에 CampaignMember로 **자신의 11명**(이하은 외 10명)을 추가한다 — 새 대상을 찾지 않고 Step 1에서 자기가 이미 만든 그 11명을 그대로 재사용한다. 이후 Pipeline/Revenue Dashboard에서 전체 체인이 실제로 연결됐는지 마지막 검증을 한다(계약 이후 Performance 분석은 Future Scope, `00_STORY.md` §8.4).
 
 ---
 
@@ -127,7 +127,7 @@ D. 은영 (Opportunity 생성)
    ↓ (Opportunity Lookup)
 E. 승우 (Product/Quote/Campaign 생성)
    ↓
-A. 사라 (Campaign Member로 8명 연결, Performance 확인)
+A. 사라 (Campaign Member로 11명 연결, Pipeline/Revenue Dashboard 확인)
    ↓
 Integration QA (전체 5명)
 ```
@@ -140,13 +140,13 @@ Integration QA (전체 5명)
 
 월요일 개별 작업 후, 화요일 Integration 전에 아래를 순서대로 확인한다.
 
-- [ ] A의 8명 Person Account가 실제로 존재하고 `Gender__c`/`Birthdate`/`Favorite_Player__c`가 채워져 있는가
-- [ ] B의 Lead(산리오코리아) Description에 `[SCN-B2B-001]`이 포함되어 있는가
+- [ ] A의 11명 Person Account가 실제로 존재하고 `Gender__c`/`Birthdate`/`Favorite_Player__c`가 채워져 있는가
+- [ ] B의 Lead(d'Alba(달바)) Description에 `[SCN-B2B-001]`이 포함되어 있는가
 - [ ] B의 Lead가 Convert되어 C의 Account/Contact가 **새로 생성이 아니라 Convert 결과로** 존재하는가
-- [ ] D의 Opportunity.`AccountId`가 C의 Account(산리오코리아)를 정확히 가리키는가
+- [ ] D의 Opportunity.`AccountId`가 C의 Account(d'Alba(달바))를 정확히 가리키는가
 - [ ] E의 Product가 D의 Opportunity에 Line Item으로 붙어 있는가
 - [ ] E의 Campaign이 D의 Opportunity를 `Primary Campaign Source`로 연결하고 있는가
-- [ ] E의 CampaignMember 8명이 A의 8명과 정확히 일치하는가
+- [ ] E의 CampaignMember 11명이 A의 11명과 정확히 일치하는가
 - [ ] 전체 레코드의 Description/이름에 `[SCN-B2B-001]` (또는 팀이 정한 최종 Scenario ID)이 일관되게 들어가 있는가
 
 ---

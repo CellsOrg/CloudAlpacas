@@ -1,10 +1,19 @@
 # P2 Technical Decision Sheet
 
 > Working Document — 2026-08-18(화요일) 회의용이었다. **회의 완료, 아래 §2 Decision 표에
-> 결과를 반영했다.** Source of Truth는 여전히 `05_DECISIONS.md`(Decision 017·018)와
+> 결과를 반영했다.** Source of Truth는 여전히 `05_DECISIONS.md`(Decision 017·018·019)와
 > `03_SYSTEM.md §7`이다(하단 "Decision 반영 규칙" 참고) — 이 문서는 회의 준비/기록용
 > Working Document이며, 문서 간 내용이 어긋나면 `05_DECISIONS.md`를 기준으로 판단한다.
-> 근거 문서: `CLAUDE.md`, `00_STORY.md` §8/§9, `01_PROJECT.md` §2.7/§8, `03_SYSTEM.md §7`(A~K), `05_DECISIONS.md`(특히 Decision 003/005/006/009/015/016/017/018)
+> 근거 문서: `CLAUDE.md`, `00_STORY.md` §8/§9, `01_PROJECT.md` §2.7/§8, `03_SYSTEM.md §7`(A~K), `05_DECISIONS.md`(특히 Decision 003/005/006/009/015/016/017/018/019)
+>
+> ✅ **같은 날 이후 진행된 멘토링으로 Business 방향이 추가 갱신됐다**(`05_DECISIONS.md`
+> Decision 019): 대표 시나리오가 Sanrio(산리오) → **d'Alba(달바)**로 바뀌었고, Phase 2의
+> 중심축이 "Collaboration"에서 **"Sponsorship Sales/Pipeline"**으로 이동했다. 아래 A~K의
+> **기술 선택 자체는 바뀌지 않는다** — 다만 §2 표에 남아 있는 "Hello Kitty Collaboration"
+> 시나리오 표기는 역사적 회의 기록이므로 그대로 두고, 실제 최신 시나리오는
+> `P2_DUMMY_DATA_MASTER.md` §3(d'Alba)을 따른다. 또한 **Agentforce Fit/Recommendation
+> Score와 Lead Score는 서로 다른 개념**이라는 점이 명확해졌다(`03_SYSTEM.md §7 E` 참고) —
+> 이 Sheet의 B/E/H/I 항목을 읽을 때 이 구분을 함께 참고한다.
 
 ## 0. Review Order — 회의 진행 순서
 

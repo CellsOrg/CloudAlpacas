@@ -106,19 +106,21 @@ Phase 1의 핵심은 **Salesforce Customer 360**이며, 8/14 Demo 역시 Custome
 
 ### Phase 2 — MVP 고도화 + B2B Expansion (진행 중, 2026-08-15 ~)
 
-Phase 2는 **B2B Collaboration/Sponsorship만을 의미하지 않습니다.** 아래 두 방향을 함께 포함합니다.
+Phase 2는 **B2B Sponsorship Sales만을 의미하지 않습니다.** 아래 두 방향을 함께 포함합니다.
 
 **1. MVP 고도화**
 
 Phase 1 B2C Fan 360 MVP의 안정화, 세부 기능 보완, 필요한 UX/데이터/자동화 개선을 계속합니다. 구체적인 개발 프로세스(브랜치 전략 등)는 `02_TEAM_GUIDE.md`를 따릅니다.
 
-**2. B2B Collaboration / Sponsorship Expansion**
+**2. B2B Sponsorship Sales Expansion**
 
-Phase 1에서 구축한 Fan 360 데이터를 기반으로 제휴 및 스폰서 영업 영역으로 확장합니다. Cloud Alpacas는 팬이 증가하고 있지만 구단 재정 운영상 적자 상황이라, 새로운 스폰서/제휴사를 발굴해야 합니다. 기존 Fan 360을 버리는 것이 아니라, 그 위에 새로운 흐름을 더하는 것입니다.
+Phase 1에서 구축한 Fan 360 데이터를 기반으로 광고주·스폰서 영업(Sales Pipeline) 영역으로 확장합니다. Cloud Alpacas는 팬이 증가하고 있지만 구단 재정 운영상 적자 상황이라, 팬덤의 광고 가치를 근거로 새로운 스폰서·광고주를 발굴하고 실제 계약(Revenue)으로 연결해야 합니다. 기존 Fan 360을 버리는 것이 아니라, 그 위에 새로운 흐름을 더하는 것입니다.
 
-핵심 흐름:
+핵심 흐름(2026-08-18 멘토링 반영, `05_DECISIONS.md` Decision 019):
 
-> Fan 360 Data → Fan 분석/그룹화 → 제휴·스폰서 후보 발굴 → Lead → Account/Contact → Opportunity → 단기 Collaboration → Product/Quote/Campaign → Collaboration 성과 분석 → 장기 Partnership/Sponsorship
+> Fan 360 Data → Fan Insight(팬덤 광고 가치 발견) → 기업 DB(약 100개) → Agentforce Matching/Top 10 추천 → Outbound Lead → Lead Qualification/Lead Score → Account/Contact → Opportunity → Sponsorship Package/Quote → Negotiation → Closed Won → Contract/Sponsorship Revenue → Pipeline/Revenue Dashboard
+
+> 핵심은 "Collaboration을 잘할 기업을 찾는 것"이 아니라 **"Cloud Alpacas에 광고비/스폰서십 비용을 지불할 가능성이 높은 기업을 발굴해 실제 Sales Pipeline으로 연결하는 것"**입니다. Collaboration(단기 협업)은 이 흐름에서 여전히 유효한 개념이지만(Campaign Record Type으로 구현, Decision 018-D), Phase 2 전체를 대표하는 중심 개념은 아닙니다.
 
 B2B 영역의 상세 Story, Persona, Object, Field, 역할 분담은 확정되는 대로 `00_STORY.md`, `01_PROJECT.md`, `03_SYSTEM.md`, `02_TEAM_GUIDE.md`에 각각 반영합니다.
 

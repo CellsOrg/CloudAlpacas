@@ -9,9 +9,10 @@
 
 ## [P2] Mission
 
-Lead가 전환된 이후의 파트너사 정보(Account)와 담당자(Contact)를 관리하고,
-협업 현황(Active Collaboration/Total Collab Value)이 한눈에 보이도록 만든다
-(`01_PROJECT.md §6.1`, `03_SYSTEM.md §7 K`).
+Lead가 전환된 이후의 스폰서사 정보(Account)와 담당자(Contact)를 관리하고,
+Sponsorship 현황(Active Collaboration/Total Collab Value — 필드명은 On Hold)이
+한눈에 보이도록 만든다(`01_PROJECT.md §6.1`, `03_SYSTEM.md §7 K`). 대표 예시는
+d'Alba(달바)다(`05_DECISIONS.md` Decision 019, `data/P2_DUMMY_DATA_MASTER.md §3`).
 
 ## [P2] Ownership
 

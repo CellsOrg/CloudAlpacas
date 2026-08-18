@@ -1126,3 +1126,131 @@ CLAUDE.md 범위 제한과 직결된 질문이라, 그 **범위 승인**은 Busi
 - Target Segment Picklist의 실제 값 목록
 - Segment Match·Recommendation Reason의 Agentforce 상세 구현([[Decision 017]] TBD와 동일)
 - Account 집계 필드(K) 전체 — Option A/B 모두 미확정
+
+---
+
+## Decision 019 — [P2] Business Decision: B2B Story 축을 "Collaboration 중심"에서 "Sponsorship Sales/Pipeline 중심"으로 전환 (d'Alba 대표 시나리오, 기업 DB, Fan Fit/Lead Score 구분, Fan Data 목표 5,000명)
+
+**상태**: 확정
+**기록일**: 2026-08-18
+
+### 배경
+
+Decision 015~018이 확정한 "Fan Insight → Business Fit → Candidate Discovery → Lead →
+Account/Contact → Opportunity → 단기 Collaboration → 성과 검증 → 장기 Partnership"
+흐름과, 이 흐름의 대표 예시로 써온 산리오(Sanrio) Hello Kitty Collaboration 시나리오는
+**2026-08-18 멘토링**을 통해 Business 관점에서 크게 조정이 필요하다는 피드백을 받았다.
+핵심 지적은 다음과 같다.
+
+- "Collaboration을 잘할 기업을 찾는다"는 프레이밍은 실제 구단의 Pain Point(재정
+  적자)를 해결하는 목적어가 명확하지 않다 — 진짜 목적은 "광고비/스폰서십 비용을
+  지불할 가능성이 높은 기업을 발굴해 실제 매출(Revenue)로 연결하는 것"이다.
+- 과거 실패 원인을 "장기 계약을 데이터 없이 시작했다"는 정도로만 설명했는데,
+  실제로는 "야구 팬은 40~50대 남성"이라는 구체적으로 틀린 타깃 가정이 있었다 —
+  이 구체성이 Fan 360 데이터 기반 접근의 필요성을 훨씬 설득력 있게 만든다.
+- Lead를 둘러싼 점수 체계에서 "Agentforce가 매긴 점수"와 "영업 담당자가 실제
+  계약 가능성을 판단하는 점수"가 문서마다 섞여 쓰이고 있었다 — 이 둘은 근거와
+  산출 시점이 전혀 다른 별개의 개념인데도 구분 없이 "Score"로만 표현됐다.
+- 기존 100명 이하 소규모 Fan Dummy Data로는 Fan Segment/기업 Matching/Scoring의
+  분포를 통계적으로 설득력 있게 보여줄 수 없다는 멘토 피드백을 받았다.
+- 산리오는 실존 기업이지만 Cloud Alpacas의 Fan 360(뷰티/라이프스타일/F&B 관심)과의
+  연결 논리가 약했다 — 더 명확한 산업 연결고리를 가진 대표 시나리오가 필요했다.
+
+### 결정
+
+1. **B2B Business Story의 핵심 메시지를 "팬을 이해하고, 기업을 찾아, 계약으로
+   연결하다"로 전환한다.** 흐름은 다음과 같이 확장된다:
+   > Fan 360 → Fan Insight(팬덤의 광고 가치 발견) → 기업 DB(약 100개) →
+   > Agentforce Matching/Top 10 추천 → Outbound Lead → Lead Qualification/Lead
+   > Score → Account/Contact → Opportunity → Sponsorship Package/Quote →
+   > Negotiation → Closed Won → Contract/Sponsorship Revenue → Pipeline/Revenue
+   > Dashboard
+2. **과거 실패 배경을 구체화한다**: "야구 팬은 40~50대 남성"이라는 검증되지 않은
+   타깃 가정으로 과거 장기 스폰서·캠페인을 진행했으나 기대만큼 성과가 나지
+   않았다는 것이 Pain Point의 구체적 근거다(`00_STORY.md` §2 Pain Point 7).
+3. **대표 Demo 시나리오를 산리오(Sanrio/Hello Kitty)에서 d'Alba(달바)로 교체한다.**
+   d'Alba는 기업 DB(약 100개) 중 Agentforce가 높은 Fit으로 추천하는 대표 광고주이며,
+   이후 Outbound Lead → Account/Contact → Opportunity → Sponsorship 계약으로
+   이어지는 대표 Scenario로 쓴다. 기존 문서에 남아 있는 Sanrio 언급은 이 Decision
+   이전의 역사적/예시 맥락(예: 초기 Domain Model 분석, 확정된 과거 Draft 인용)에
+   한해 보존하고, 현재形 대표 시나리오로는 더 이상 사용하지 않는다.
+4. **기업 DB(약 100개)를 새로운 Business 개념으로 도입한다.** 가상의 기업만 생성하지
+   않고 실제 기업 정보를 기반으로 구성하며, 데이터 출처로 DART Open API 활용을
+   방향으로 검토한다(TBD — 실제 연동은 확정하지 않는다). 화장품/뷰티, F&B, 자동차,
+   핀테크, OTT 등 다양한 산업의 기업이 포함된다. **이 기업 DB를 Salesforce에서
+   어떤 Object 형태로 관리할지는 확정하지 않는다(TBD)** — 임의로 새 Custom
+   Object/Field를 만들지 않는다.
+5. **Fan Fit/Recommendation Score(Agentforce)와 Lead Score를 명확히 다른 개념으로
+   구분한다.**
+   - Fan Fit/Recommendation Score = Agentforce가 Fan 360 데이터를 근거로 산출하는
+     "팬덤과 기업의 궁합" 값(Target Segment, Segment Match, Recommendation Reason 포함)
+   - Lead Score = 담당자의 의사결정 권한, 직무/역할, 접촉 이력, 메시지/미팅 반응,
+     예산/구매 가능성 등 **실제 영업 활동**을 근거로 판단하는 "계약 가능성" 값
+   - 이 구분은 새로운 Object/Field 결정이 아니라 **기존 Decision 018-E
+     (`Lead_Score__c`)·018-H(Segment Match)·018-I(Recommendation Reason)의 의미를
+     명확히 하는 것**이다 — 기술 선택(어떤 Object/Field를 쓰는지)은 바뀌지 않는다.
+6. **Fan Dummy Data 목표를 기존 "약 1,000명"에서 "최소 5,000명"으로 상향한다.**
+   100명 이하 소규모 데이터로는 Fan Segment/기업 Matching/Scoring의 분포를 설득력
+   있게 보여줄 수 없다는 멘토 피드백을 반영한다. 실제 5,000명 CSV 생성/Org
+   Insert는 이 Decision이 확정하는 것이 아니라 별도 Data 작업이다 — "목표
+   데이터 규모"와 "구현 완료 여부"를 구분한다.
+7. **B2B Sales Pipeline/Revenue라는 새로운 관점을 도입한다.** 현재 Opportunity 수,
+   Pipeline Amount, Stage별 Pipeline, 예상 매출, 목표 매출, 목표 대비 부족 금액,
+   평균 계약금액 기준 필요 신규 스폰서 수 등을 Pipeline/Revenue Dashboard로 보여주는
+   방향을 잡는다. **구체적인 KPI 공식/Field는 확정하지 않는다(TBD)** — 임의의
+   계산식을 확정하지 않는다.
+
+### 이 Decision이 바꾸지 않는 것 (Decision 017·018과의 관계)
+
+- **Decision 017(Agentforce = Phase 2 AI Matching 예외)은 그대로 유지한다.** 오히려
+  이번 Decision은 Agentforce의 역할(기업 DB Matching)을 더 구체화한다.
+- **Decision 018의 A~K 기술 선택은 전부 그대로 유지한다**: Partner Candidate → Lead
+  흡수(A), Standard Quote(C), Campaign = Collaboration Record Type(D), `Lead_Score__c`
+  신규 필드(E), Expected Benefit 3분할(F), Target Segment Picklist(G), Fan Insight
+  = Report/Dashboard(J), Account 집계 On Hold(K) — 어느 것도 뒤집지 않는다. 바뀐
+  것은 이 기술 요소들이 표현하는 **Business Story의 중심**이다.
+- **Collaboration 개념 자체는 삭제되지 않는다.** Campaign Record Type으로 여전히
+  유효하며, Opportunity Won 이후 실행 수단으로 쓰일 수 있다 — 다만 Phase 2를
+  대표하는 중심 개념의 자리에서는 내려온다.
+- Decision 001~016의 역사적 기록은 수정하지 않는다.
+
+### 이유
+
+- Business Goal(CLAUDE.md §2 — Fan Lifetime Value·구단 수익 다변화)에 더 직접적으로
+  연결되는 것은 "Collaboration 실행"이 아니라 "실제 계약과 매출"이다 — Sales
+  Pipeline/Revenue 프레이밍이 이 목표와 더 명확히 정렬된다.
+- "40~50대 남성"이라는 구체적 오판 사례를 Pain Point에 명시하면, Fan 360 데이터
+  기반 접근이 왜 필요한지가 추상적 설명("데이터 없이 시작했다")보다 훨씬
+  설득력 있게 전달된다.
+- Fan Fit Score와 Lead Score를 분리하지 않으면, "Agentforce가 추천했으니 곧 계약될
+  것"이라는 잘못된 기대를 만들 위험이 있다 — 실제 영업은 추천 이후에도 별도의
+  단계(Qualification)를 거쳐야 한다는 것을 Business/System 문서 모두에서 명확히
+  해야 한다.
+- Fan Data 규모를 5,000명으로 올린 이유는 순수하게 Demo 설득력 문제다 — 세그먼트
+  분포, 기업 Matching 결과, Scoring 분포 모두 표본이 작으면 "우연"처럼 보인다.
+- d'Alba를 대표 시나리오로 쓰는 이유는 뷰티/스킨케어 산업이 Fan Insight가 발견한
+  "여성 팬의 뷰티/라이프스타일 관심"과 직접 연결되어, "왜 이 기업인가"라는 질문에
+  산리오보다 더 명확하게 답할 수 있기 때문이다.
+
+### 영향
+
+- `00_STORY.md` §1, §2, §3, §4, §8, §9가 이 Decision을 근거로 전면 갱신됐다 —
+  Business Goal, Pain Point, Persona Mission, B2B Story, Next Best Action 표.
+- `01_PROJECT.md` §2.7, §4(Lead/Collaboration Entity), §5([P2] Partnership 축),
+  §6.1(매핑 표), §6.11, §8(Business Workflow 표)이 이 Decision을 근거로 갱신됐다.
+- `03_SYSTEM.md` §7 배너·§B·§E·§H·§I·§K에 Agentforce Fit Score ≠ Lead Score 구분과
+  기업 DB 개념이 반영됐다 — A~K의 기술 선택 자체(Status 줄)는 변경하지 않았다.
+- `04_DEMO.md` §7~§9·§12가 Scene 흐름을 d'Alba/Sponsorship Sales Pipeline 기준으로
+  갱신했고, Fan Data 목표를 5,000명으로 갱신했다.
+- `docs/decision_sheet/P2_TECHNICAL_DECISION_SHEET.md`, `data/DEMO_DATA_STANDARD.md`,
+  `data/P2_DUMMY_DATA_MASTER.md`, `docs/decision_sheet/P2_DATA_CONTRACT.md`,
+  `02_TEAM_GUIDE.md`, `docs/members/*.md`도 이 Decision을 근거로 갱신했다(각 문서의
+  변경 내역 참고).
+
+### TBD (아직 확정하지 않은 것)
+
+- 기업 DB(약 100개)의 Salesforce Object 구현 형태
+- 기업 데이터 출처(DART Open API 등) 실제 연동 여부
+- Pipeline/Revenue Dashboard의 구체적인 지표·계산식(목표 매출, 필요 신규 스폰서 수 등)
+- Fan Dummy Data 5,000명의 실제 분포 비율, CSV 생성/Org Insert 일정
+- `Lead_Score__c`의 실제 계산 방식(사람이 수동 입력하는지, 일부 자동화하는지)

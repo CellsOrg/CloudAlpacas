@@ -15,14 +15,15 @@
 Cellsforce는 Cloud Alpacas(가상 구단)의 Fan Relationship Management(FRM) Team이
 되어 Salesforce Customer 360을 만든다. Phase 1에서는 신규 팬을 이해하고 충성
 팬으로 성장시키는 B2C Fan 360을, Phase 2에서는 그 Fan 360 데이터를 구단의 B2B
-Collaboration/Sponsorship 의사결정에 활용하는 것까지 확장한다(`CLAUDE.md` §1~§2).
+Sales(Sponsorship Sales Pipeline) 의사결정에 활용하는 것까지 확장한다
+(`CLAUDE.md` §1~§2).
 
 ## 0-1. Project Phase
 
 | Phase | 내용 | 상태 |
 |---|---|---|
 | Phase 1 | B2C Fan 360 MVP | [P1] 완료(~2026-08-14) |
-| Phase 2 | B2C 고도화 + B2B Collaboration/Sponsorship Expansion | [P2] 진행 중(2026-08-15~) |
+| Phase 2 | B2C 고도화 + B2B Sales(Sponsorship) Expansion | [P2] 진행 중(2026-08-15~) |
 
 자세한 범위는 `CLAUDE.md` §5(Source of Truth)를 따른다 — 이 문서에서 반복하지
 않는다. 아래 §1~§2는 Phase 1 당시 확정한 역할 배정(History)이고, **현재 역할은
@@ -286,8 +287,8 @@ Phase 2는 "PM이 모든 것을 대신 만드는 구조"가 아니다. **사라�
 | 사라 | 🦙 Fan 360 고도화 + B2B 연결 | Fan / Fan Insight / Fan Grouping / B2C↔B2B 연결 | Fan, Segment, Engagement, Fan Value |
 | 혜준 | 🔎 Collab360 + Lead | Partner Candidate / Lead | Partner Candidate, Lead |
 | 아론 | 🏢 Account + Contact | Partner Account / Partner Contact | Account, Contact |
-| 은영 | 💼 Opportunity | Collaboration Opportunity | Opportunity, Stage, Benefit |
-| 승우 | 🎁 Product + Quote + Campaign | Collaboration Product / Quote / Campaign | Product, Quote, Campaign |
+| 은영 | 💼 Opportunity | Sponsorship Opportunity | Opportunity, Stage, Benefit |
+| 승우 | 🎁 Product + Quote + Campaign | Sponsorship Package / Quote / Campaign | Product, Quote, Campaign |
 
 > ✅ 위 역할 배정 자체(누가 무엇을 담당하는가)은 바뀌지 않았다. 2026-08-18
 > Technical Decision 회의(`03_SYSTEM.md §7`, `05_DECISIONS.md` Decision
@@ -298,6 +299,14 @@ Phase 2는 "PM이 모든 것을 대신 만드는 구조"가 아니다. **사라�
 > Fan Insight = Report/Dashboard**가 확정됐다 — 각 담당자 문서
 > (`docs/members/`)도 이 결과에 맞춰 갱신했다. **Account 집계 필드만 여전히
 > On Hold(TBD)**다(§7 K). 이 표는 §17의 Phase 1→Phase 2 변화 요약과 함께 읽는다.
+>
+> ✅ **같은 날 이후 멘토링으로 Business 방향이 추가 갱신됐다**(`05_DECISIONS.md`
+> Decision 019): Phase 2의 중심축이 "Collaboration"에서 **"Sponsorship
+> Sales/Pipeline"**으로 이동했고, 대표 시나리오가 Sanrio → **d'Alba(달바)**로
+> 바뀌었다. 위 역할 배정(누가 무엇을 담당하는가)은 이번에도 바뀌지 않는다 —
+> 바뀐 것은 각자가 다루는 Business 시나리오의 내용이다. 또한 **Agentforce
+> Fit/Recommendation Score와 Lead Score는 서로 다른 개념**이라는 점이 명확해졌다
+> (혜준 담당 영역, `docs/members/03_HYEJUNE.md` 참고).
 
 ---
 
@@ -320,8 +329,12 @@ Standard 기능으로 해결 가능한 것은 불필요하게 Apex/LWC를 만들
 Phase 2는 각자 따로 만드는 프로젝트가 아니라, 하나의 Shared Scenario(예:
 `SCN-B2B-001`)로 연결된다.
 
-> Fan Insight → Partner Candidate → Lead → Account/Contact → Opportunity →
-> Product/Quote → Campaign/Collaboration → Performance → Partnership/Sponsorship
+> Fan Insight → 기업 DB/Agentforce Matching → Outbound Lead → Lead Qualification →
+> Account/Contact → Opportunity → Sponsorship Package/Quote → Campaign(Collaboration
+> Record Type, 필요 시) → Pipeline/Revenue Dashboard
+>
+> (2026-08-18 멘토링으로 갱신 — `05_DECISIONS.md` Decision 019. 대표 시나리오는
+> d'Alba(달바)다.)
 
 예: 혜준이 만든 Lead가 → 아론의 Account/Contact로 이어지고 → 은영의 Opportunity가
 되고 → 승우의 Product/Campaign과 연결되고 → 사라의 Fan Insight와 연결되어야 한다.
@@ -399,8 +412,8 @@ Decision Sheet 하단 규칙과 동일).
 | 사라 | PM / Solution Architect / Product Designer | Fan 360 고도화 + B2B 연결 | Fan Insight / Grouping |
 | 혜준 | Salesforce Experience Lead / QA Lead | Collab360 + Lead | Partner Candidate / Lead |
 | 아론 | Business Analyst / Demo Experience Lead | Account + Contact | Partner Account / Contact |
-| 은영 | Developer Lead / Team Lead | Opportunity | Collaboration Pipeline |
-| 승우 | Salesforce Builder | Product + Quote + Campaign | Collaboration Product/Quote/Campaign |
+| 은영 | Developer Lead / Team Lead | Opportunity | B2B Sales Pipeline |
+| 승우 | Salesforce Builder | Product + Quote + Campaign | Sponsorship Package/Quote/Campaign |
 
 > [P1] 열은 §1(Phase 1 History) 표를 그대로 옮긴 것이다 — Phase 1 역할이 사라진
 > 것이 아니라 History로 보존되고, 그 위에 Phase 2 역할이 새로 정의된 것이다.

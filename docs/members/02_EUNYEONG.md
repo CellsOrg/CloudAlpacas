@@ -3,15 +3,18 @@
 ## [P2] Current Role
 
 💼 **Opportunity**. Developer Lead 역할(`02_TEAM_GUIDE.md §1`)은 유지하되, Phase 2
-에서는 B2B Collaboration의 핵심 파이프라인인 **Opportunity**를 End-to-End로
+에서는 B2B Sponsorship Sales의 핵심 파이프라인인 **Opportunity**를 End-to-End로
 담당한다(`02_TEAM_GUIDE.md §11`) — Phase 1에서 Fan App 개발에 쏠려 있던 비중이
 Opportunity 영역으로 확장된다.
 
 ## [P2] Mission
 
-Lead가 Account/Contact로 전환된 뒤 실제 협업 거래(Opportunity)가 Stage를 따라
-진행되고, Expected Benefit·Performance까지 자연스럽게 이어지도록 만든다
-(`00_STORY.md §9`, `03_SYSTEM.md §7`).
+Lead가 Account/Contact로 전환된 뒤 실제 Sponsorship 거래(Opportunity, 예:
+Advertising Sponsorship)가 Stage를 따라 진행되고, Expected Benefit→
+Sponsorship Package/Quote→Closed Won→Pipeline/Revenue Dashboard까지
+자연스럽게 이어지도록 만든다(`00_STORY.md §8.3`, `03_SYSTEM.md §7`,
+`05_DECISIONS.md` Decision 019). 계약 이후 실제 Performance 분석은 Future
+Scope다(`00_STORY.md §8.4`).
 
 ## [P2] Ownership
 

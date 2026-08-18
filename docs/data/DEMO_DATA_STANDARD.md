@@ -35,12 +35,12 @@ Scenario로 연결되도록** 하는 것이 이 문서의 유일한 목적이다
 
 | Entity | 제안 규칙 | 근거 |
 |---|---|---|
-| Account(Sponsor/Partner) | 회사/브랜드명 | Wireframe 예시는 "Sanrio", "스위트클라우드" 등 |
+| Account(Sponsor/Partner) | 회사/브랜드명 | 대표 시나리오는 d'Alba(달바) — 초기 Wireframe 예시는 "Sanrio", "스위트클라우드" 등이었으나 2026-08-18 멘토링으로 대표 시나리오가 교체됐다(`05_DECISIONS.md` Decision 019) |
 | Lead | Company 필드에 후보 기업명 | Wireframe 그대로 |
-| Opportunity | `{Account명} × Cloud Alpacas — {Collab명}` | Wireframe 예시: "Sanrio × Cloud Alpacas — Hello Kitty Collaboration 2027" |
+| Opportunity | `{Account명} × Cloud Alpacas — {Sponsorship명}` | 예시: "d'Alba × Cloud Alpacas — Advertising Sponsorship" |
 
-> ⚠️ **팀 확인 필요**: Wireframe에는 실제 존재하는 기업명(Sanrio 등)이 예시로
-> 쓰였다. Demo에서 실제 브랜드명을 그대로 쓸지, 가상 브랜드명으로 바꿀지는
+> ⚠️ **팀 확인 필요**: 초기 Wireframe에는 실제 존재하는 기업명(Sanrio 등)이 예시로
+> 쓰였고, 지금은 d'Alba를 대표 시나리오로 쓴다. Demo에서 실제 브랜드명을 그대로 쓸지, 가상 브랜드명으로 바꿀지는
 > 이 문서가 아니라 팀이 별도로 결정한다.
 
 ---
@@ -63,37 +63,50 @@ Product → Quote → Campaign → Performance가 하나의 이야기로 연결�
 
 ## 6.4 Fan Data Distribution
 
-### 6.4.1 최종 Demo 목표 규모 — 약 1,000 Fans
+### 6.4.1 최종 Demo 목표 규모 — 최소 5,000 Fans
 
-**최종 Demo 목표는 Fan 약 1,000명 규모다.** 단, 지금 당장 1,000명 CSV를 생성하지
-않는다 — 지금 확정하는 것은 "1,000명 데이터를 만드는 것"이 아니라 **"1,000명을
-만들 때 따라야 할 분포 기준"**이다.
+**최종 Demo 목표는 Fan 최소 5,000명 규모다.** (2026-08-18 멘토링으로 기존 "약
+1,000명" 목표에서 상향 — `05_DECISIONS.md` Decision 019. 100명 이하 소규모
+데이터로는 Fan Segment/기업 Matching/Scoring의 분포를 설득력 있게 보여주기
+어렵다는 멘토 피드백을 반영했다.)
+
+✅ **Org 확인 결과 (읽기 전용 조회)**: `CloudAlpacasProd`에 `RecordType.DeveloperName
+= 'Fan'` 기준 **Account 5,024건**이 존재한다 — 목표 규모(최소 5,000명) 충족을
+**헤드카운트 기준으로 확인**했다. 단, 이 5,024건이 §6.4.2의 분포 기준(Current
+Segment/Fan Value/Gender/연령대/대표 팬층 비중 등)과 `Gender__c`/`Birthdate` 등
+필수 Field를 실제로 만족하는지는 **별도 QA 대상이며 아직 검증하지 않았다** —
+"인원수가 찼다"와 "분포/Field가 Demo 목적에 맞게 채워졌다"는 다른 질문이다.
 
 | 단계 | 규모 | 목적 | 상태 |
 |---|---|---|---|
 | 소규모 QA 데이터 | 현재 30~35명(`P2_DUMMY_DATA_MASTER.md`) | 구조/화면/Flow 검증용 — **삭제하지 않고 그대로 유지** | ✅ 존재함 |
-| 최종 Target Demo Scale | 약 1,000 Fans | 실제 발표 규모 | 🔵 별도 CSV 생성 예정, 아직 생성 안 함 |
+| 최종 Target Demo Scale | **최소 5,000 Fans** | 실제 발표 규모 — Fan Segment/기업 Matching/Scoring 분포의 설득력 확보 | ✅ **헤드카운트 충족(Org 5,024명 확인)** — 🔵 Field/Distribution QA는 별도 대상, 아직 미검증 |
 
 > 기존에 "30~50명 권장"이라고 안내했던 §10(`04_DEMO.md`) 규모 제안은 **소규모
-> QA 단계의 기준**으로 재해석한다 — 최종 목표는 1,000명이며, 30~50명은 그 전에
+> QA 단계의 기준**으로 재해석한다 — 최종 목표는 5,000명이며, 30~50명은 그 전에
 > 화면·Flow가 깨지지 않는지 검증하는 최소 단계다.
 
-### 6.4.2 1,000명 데이터가 따라야 할 분포 기준
+### 6.4.2 5,000명 데이터가 따라야 할 분포 기준 (Field/Distribution QA 체크리스트)
 
-아래는 1,000명 데이터를 실제로 만들 때 지켜야 할 **분포 비율**이다 — 현재
-소규모 데이터(§1 대표팬 11명 포함 30명)에서 확인한 비율을 그대로 스케일업한다
-(`P2_DUMMY_DATA_MASTER.md` §1~2 참고).
+아래는 5,000명 데이터가 만족해야 하는 **분포 비율**이다 — 현재 소규모 데이터
+(§1 대표팬 11명 포함 30명)에서 확인한 비율을 그대로 스케일업한다
+(`P2_DUMMY_DATA_MASTER.md` §1~2 참고). 절대 인원수는 "최소 5,000명" 기준 예시이며,
+실제 총원(Org 확인 5,024명, §6.4.1)에 맞춰 비율을 그대로 적용한다.
 
-| 축 | 기존 확정 값 목록 | 분포 기준(1,000명 스케일) |
+> ⚠️ Org에 5,024건이 이미 존재하는 것(§6.4.1)과, 그 5,024건이 아래 분포 기준·
+> 필수 Field(`Gender__c`/`Birthdate` 등)를 실제로 만족하는지는 **별개의 질문**이다.
+> 이 표는 앞으로 **QA 대상**으로 남는다 — 아직 검증되지 않았다.
+
+| 축 | 기존 확정 값 목록 | 분포 기준(5,000명 스케일 예시) |
 |---|---|---|
-| Current Segment(Life Cycle) | New/Active/At-Risk/Dormant/Churned/Unreachable(6종, Decision 009) | 각 값 최소 5% 이상 등장(6종 균등이면 약 166명씩) |
-| Fan Value Tier | 일반/우수/VIP(Decision 009·010) | VIP는 소수(전체의 10~15% 수준, 약 100~150명) |
-| Engagement Level | 가입/관심/활동/충성/멤버십/핵심 팬(6종, Decision 010) | 각 값 최소 5% 이상 |
+| Current Segment(Life Cycle) | New/Active/At-Risk/Dormant/Churned/Unreachable(6종, Decision 009) | 각 값 최소 5% 이상 등장(6종 균등이면 약 833명씩) |
+| Fan Value Tier | 일반/우수/VIP(Decision 009·010) | VIP는 소수(전체의 10~15% 수준, 약 500~750명) |
+| Engagement Level | 가입/관심/활동/충성/멤버십/핵심 팬(6종, Decision 010) | 각 값 최소 5% 이상(약 250명 이상) |
 | **[P2] Gender__c** | 남/여(`03_SYSTEM.md §2.1`) | 균형 있게 분배(예: 5:5 또는 4:6) — 정확한 비율은 TBD |
 | **[P2] 연령대**(Birthdate 기반) | 표준 필드 | 10대~50대 이상 고르게, 특정 구간(예: 20~30대)에 의도적으로 더 몰아 "대표 세그먼트"를 만든다 |
-| **[P2] SCN-B2B-001 대표 팬층(10~30대 여성)** | `P2_DUMMY_DATA_MASTER.md` §2.1 | 1,000명 규모에서도 이 팬층의 비중 변화(약 18%→35% 이상)가 **통계적으로 뚜렷하게** 드러나도록, 최소 수십 명 단위로 스케일업 — 정확한 인원수는 TBD |
+| **[P2] SCN-B2B-001 대표 팬층(10~30대 여성, 뷰티/라이프스타일 관심)** | `P2_DUMMY_DATA_MASTER.md` §2.1 | 5,000명 규모에서도 이 팬층의 비중 변화(약 18%→35% 이상)가 **통계적으로 뚜렷하게** 드러나도록 최소 수백 명 단위로 스케일업 — 정확한 인원수는 TBD |
 
-Naming/Cross-Object Consistency 규칙(§6.2·§6.5)은 1,000명 규모에서도 동일하게
+Naming/Cross-Object Consistency 규칙(§6.2·§6.5)은 5,000명 규모에서도 동일하게
 적용한다 — 규모가 커진다고 규칙이 달라지지 않는다.
 
 > 이 표는 "각 값이 최소 1번은 등장해야 한다"던 기존 QA 원칙(`SAMPLE_DATA_v2_1.md`)을

@@ -10,10 +10,16 @@ Story·Scope·공용 Data 기준·Integration/QA 흐름을 연결한다(`02_TEAM
 
 ## [P2] Mission
 
-Phase 1에서 쌓은 Fan 360 데이터가 Phase 2 B2B 의사결정에 실제로 쓰일 수 있도록
-Fan Insight/Fan Grouping을 설계하고, 그 결과가 다른 담당자의 Feature(특히 혜준의
-Partner Candidate Discovery)로 끊기지 않고 이어지게 만든다(`00_STORY.md §8.2`,
-`01_PROJECT.md §2.7`).
+Phase 1에서 쌓은 Fan 360 데이터가 Phase 2 B2B Sponsorship Sales 의사결정에 실제로
+쓰일 수 있도록 Fan Insight/Fan Grouping을 설계하고, 그 결과가 다른 담당자의
+Feature(특히 혜준의 기업 DB/Agentforce Matching)로 끊기지 않고 이어지게 만든다
+(`00_STORY.md §8.2`, `01_PROJECT.md §2.7`).
+
+> **✅ 2026-08-18 멘토링 갱신**(`05_DECISIONS.md` Decision 019): Fan Insight가
+> 발견해야 하는 것이 "궁합 좋은 기업"에서 **"팬덤의 광고 가치"**(뷰티/라이프스타일
+> 관심 등)로 구체화됐다 — 대표 시나리오는 d'Alba(달바). Fan Data 목표도 약
+> 1,000명에서 **최소 5,000명**으로 상향됐고, Org에 5,024건 존재가 확인됐다
+> (헤드카운트만 확인, Field/Distribution QA는 별도 — `data/DEMO_DATA_STANDARD.md §6.4`).
 
 ## [P2] Ownership
 

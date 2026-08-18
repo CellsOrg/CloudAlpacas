@@ -8,14 +8,24 @@
 > Naming Rule은 `DEMO_DATA_STANDARD.md` §6.2, Fan 분포 기준은 §6.4를 따른다.
 > 기존 Fan(이루키·박서연·김도현·최민재·정하윤)과 이름이 겹치지 않는 새 30명이다.
 > 기존 5명 + 이번 30명 = 총 35명 — 이 30명은 **구조/화면/Flow 검증용 소규모 QA
-> 데이터**로 유지한다(삭제하지 않음). 최종 Demo 목표 규모(약 1,000명)와 분포 기준은
-> `DEMO_DATA_STANDARD.md` §6.4를 따른다 — 이 문서는 그 목표를 향한 1차 소규모
-> 데이터일 뿐, 1,000명 데이터 자체는 아직 생성하지 않는다.
+> 데이터**로 유지한다(삭제하지 않음). 최종 Demo 목표 규모(**최소 5,000명**,
+> 2026-08-18 멘토링으로 상향 — `05_DECISIONS.md` Decision 019)와 분포 기준은
+> `DEMO_DATA_STANDARD.md` §6.4를 따른다 — 이 문서(35명)는 그 목표를 향한 1차
+> 소규모 데이터다. ✅ Org에는 별도로 Fan 5,024건이 이미 존재함을 확인했다
+> (`DEMO_DATA_STANDARD.md` §6.4.1) — 다만 그 5,024건이 §6.4.2 분포 기준을
+> 충족하는지는 별도 QA 대상이며, 이 문서의 30명 예시와 Org의 5,024건이 같은
+> 레코드인지도 확인되지 않았다(아직 검증 안 함).
 >
 > ✅ 아래 Object 배치(Lead=Standard Lead 등)는 2026-08-18 Technical Decision
 > 회의로 **확정됐다**(`05_DECISIONS.md` Decision 017·018). Campaign(§3.6)은
 > Decision D — **Campaign Record Type**으로 확정, Quote(§3.7)도 **Standard
 > Quote 사용**으로 확정됐다. 아래 각 섹션에 확정 내용을 반영했다.
+>
+> ✅ **2026-08-18 멘토링으로 대표 시나리오가 변경됐다**(`05_DECISIONS.md` Decision
+> 019): 산리오/Hello Kitty Collaboration → **d'Alba(달바) Sponsorship**. §3을
+> d'Alba 기준으로 갱신했다. Fan Insight(§1~2)의 계산 구조/수치는 유지하되, 대상
+> 산업을 "캐릭터·라이프스타일"에서 "뷰티(Beauty)/라이프스타일"로 좁혀 d'Alba와의
+> 연결 논리를 명확히 했다.
 
 ---
 
@@ -70,6 +80,15 @@
 > `DEMO_DATA_STANDARD.md`가 요구하는 "Fan Activity Pattern 집계값은 원본 Order/Admission과
 > 일치해야 한다"는 원칙을 Fan Insight 숫자에도 그대로 적용한다. 아래 배정을 그대로
 > Order/`Engagement_Signal__c`에 입력해야 Workbook §2의 수치가 Report에서 실제로 재현된다.
+>
+> ⚠️ **"뷰티/라이프스타일 관심" 데이터 표현의 한계**: 현재 `Engagement_Signal__c`는
+> `Signal_Type__c`(SNS Click/Video View/App Open)·`Source__c`·`Player__c`(선호
+> 선수)만 가지고 있고, "뷰티/라이프스타일/F&B" 같은 관심 카테고리를 담는 전용
+> 필드는 없다(`03_SYSTEM.md §2.12`). 아래 SNS 반응 데이터는 **문태양(선수) 관련
+> 콘텐츠에 대한 반응**을 대표 팬층의 활동 신호로 쓰는 기존 방식을 그대로
+> 유지한다 — "이 신호가 곧 뷰티 관심을 증명한다"고 주장하지 않는다. 뷰티/라이프
+> 스타일 관심사를 직접 표현하는 필드/데이터 소스가 필요한지는 별도 TBD로
+> 남긴다(새 필드를 임의로 만들지 않는다).
 
 ### 2.1 대표 팬 11명의 두 하위 그룹 — 가입일(`CreatedDate`) 기준
 
@@ -137,30 +156,56 @@
 
 ---
 
-## 3. Master Data — SCN-B2B-001: Hello Kitty Collaboration
+## 3. Master Data — SCN-B2B-001: d'Alba Sponsorship
 
-> ⚠️ "산리오/Hello Kitty"는 Demo 예시다. 실제 브랜드명 사용 여부는 팀 결정 사항이며
-> (`DEMO_DATA_STANDARD.md` §6.2), 아래는 그 결정 전까지 쓸 수 있는 임시 데이터다.
-> 모든 레코드 Description에 `[SCN-B2B-001]`을 포함해 하나의 Scenario로 연결한다.
+> ⚠️ "d'Alba(달바)"는 Demo 예시다(2026-08-18 멘토링으로 산리오/Hello Kitty에서
+> 교체 — `05_DECISIONS.md` Decision 019). 실제 브랜드명 사용 여부·실제 계약
+> 관계 유무와 무관한 **가상 시나리오**이며, 실제 브랜드명을 그대로 쓸지 가상
+> 브랜드명으로 바꿀지는 팀 결정 사항이다(`DEMO_DATA_STANDARD.md` §6.2). 아래는
+> 그 결정 전까지 쓸 수 있는 임시 데이터다. 모든 레코드 Description에
+> `[SCN-B2B-001]`을 포함해 하나의 Scenario로 연결한다.
+>
+> **기업 DB(약 100개) 중 하나로서의 위치**: d'Alba는 Agentforce가 기업 DB(약
+> 100개, 화장품/뷰티·F&B·자동차·핀테크·OTT 등)에서 Cloud Alpacas 팬덤과 Fit이
+> 높다고 추천한 Top 10 중 대표 사례다. 아래 3.0 Recommendation은 이 "추천
+> 단계"(아직 Lead 아님)를, 3.1부터는 "Outbound 대상으로 선정되어 Lead가 된
+> 이후"를 나타낸다 — Agentforce의 추천과 Lead 등록은 서로 다른 단계다(§2.7,
+> `03_SYSTEM.md §7 B`).
 
-### 3.1 Lead
+### 3.0 Agentforce Recommendation (Top 10 중 하나) — 아직 Lead 아님
+
+| 항목 | 값 |
+|---|---|
+| 추천 기업명 | d'Alba(달바) |
+| 산업 | 화장품/뷰티(스킨케어) |
+| Fan Fit/Recommendation Score(예시) | 92 *(실제 계산 로직은 TBD — Demo 예시 값)* |
+| Recommendation Reason(예시) | "10~30대 여성 팬 비중 최근 18%→37% 증가, 해당 팬층의 뷰티/SNS 반응 신호 다수 확인 — d'Alba 타겟 고객층과 Fit 높음" *(실제 문장 생성 로직은 TBD — Demo 예시 문구)* |
+| 상태 | 추천 후보(Lead 아님) |
+
+> ⚠️ 위 Score/Reason은 Agentforce가 실제로 산출한 값이 아니라 **Demo 시나리오용
+> 예시**다 — `03_SYSTEM.md §7 B`가 이미 명시하듯 Agentforce의 실제 구성(프롬프트,
+> 데이터 소스, 평가 기준)은 TBD다. 이 예시는 "회의 없이 어떤 값이든 보여줘야
+> 하는 실제 Demo 순간"을 대비한 자리표시자(placeholder)일 뿐, 확정 로직이 아니다.
+
+### 3.1 Lead — Outbound 대상으로 선정된 이후
 
 | Field | 값 |
 |---|---|
-| Company | 산리오코리아 |
+| Company | d'Alba(달바) |
 | Last Name | 김하나 |
-| Title | Licensing Manager |
+| Title | Marketing Partnership Manager |
 | Lead Source | FRM 발굴 (Fan Insight 기반) |
 | Status | Qualified |
-| Description | [SCN-B2B-001] 10~30대 여성 팬층 × 문태양 관련 굿즈 구매율/SNS 반응률 Fit 가설로 발굴한 후보 |
+| `Lead_Score__c`(예시) | 78 *(Agentforce Fit Score(92)와는 다른 값 — 실제 접촉·미팅 반응을 근거로 한 예시. §2.7 "Fan Fit ≠ Lead Score" 참고)* |
+| Description | [SCN-B2B-001] 10~30대 여성 팬층 × 뷰티/라이프스타일 관심 신호(§2) 기반 Agentforce 추천(Fit 92) → Outbound 접촉 후 Lead 등록 |
 
 ### 3.2 Account (Lead Convert 후)
 
 | Field | 값 |
 |---|---|
-| Account Name | 산리오코리아 |
+| Account Name | d'Alba(달바) |
 | Record Type | Partner |
-| Industry | Character IP / Licensing |
+| Industry | Cosmetics / Beauty |
 | Description | [SCN-B2B-001] |
 
 ### 3.3 Contact
@@ -168,16 +213,16 @@
 | Field | 값 |
 |---|---|
 | Name | 김하나 |
-| Title | Licensing Manager |
-| Account | 산리오코리아 |
+| Title | Marketing Partnership Manager |
+| Account | d'Alba(달바) |
 | Description | [SCN-B2B-001] |
 
 ### 3.4 Opportunity
 
 | Field | 값 |
 |---|---|
-| Opportunity Name | 산리오코리아 × Cloud Alpacas — Hello Kitty Collaboration 2027 |
-| Account | 산리오코리아 |
+| Opportunity Name | d'Alba × Cloud Alpacas — Advertising Sponsorship |
+| Account | d'Alba(달바) |
 | Stage | Proposal/Price Quote |
 | Amount | 50,000,000원 |
 | Close Date | 2027-03-01 |
@@ -187,10 +232,10 @@
 
 | Field | 값 |
 |---|---|
-| Product Name | Hello Kitty 콜라보 굿즈 세트 |
+| Product Name | d'Alba 전광판 광고 + Brand Day 패키지 |
 | Record Type | Sponsorship Package |
-| Product Code | SPN-2027-HK01 |
-| Description | [SCN-B2B-001] |
+| Product Code | SPN-2027-DALBA01 |
+| Description | [SCN-B2B-001] — "무엇을 얼마에 판매하는가"의 예시(전광판/펜스 광고, Brand Day 프로모션 등) |
 
 Opportunity(3.4)에 Product Line Item으로 연결한다.
 
@@ -202,23 +247,24 @@ Opportunity(3.4)에 Product Line Item으로 연결한다.
 > RecordType(Collaboration)을 부여하고, Opportunity와의 연결은 별도로 표준
 > `Primary Campaign Source`(Opportunity 필드)를 그대로 사용한다 — 두 방식은
 > 서로 배타적이지 않다(RecordType=Campaign의 분류, Primary Campaign Source=
-> Opportunity와의 연결).
+> Opportunity와의 연결). Collaboration은 Opportunity Won 이후 필요 시 실행하는
+> 수단이며, Phase 2 Sales Pipeline의 중심은 아니다(`00_STORY.md` §8.3).
 
 | Field | 값 |
 |---|---|
-| Campaign Name | Hello Kitty Collaboration Campaign |
+| Campaign Name | d'Alba Sponsorship Campaign |
 | Record Type | Collaboration(B2B) — 정확한 RecordType 이름은 Org 반영 시 확정 |
 | 연결 방식 | Opportunity.`Primary Campaign Source` = 이 Campaign |
 | Description | [SCN-B2B-001] |
 
-**Campaign Member로 등록할 대상** — 대표 팬층 8명(이하은, 최유진, 강수아, 윤지아, 임소연, 오예린, 황서현, 송다인)을 Campaign Member로 추가한다.
+**Campaign Member로 등록할 대상** — 대표 팬층 11명(이하은, 최유진, 강수아, 윤지아, 임소연, 오예린, 황서현, 송다인, 전하율, 곽나연, 노아름)을 Campaign Member로 추가한다.
 
 ### 3.7 Quote
 
 | Field | 값 |
 |---|---|
-| Quote Name | Hello Kitty Collaboration 2027 Quote |
-| Opportunity | 산리오코리아 × Cloud Alpacas — Hello Kitty Collaboration 2027 (3.4) |
+| Quote Name | d'Alba Sponsorship Quote |
+| Opportunity | d'Alba × Cloud Alpacas — Advertising Sponsorship (3.4) |
 | Status | Draft |
 | Expiration Date | 2027-02-01 |
 | Description | [SCN-B2B-001] |
@@ -227,7 +273,7 @@ Opportunity(3.4)에 Product Line Item으로 연결한다.
 
 | Field | 값 |
 |---|---|
-| Product | Hello Kitty 콜라보 굿즈 세트 (3.5, Opportunity Line Item과 동일 Product2 재사용) |
+| Product | d'Alba 전광판 광고 + Brand Day 패키지 (3.5, Opportunity Line Item과 동일 Product2 재사용) |
 | Quantity | 1 |
 | Unit Price | 50,000,000원 |
 
@@ -236,13 +282,16 @@ Opportunity(3.4)에 Product Line Item으로 연결한다.
 ## 4. 이어지는 흐름 (Demo 검증용)
 
 ```
-Fan Insight(위 8명 Report 집계 — §2 계산 기준대로 입력하면 재현됨)
-  → Business Fit 가설(SCN-B2B-001)
-  → Lead(산리오코리아, 김하나)
-  → Account/Contact 전환
-  → Opportunity(Hello Kitty Collaboration 2027)
-  → Product(Hello Kitty 콜라보 굿즈 세트) + Quote(Hello Kitty Collaboration 2027 Quote)
-  → Campaign(Primary Campaign Source로 연결, Member = 대표 팬층 8명)
-  → Performance(Campaign Member 반응률 Report)
-  → Partnership/Sponsorship 판단
+Fan Insight(위 11명 Report 집계 — §2 계산 기준대로 입력하면 재현됨)
+  → 팬덤 광고 가치 발견(뷰티/라이프스타일 관심)
+  → 기업 DB(약 100개) → Agentforce Matching → Top 10 추천(d'Alba, Fit 92, §3.0)
+  → Outbound Lead 등록(d'Alba, 김하나, §3.1)
+  → Lead Qualification(`Lead_Score__c` 78, Agentforce Fit과 별개)
+  → Account/Contact 전환(§3.2~3.3)
+  → Opportunity(Advertising Sponsorship, §3.4)
+  → Product(전광판 광고+Brand Day 패키지) + Quote(§3.5, §3.7)
+  → Campaign(Primary Campaign Source로 연결, Member = 대표 팬층 11명, §3.6)
+  → Closed Won → Contract/Sponsorship Revenue
+  → Pipeline/Revenue Dashboard 확인 — Demo End Point
+  → (Future Scope) 계약 이후 Performance → 장기 재계약/Partnership 판단
 ```
