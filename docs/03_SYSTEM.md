@@ -685,6 +685,8 @@ flowchart TD
 | `Engagement_Level__c`/`Fan_Value_Tier__c` 이력 Object(`Engagement_Level_History__c` 등) | 두 축의 변경 시점을 자동화 트리거 근거로 남겨야 할 만큼 중요해지면 | Decision 009 |
 | OWD/Sharing Rule/Role Hierarchy/Queue 기반 접근 제한 | Staff(담당 직원)가 김매니저 1명에서 여러 명으로 늘어날 때 | Decision 009 |
 | Marketing Cloud Next 확장 파이프라인(Sales Cloud Fan Data → Data Cloud → Segment Builder → Marketing Cloud Next → Campaign/Journey/Personalization → 성과 분석) | 실제 Org 구현 이후 고도화 필요성이 확인되면 — 현재 MVP Object를 Marketing Cloud 전용 구조로 미리 재설계하지 않음 | Decision 009, CLAUDE.md §5 |
+| 실제 SNS Click 외부 연동(Data Cloud/외부 API로 SNS 반응을 실시간 수집) | 현재는 `Engagement_Signal__c`에 Dummy Data로 SNS 반응을 표현할 뿐, 실제 소스 연동은 미구현 — 연동 필요성이 확인되면 | CLAUDE.md §5, `data/P2_DUMMY_DATA_MASTER.md` §2.3 |
+| 과거 Campaign Performance 데이터 축적·분석(신규 Collaboration 방향 결정에 참고) | `00_STORY.md` §8.3의 Story는 있으나 실제 축적·분석 기능은 미구현 | `04_DEMO.md` §12 |
 
 ---
 

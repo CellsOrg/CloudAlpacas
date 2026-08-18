@@ -5,8 +5,10 @@
 > Expansion까지 구현한 뒤, 실제 Business Story와 End-to-End Workflow가 처음부터
 > 끝까지 제대로 이어지는지 검증하기 위한 Demo Plan**으로 §7부터 재정의한다.
 > **9/4 발표를 위한 계획이 아니다** — 발표 일정이 확정되면 그때 별도로 기록한다.
-> §7 이후는 `03_SYSTEM.md §7`의 Technical Decision(A~K, 화요일 회의)이 아직
-> 확정되지 않은 상태를 전제로 한 DRAFT다.
+> §7 이후는 `03_SYSTEM.md §7`의 Technical Decision(A~K)이 2026-08-18 회의로
+> **K(Account 집계)를 제외하고 확정된 상태**를 전제로 갱신했다(`05_DECISIONS.md`
+> Decision 017·018). 여전히 DRAFT인 이유는 발표 일정·8/21 이후 실제 Org 구현
+> 검증이 아직 남아 있기 때문이다.
 
 > 이 문서는 Demo Story, Screen, 발표 시나리오를 다룬다. Persona(김매니저·이루키)와
 > Customer Journey의 근거는 `00_STORY.md`, 화면에 나오는 Object/Field 근거는
@@ -252,13 +254,18 @@ Engagement Level 5종이 각각 1명씩만 배정되어 있다.
 - 시간에 따른 변화(예: "최근 3개월 관람 증가율")를 보여주려면 여러 달에 걸쳐
   분산된 이벤트 데이터가 필요한데, 현재는 특정 시즌 한 시점에 몰려 있다.
 
-### 규모 제안 (Demo Proposal — 확정 아님)
+### 규모 제안 (단계적 검증 — 최종 목표는 확정됨)
 
-| 단계 | 목적 | 규모 제안 | 근거 |
+| 단계 | 목적 | 규모 | 상태 |
 |---|---|---|---|
-| **Minimum** | 화면/Flow가 깨지지 않고 동작하는지 검증 | 현재 수준(5~10명, Picklist 값 1회 이상) | 이미 갖춰짐 — "그룹"을 보여줄 수는 없음 |
-| **Recommended** | Fan Grouping/Insight가 "의미 있는 그룹"으로 보임 | 총 30~50명, 대표 세그먼트(예: 특정 연령대×성별) 1개당 5명 이상 | "그룹"이라는 표현이 성립하려면 한 조합에 최소 5명은 필요, 대표 세그먼트 3~4개 노출 기준 |
-| **Ideal** | B2B Partner Candidate 추천까지 자연스럽게 설득력 있음 | 총 60~100명 + 2~3개월 이상 시간 분산된 Admission/Order | 세그먼트 간 규모 차이 + 증가 추세("최근 3개월 +24%" 같은 표현)를 보여주려면 시계열 데이터 필요 |
+| **Minimum** | 화면/Flow가 깨지지 않고 동작하는지 검증 | 현재 수준(5~10명, Picklist 값 1회 이상) | ✅ 이미 갖춰짐 — "그룹"을 보여줄 수는 없음 |
+| **소규모 QA** | Fan Grouping/Insight가 "의미 있는 그룹"으로 보임 | 약 30~35명(`P2_DUMMY_DATA_MASTER.md`) | ✅ 존재함 — 삭제하지 않고 QA용으로 유지 |
+| **최종 Target Demo Scale** | B2B Fan Insight 변화(약 18%→35% 이상)가 통계적으로 뚜렷하게 드러남 | **약 1,000 Fans** | 🔵 목표 확정, 실제 CSV는 아직 생성 안 함 |
+
+> 이전에 "Ideal(60~100명)"로 제안했던 단계는 최종 목표(약 1,000명)로 대체됐다
+> (`data/DEMO_DATA_STANDARD.md` §6.4.1) — 중간 규모 없이 소규모 QA 데이터에서
+> 바로 최종 목표로 스케일업하며, 그 분포 기준(어떤 비율로 1,000명을 구성할지)은
+> `data/DEMO_DATA_STANDARD.md` §6.4.2에서 정의한다.
 
 Fan 수뿐 아니라 관련 Record도 함께 늘어나야 한다: Order/OrderItem, Admission,
 Attendance_Record, Fan_Activity_Pattern, Engagement_Signal, Recommendation,
@@ -289,6 +296,12 @@ Expected Benefit 3분할, Target Segment Picklist, Fan Insight = Report/Dashboar
 - **성공/실패 KPI 판단 기준** — Collaboration의 성공 기준 자체가 아직 정의되지 않음(TBD)
 - **성과가 좋지 않을 때의 재검토/관계 종료** — 판단 절차·기준 모두 TBD
 - **장기 Partnership/Sponsorship 전환** — Sponsor Contract 등 후속 Object/Field 설계 포함
+- **과거 Campaign Performance를 활용한 고도화** — 새 Collaboration의 방향을 과거 Campaign
+  성과 데이터로 참고한다는 Story(`00_STORY.md` §8.3)는 있지만, 실제 Campaign Performance
+  데이터의 축적·분석 기능은 구현하지 않는다 — Demo에서 필요하면 Dummy Data로만 표현한다
+- **실제 SNS/외부 데이터 소스 연동** — SNS 반응은 현재 `Engagement_Signal__c`의 Dummy
+  Data로만 표현한다. Data Cloud 등을 통한 실시간 SNS Click 수집은 미구현이며, 연동
+  가능 여부는 별도 Technical TBD로 남긴다(`03_SYSTEM.md §5`, `data/P2_DUMMY_DATA_MASTER.md §2.3`)
 
 **여전히 미확정인 것**:
 
@@ -298,5 +311,6 @@ Expected Benefit 3분할, Target Segment Picklist, Fan Insight = Report/Dashboar
 - Target Segment Picklist의 실제 값 목록
 - Agentforce AI Matching/Segment Match/Recommendation Reason의 상세 기술 구성(프롬프트·데이터 소스 등)
 - 발표 일정·시간은 아직 확정되지 않았다.
-- Fan Data 실제 증분(§10 Recommended/Ideal)은 팀이 실제로 만들지 결정한 뒤 진행한다
-  — 이번 문서는 규모만 제안했을 뿐 실제 Dummy Data를 생성하지 않았다.
+- **최종 Target Demo Scale(약 1,000 Fans)의 실제 CSV 생성** — 분포 기준은
+  `data/DEMO_DATA_STANDARD.md` §6.4.2에서 정의했지만, 실제 데이터 생성은 아직
+  진행하지 않았다(§10 참고).

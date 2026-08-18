@@ -1,8 +1,10 @@
 # Cloud Alpacas — P2 Data Contract
 
-> **회의 메인 문서가 아니다.** 화요일 회의는 `P2_TECHNICAL_DECISION_SHEET.md` 하나로
-> 진행하고, 이 문서는 결정 이후 **실제 구현 단계에서 Owner / Related Record / Handoff를
-> 확인하는 실행 기준**으로 연다(Review Order 6번).
+> **회의 메인 문서가 아니다.** 2026-08-18 회의는 `P2_TECHNICAL_DECISION_SHEET.md` 하나로
+> 진행했고, 이 문서는 그 결정 이후 **실제 구현 단계에서 Owner / Related Record / Handoff를
+> 확인하는 실행 기준**이다(Review Order 6번). A~K 결정 결과는 `05_DECISIONS.md`
+> Decision 017·018을 따른다 — 아래 표에서 그 결정과 충돌하는 서술(예: Campaign
+> RecordType 관련)은 결정 결과에 맞춰 갱신했다.
 >
 > "공통 영역 회의에서 확정해야 하는 건 Object 자체보다 **Relationship과 데이터의
 > 주인**이다" — 이 문서는 그 결정을 기록하는 곳이다. `03_SYSTEM.md`가 "Object가
@@ -58,7 +60,7 @@
 | **E. 승우** | SCN-B2B-001 | Product2 | Hello Kitty 콜라보 굿즈 세트 | D의 Opportunity에 Product Line Item으로 연결 |
 | **E. 승우** | SCN-B2B-001 | Quote | Hello Kitty Collaboration 2027 Quote | D의 Opportunity (`OpportunityId` Lookup, Wireframe 확정) |
 | **E. 승우** | SCN-B2B-001 | QuoteLineItem | Hello Kitty 콜라보 굿즈 세트 | E 자신의 Quote + E 자신의 Product2 (동일 Product2를 Opportunity Line Item과 Quote Line Item 양쪽에 재사용) |
-| **E. 승우** | SCN-B2B-001 | Campaign | Hello Kitty Collaboration Campaign | D의 Opportunity (`Primary Campaign Source`로 연결 — RecordType 아님) |
+| **E. 승우** | SCN-B2B-001 | Campaign | Hello Kitty Collaboration Campaign | D의 Opportunity (`Primary Campaign Source`로 연결). Campaign 자체는 **Record Type = Collaboration**으로 생성(Decision 018-D 확정 — RecordType 방식) |
 | **E. 승우** | SCN-B2B-001 | CampaignMember × 8 | 위 8명 | A의 Person Account 8명 + E 자신의 Campaign |
 
 ### 읽는 법 (예시)

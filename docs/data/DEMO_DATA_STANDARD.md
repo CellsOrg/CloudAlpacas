@@ -63,20 +63,42 @@ Product → Quote → Campaign → Performance가 하나의 이야기로 연결�
 
 ## 6.4 Fan Data Distribution
 
-`04_DEMO.md §10`의 "Recommended" 규모(30~50명)를 기준으로 한 분포 제안이다 —
-**실제 숫자는 TBD/Demo Proposal**이며, 화요일 회의 이후 팀이 조정한다.
+### 6.4.1 최종 Demo 목표 규모 — 약 1,000 Fans
 
-| 축 | 기존 확정 값 목록 | 분포 제안(Demo Proposal) |
+**최종 Demo 목표는 Fan 약 1,000명 규모다.** 단, 지금 당장 1,000명 CSV를 생성하지
+않는다 — 지금 확정하는 것은 "1,000명 데이터를 만드는 것"이 아니라 **"1,000명을
+만들 때 따라야 할 분포 기준"**이다.
+
+| 단계 | 규모 | 목적 | 상태 |
+|---|---|---|---|
+| 소규모 QA 데이터 | 현재 30~35명(`P2_DUMMY_DATA_MASTER.md`) | 구조/화면/Flow 검증용 — **삭제하지 않고 그대로 유지** | ✅ 존재함 |
+| 최종 Target Demo Scale | 약 1,000 Fans | 실제 발표 규모 | 🔵 별도 CSV 생성 예정, 아직 생성 안 함 |
+
+> 기존에 "30~50명 권장"이라고 안내했던 §10(`04_DEMO.md`) 규모 제안은 **소규모
+> QA 단계의 기준**으로 재해석한다 — 최종 목표는 1,000명이며, 30~50명은 그 전에
+> 화면·Flow가 깨지지 않는지 검증하는 최소 단계다.
+
+### 6.4.2 1,000명 데이터가 따라야 할 분포 기준
+
+아래는 1,000명 데이터를 실제로 만들 때 지켜야 할 **분포 비율**이다 — 현재
+소규모 데이터(§1 대표팬 11명 포함 30명)에서 확인한 비율을 그대로 스케일업한다
+(`P2_DUMMY_DATA_MASTER.md` §1~2 참고).
+
+| 축 | 기존 확정 값 목록 | 분포 기준(1,000명 스케일) |
 |---|---|---|
-| Current Segment(Life Cycle) | New/Active/At-Risk/Dormant/Churned/Unreachable(6종, Decision 009) | 각 값 최소 3~5명 이상 등장 |
-| Fan Value Tier | 일반/우수/VIP(Decision 009·010) | VIP는 소수(전체의 10~15% 수준 제안) |
-| Engagement Level | 가입/관심/활동/충성/멤버십/핵심 팬(6종, Decision 010) | 각 값 최소 3명 이상 |
-| **[P2] Gender__c** | 남/여(`03_SYSTEM.md §2.1`) | 균형 있게 분배(예: 5:5 또는 4:6) — TBD |
-| **[P2] 연령대**(Birthdate 기반) | 표준 필드 | 10대~50대 이상 고르게, 특정 구간(예: 20~30대)에 의도적으로 더 몰아 "대표 세그먼트"를 만들 것을 제안 |
+| Current Segment(Life Cycle) | New/Active/At-Risk/Dormant/Churned/Unreachable(6종, Decision 009) | 각 값 최소 5% 이상 등장(6종 균등이면 약 166명씩) |
+| Fan Value Tier | 일반/우수/VIP(Decision 009·010) | VIP는 소수(전체의 10~15% 수준, 약 100~150명) |
+| Engagement Level | 가입/관심/활동/충성/멤버십/핵심 팬(6종, Decision 010) | 각 값 최소 5% 이상 |
+| **[P2] Gender__c** | 남/여(`03_SYSTEM.md §2.1`) | 균형 있게 분배(예: 5:5 또는 4:6) — 정확한 비율은 TBD |
+| **[P2] 연령대**(Birthdate 기반) | 표준 필드 | 10대~50대 이상 고르게, 특정 구간(예: 20~30대)에 의도적으로 더 몰아 "대표 세그먼트"를 만든다 |
+| **[P2] SCN-B2B-001 대표 팬층(10~30대 여성)** | `P2_DUMMY_DATA_MASTER.md` §2.1 | 1,000명 규모에서도 이 팬층의 비중 변화(약 18%→35% 이상)가 **통계적으로 뚜렷하게** 드러나도록, 최소 수십 명 단위로 스케일업 — 정확한 인원수는 TBD |
+
+Naming/Cross-Object Consistency 규칙(§6.2·§6.5)은 1,000명 규모에서도 동일하게
+적용한다 — 규모가 커진다고 규칙이 달라지지 않는다.
 
 > 이 표는 "각 값이 최소 1번은 등장해야 한다"던 기존 QA 원칙(`SAMPLE_DATA_v2_1.md`)을
-> 유지하되, Phase 2에서는 **"그룹"이라고 부를 수 있는 규모**까지 확장하는 것이
-> 다른 점이다.
+> 유지하되, Phase 2에서는 **"그룹"이라고 부를 수 있는 규모, 나아가 "통계적으로
+> 유의미한 규모"**까지 확장하는 것이 다른 점이다.
 
 ---
 
@@ -110,11 +132,16 @@ Product → Quote → Campaign → Performance가 하나의 이야기로 연결�
 | B2C Fan Core(Person Account, `Gender__c`/`Birthdate` 포함) | 아론 | Fan 레코드 | Contact(Player) | 혜준 |
 | B2C Transaction(Order/OrderItem/Admission 등) | 아론 | 기존 패턴 그대로 | Product2/Season__c/Game__c | 혜준 |
 | B2C Analytics(Fan_Activity_Pattern/Engagement_Signal 등) | 아론 | 기존 패턴 | Order/Admission | 혜준 |
-| **[P2] B2B(Lead/Account/Contact/Opportunity/Campaign 등)** | **TBD — 담당자 미배정** | `03_SYSTEM.md §7` 확정 후 | B2C Fan Insight 데이터 | TBD |
+| **[P2] Fan Insight/Fan Grouping** | 사라 | Fan Insight Report, Target Segment/Segment Match 관련 데이터 | B2C Fan Core | 혜준 |
+| **[P2] Lead(Candidate 단계 포함)** | 혜준 | Lead 레코드 | 사라의 Fan Insight | 아론 |
+| **[P2] Account/Contact(Partner)** | 아론 | Account/Contact(Lead Convert 결과) | 혜준의 Lead | 은영 |
+| **[P2] Opportunity** | 은영 | Opportunity 레코드 | 아론의 Account/Contact | 승우 |
+| **[P2] Product/Quote/Campaign** | 승우 | Sponsorship Package, Quote, Campaign(Collaboration Record Type) | 은영의 Opportunity | 사라 |
 
-> ⚠️ **팀 결정 필요**: B2B 데이터 영역은 아직 `02_TEAM_GUIDE.md`에 담당자가
-> 배정되어 있지 않다. 화요일 회의에서 Technical Decision과 함께 정하는 것을
-> 제안한다.
+> ✅ B2B 데이터 영역 담당자는 `02_TEAM_GUIDE.md` §11(Phase 2 Team Roles)에
+> 확정되어 있다 — 위 표는 그 배정을 Data 영역 기준으로만 다시 정리한 것이며
+> 새로 배정하지 않는다. 실제 Record 단위 Owner/Related Record는
+> `docs/decision_sheet/P2_DATA_CONTRACT.md`를 따른다(중복 방지).
 
 ---
 

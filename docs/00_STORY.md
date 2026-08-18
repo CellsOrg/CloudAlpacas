@@ -209,7 +209,11 @@ Fit이 확인된 후보는 아직 계약 상대가 아니라 "가능성 있는 �
 
 **5. 왜 바로 장기 Sponsorship이 아니라 단기 Collaboration부터인가**
 
-검증되지 않은 상대와 곧바로 장기 계약을 맺는 것은 리스크가 크다 — Fit 가설이 틀렸을 경우 되돌리기 어렵다. 그래서 이 매니저는 먼저 작은 단위의 Collaboration(예: 한정 상품, 짧은 캠페인)을 제안해 가설을 실제로 검증한다.
+검증되지 않은 상대와 곧바로 장기 계약을 맺는 것은 리스크가 크다 — Fit 가설이 틀렸을 경우 되돌리기 어렵다. §2 Pain Point 7이 보여주듯, Cloud Alpacas는 이미 한 번 이 리스크를 겪은 적이 있다. 그래서 이 매니저는 먼저 작은 단위의 Collaboration(예: 한정 상품, 짧은 캠페인)을 제안해 가설을 실제로 검증한다.
+
+**Collaboration은 "실행 단계"가 아니라 "검증 단계"다.** 장기 Partnership/Sponsorship 이전에 실제 팬 반응을 확인하는 것이 이 단계의 목적이며, Opportunity가 성사됐다고 곧바로 장기 계약으로 이어지지 않는다 — Collaboration을 거쳐야 한다.
+
+이 매니저는 Collaboration의 구체적인 방향(어떤 형태의 협업이 효과적일지)을 정할 때, 과거에 진행했던 Campaign 데이터를 참고해 "어떤 유형의 Collaboration이 효과가 있었고, 어떤 유형은 효과가 없었는지"를 확인한다. 다만 이 참고 과정은 Story 수준의 의도이며, **현재 Org에 과거 Campaign Performance 데이터가 실제로 축적·구현되어 있지는 않다** — Demo에서는 Dummy Data로 표현하거나, 실제 축적은 향후 구현 대상(Future Scope)으로 구분한다(`04_DEMO.md` §12).
 
 **6. Collaboration 성과 → 다음 의사결정**
 
