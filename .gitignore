@@ -19,3 +19,9 @@ build/
 
 # Personal
 0nlySara/
+
+# Salesforce CLI local state
+.sf/
+
+# VS Code personal settings
+.vscode/
