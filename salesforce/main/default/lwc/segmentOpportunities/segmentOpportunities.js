@@ -1,8 +1,8 @@
 import { LightningElement, wire } from 'lwc';
 import getMembershipCompletedCount from '@salesforce/apex/SegmentMembershipCompleted.getCount';
 import getNoVisitAfterSignupCount from '@salesforce/apex/SegmentNoVisitAfterSignup.getCount';
-// 다음 단계에서 세그먼트별 독립 Apex Class를 하나씩 추가하며 import를 늘려간다:
-// import getDecliningVisitsCount from '@salesforce/apex/SegmentDecliningVisits.getCount';
+import getDecliningVisitsCount from '@salesforce/apex/SegmentDecliningVisits.getCount';
+// 다음 단계에서 추가:
 // import getNoGoodsLoyalCount from '@salesforce/apex/SegmentNoGoodsLoyal.getCount';
 
 export default class SegmentOpportunities extends LightningElement {
@@ -29,8 +29,8 @@ export default class SegmentOpportunities extends LightningElement {
             id: 'seg-decline',
             title: '최근 30일 관람 감소',
             fallbackCount: '1,204명',
-            trait1: '관람 빈도 평균 40% 감소',
-            trait2: '멤버십 만료 임박',
+            trait1: '멤버십 만료 45~75일 전',
+            trait2: '관람 빈도 평균 대비 40% 이하',
             why: '충성도가 높았던 팬의 이탈 신호로, 조기 개입 시 유지 가능성이 큽니다.',
             isRepresentative: false
         },
@@ -58,6 +58,13 @@ export default class SegmentOpportunities extends LightningElement {
     wiredNoVisitCount({ data }) {
         if (data !== undefined && data !== null) {
             this.realCounts = { ...this.realCounts, 'seg-no-visit': data };
+        }
+    }
+
+    @wire(getDecliningVisitsCount)
+    wiredDecliningCount({ data }) {
+        if (data !== undefined && data !== null) {
+            this.realCounts = { ...this.realCounts, 'seg-decline': data };
         }
     }
 
