@@ -1,12 +1,11 @@
 import { LightningElement, wire } from 'lwc';
 import getMembershipCompletedCount from '@salesforce/apex/SegmentMembershipCompleted.getCount';
+import getNoVisitAfterSignupCount from '@salesforce/apex/SegmentNoVisitAfterSignup.getCount';
 // 다음 단계에서 세그먼트별 독립 Apex Class를 하나씩 추가하며 import를 늘려간다:
-// import getNoVisitAfterSignupCount from '@salesforce/apex/SegmentNoVisitAfterSignup.getCount';
 // import getDecliningVisitsCount from '@salesforce/apex/SegmentDecliningVisits.getCount';
 // import getNoGoodsLoyalCount from '@salesforce/apex/SegmentNoGoodsLoyal.getCount';
 
 export default class SegmentOpportunities extends LightningElement {
-    // 세그먼트 카드. count는 해당 Apex Class가 연동되면 실시간 값, 아직이면 고정값(fallbackCount) 사용.
     segmentsBase = [
         {
             id: 'seg-membership',
@@ -21,7 +20,7 @@ export default class SegmentOpportunities extends LightningElement {
             id: 'seg-no-visit',
             title: '가입 후 경기 미관람',
             fallbackCount: '3,842명',
-            trait1: '가입 후 평균 21일 경과',
+            trait1: '가입 후 21일 이상 경과',
             trait2: '앱 방문은 있으나 티켓 미구매',
             why: '초기 미참여가 장기화되면 이탈로 이어질 가능성이 높습니다.',
             isRepresentative: false
@@ -46,23 +45,21 @@ export default class SegmentOpportunities extends LightningElement {
         }
     ];
 
-    realCounts = {}; // { 'seg-membership': 123, ... }
+    realCounts = {};
 
     @wire(getMembershipCompletedCount)
-    wiredMembershipCount({ data, error }) {
+    wiredMembershipCount({ data }) {
         if (data !== undefined && data !== null) {
             this.realCounts = { ...this.realCounts, 'seg-membership': data };
         }
-        // 에러 나도 조용히 고정값으로 폴백
     }
 
-    // 다음 단계에서 이런 형태로 @wire를 하나씩 추가:
-    // @wire(getNoVisitAfterSignupCount)
-    // wiredNoVisitCount({ data }) {
-    //     if (data !== undefined && data !== null) {
-    //         this.realCounts = { ...this.realCounts, 'seg-no-visit': data };
-    //     }
-    // }
+    @wire(getNoVisitAfterSignupCount)
+    wiredNoVisitCount({ data }) {
+        if (data !== undefined && data !== null) {
+            this.realCounts = { ...this.realCounts, 'seg-no-visit': data };
+        }
+    }
 
     get segments() {
         return this.segmentsBase.map((seg) => {
