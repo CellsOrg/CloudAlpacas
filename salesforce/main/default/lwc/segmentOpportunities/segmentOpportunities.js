@@ -2,10 +2,11 @@ import { LightningElement, wire } from 'lwc';
 import getMembershipCompletedCount from '@salesforce/apex/SegmentMembershipCompleted.getCount';
 import getNoVisitAfterSignupCount from '@salesforce/apex/SegmentNoVisitAfterSignup.getCount';
 import getDecliningVisitsCount from '@salesforce/apex/SegmentDecliningVisits.getCount';
-// 다음 단계에서 추가:
-// import getNoGoodsLoyalCount from '@salesforce/apex/SegmentNoGoodsLoyal.getCount';
+import getNoGoodsLoyalCount from '@salesforce/apex/SegmentNoGoodsLoyal.getCount';
 
 export default class SegmentOpportunities extends LightningElement {
+    // 4개 세그먼트 전부 실시간 연동 완료.
+    // 각 세그먼트는 독립된 Apex Class(SegmentXxx.getCount())를 가지고 있어 유지보수가 쉬움.
     segmentsBase = [
         {
             id: 'seg-membership',
@@ -38,7 +39,7 @@ export default class SegmentOpportunities extends LightningElement {
             id: 'seg-no-goods',
             title: '굿즈 미구매 충성 팬',
             fallbackCount: '2,130명',
-            trait1: '평균 관람 8회/시즌',
+            trait1: '이번 시즌 관람 비율 40%+',
             trait2: '굿즈 구매 이력 0건',
             why: '관람 충성도는 높지만 매출 기여가 낮아, 굿즈 관심 파악이 필요합니다.',
             isRepresentative: false
@@ -65,6 +66,13 @@ export default class SegmentOpportunities extends LightningElement {
     wiredDecliningCount({ data }) {
         if (data !== undefined && data !== null) {
             this.realCounts = { ...this.realCounts, 'seg-decline': data };
+        }
+    }
+
+    @wire(getNoGoodsLoyalCount)
+    wiredNoGoodsLoyalCount({ data }) {
+        if (data !== undefined && data !== null) {
+            this.realCounts = { ...this.realCounts, 'seg-no-goods': data };
         }
     }
 
