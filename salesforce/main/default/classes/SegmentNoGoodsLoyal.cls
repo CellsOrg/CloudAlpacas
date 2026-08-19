@@ -10,25 +10,54 @@ public with sharing class SegmentNoGoodsLoyal {
 
     @AuraEnabled(cacheable=true)
     public static Integer getCount() {
-        // 1. 현재 시즌 판단: Game_Date__c가 가장 늦은(=가장 최근에 시작된) 시즌
+        return getMatchingFans().size();
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<SegmentFanListItem> getFanList() {
+        Map<Id, Decimal> matched = getMatchingFans(); // fanId -> 관람비율
+        List<SegmentFanListItem> items = new List<SegmentFanListItem>();
+        if (matched.isEmpty()) return items;
+
+        Map<Id, Account> accounts = new Map<Id, Account>([SELECT Id, Name FROM Account WHERE Id IN :matched.keySet()]);
+        for (Id fanId : matched.keySet()) {
+            String name = accounts.containsKey(fanId) ? accounts.get(fanId).Name : '(이름 없음)';
+            Integer pct = (matched.get(fanId) * 100).intValue();
+            String detail = '이번 시즌 관람비율 ' + pct + '%';
+            items.add(new SegmentFanListItem(fanId, name, detail));
+        }
+        return items;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static Id getRepresentativeFanId() {
+        Map<Id, Decimal> matched = getMatchingFans();
+        for (Id fanId : matched.keySet()) {
+            return fanId;
+        }
+        return null;
+    }
+
+    // 조건에 맞는 팬 Id -> 관람비율 맵
+    private static Map<Id, Decimal> getMatchingFans() {
+        Map<Id, Decimal> result = new Map<Id, Decimal>();
+
         List<Game__c> latestGames = [
             SELECT Season__c FROM Game__c WHERE Season__c != null ORDER BY Game_Date__c DESC LIMIT 1
         ];
-        if (latestGames.isEmpty()) return 0;
+        if (latestGames.isEmpty()) return result;
         Id currentSeasonId = latestGames[0].Season__c;
 
-        // 2. 그 시즌에서 오늘 이전에 열린 경기 수
         Date today = Date.today();
         List<Game__c> pastGamesThisSeason = [
             SELECT Id FROM Game__c WHERE Season__c = :currentSeasonId AND Game_Date__c <= :today
         ];
         Integer totalGamesSoFar = pastGamesThisSeason.size();
-        if (totalGamesSoFar == 0) return 0; // 아직 시즌 경기가 없으면 비율 산출 불가
+        if (totalGamesSoFar == 0) return result;
 
         Set<Id> pastGameIds = new Set<Id>();
         for (Game__c g : pastGamesThisSeason) pastGameIds.add(g.Id);
 
-        // 3. 팬별 이번 시즌(지금까지) 관람 횟수
         Map<Id, Integer> attendanceCount = new Map<Id, Integer>();
         for (Admission__c ad : [
             SELECT Fan__c FROM Admission__c WHERE Game__c IN :pastGameIds AND Fan__c != null
@@ -36,7 +65,6 @@ public with sharing class SegmentNoGoodsLoyal {
             attendanceCount.put(ad.Fan__c, (attendanceCount.containsKey(ad.Fan__c) ? attendanceCount.get(ad.Fan__c) : 0) + 1);
         }
 
-        // 4. 굿즈 구매 이력이 있는 팬 (제외 대상)
         Set<Id> goodsFans = new Set<Id>();
         for (AggregateResult ar : [
             SELECT AccountId a FROM Order
@@ -46,16 +74,14 @@ public with sharing class SegmentNoGoodsLoyal {
             goodsFans.add((Id) ar.get('a'));
         }
 
-        // 5. 판정: 관람비율 >= 40% AND 굿즈 구매 없음
-        Integer count = 0;
         for (Id fanId : attendanceCount.keySet()) {
             if (goodsFans.contains(fanId)) continue;
 
             Decimal ratio = Decimal.valueOf(attendanceCount.get(fanId)) / totalGamesSoFar;
             if (ratio >= THRESHOLD) {
-                count++;
+                result.put(fanId, ratio);
             }
         }
-        return count;
+        return result;
     }
 }

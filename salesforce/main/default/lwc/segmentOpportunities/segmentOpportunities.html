@@ -5,7 +5,6 @@
                 <span class="seg-title">세그먼트 기회</span>
                 <span class="seg-title-en">Segment Opportunities</span>
             </div>
-
             <template for:each={segments} for:item="s">
                 <div key={s.id} class="seg-card">
                     <div class="seg-card-top">
@@ -18,7 +17,9 @@
                     </div>
                     <div class="seg-why"><strong>중요한 이유:</strong> {s.why}</div>
                     <div class="seg-actions">
-                        <button class="seg-btn seg-btn--ghost">대상 팬 보기</button>
+                        <button class="seg-btn seg-btn--ghost" data-id={s.id} onclick={handleViewList}>
+                            대상 팬 보기
+                        </button>
                         <button class="seg-btn seg-btn--primary" data-id={s.id} onclick={handleReview}>
                             대표 팬 검토
                         </button>

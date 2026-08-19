@@ -9,6 +9,35 @@ public with sharing class SegmentMembershipCompleted {
 
     @AuraEnabled(cacheable=true)
     public static Integer getCount() {
+        return getMatchingFans().size();
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<SegmentFanListItem> getFanList() {
+        Map<Id, DateTime> matched = getMatchingFans();
+        List<SegmentFanListItem> items = new List<SegmentFanListItem>();
+        if (matched.isEmpty()) return items;
+
+        Map<Id, Account> accounts = new Map<Id, Account>([SELECT Id, Name FROM Account WHERE Id IN :matched.keySet()]);
+        for (Id fanId : matched.keySet()) {
+            String name = accounts.containsKey(fanId) ? accounts.get(fanId).Name : '(이름 없음)';
+            String detail = '멤버십 전환일: ' + matched.get(fanId).date().format();
+            items.add(new SegmentFanListItem(fanId, name, detail));
+        }
+        return items;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static Id getRepresentativeFanId() {
+        Map<Id, DateTime> matched = getMatchingFans();
+        for (Id fanId : matched.keySet()) {
+            return fanId; // 첫 번째 매칭 팬
+        }
+        return null;
+    }
+
+    // 조건에 맞는 팬 Id -> (조건을 만족시킨 멤버십 구매일) 맵
+    private static Map<Id, DateTime> getMatchingFans() {
         Map<Id, DateTime> signupDate = new Map<Id, DateTime>();
         for (Account a : [SELECT Id, CreatedDate FROM Account]) {
             signupDate.put(a.Id, a.CreatedDate);
@@ -52,7 +81,7 @@ public with sharing class SegmentMembershipCompleted {
             }
         }
 
-        Integer count = 0;
+        Map<Id, DateTime> result = new Map<Id, DateTime>();
         for (Id fanId : firstAdmissionAfterSignup.keySet()) {
             if (!firstGoodsAfterSignup.containsKey(fanId)) continue;
             if (!membershipDates.containsKey(fanId)) continue;
@@ -62,11 +91,11 @@ public with sharing class SegmentMembershipCompleted {
 
             for (DateTime memDt : membershipDates.get(fanId)) {
                 if (admDt <= memDt && goodsDt <= memDt) {
-                    count++;
+                    result.put(fanId, memDt); // 조건을 만족시킨 멤버십 구매일 기록
                     break;
                 }
             }
         }
-        return count;
+        return result;
     }
 }
