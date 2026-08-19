@@ -210,7 +210,7 @@ Fan 360 Data 분석 → 팬덤의 광고 가치 발견 → 기업 DB(약 100개)
 
 이 매니저는 실제 기업 정보로 구성된 기업 DB(약 100개, 화장품/뷰티·F&B·자동차·핀테크·OTT 등 다양한 산업)를 확보한다. Agentforce가 Fan 360 Insight와 이 기업 DB를 매칭해 **Top 10 후보를 추천**하고, 각 추천에는 **Recommendation Reason**(왜 이 기업이 우리 팬덤과 맞는지)이 함께 제공된다. 이 매칭 결과가 바로 **Fan Fit/Recommendation Score**다 — 아직 영업 대상으로 확정된 것은 아니다.
 
-> 대표 예시: **d'Alba(달바)** — 뷰티/스킨케어 브랜드로, Top 10 추천 중 Fan Fit이 높은 대표 사례로 쓰인다. 실제 기업 데이터 출처는 DART Open API 활용을 방향으로 검토 중이다(TBD).
+> 대표 예시: **d'Alba(달바)** — 뷰티/스킨케어 브랜드로, Top 10 추천 중 Fan Fit이 높은 대표 사례로 쓰인다. 기업 데이터의 **Primary Data Source는 DART Open API**로 확정했다(`05_DECISIONS.md` Decision 020) — 100개 기업은 Salesforce에 저장하지 않으며, CSV는 필요할 때만 쓰는 개발/테스트용 대체 입력일 뿐이다. 실제 연동 기술 방식은 TBD.
 
 **3. Top 추천 → Outbound Lead 등록**
 

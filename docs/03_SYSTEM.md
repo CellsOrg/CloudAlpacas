@@ -886,12 +886,23 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 >
 > **✅ 2026-08-18 멘토링 추가 (Decision 019)**: Agentforce Matching의 입력은
 > **기업 DB(약 100개, 실제 기업 정보 기반)**다 — 가상 기업만 생성하지 않고
-> 실제 기업 데이터를 활용하며, 출처로 DART Open API 활용을 방향으로 검토 중이다
-> (TBD). Agentforce는 이 기업 DB와 Fan 360 Insight를 매칭해 **Top 10을
-> 추천**하고, 추천마다 Recommendation Reason을 생성한다. **이 기업 DB를
-> Salesforce에서 어떤 형태로 관리할지(예: Lead Status=Candidate로 표현할지,
-> Salesforce 밖의 외부 데이터 소스로 유지할지)는 확정하지 않았다(TBD)** — 임의로
-> 새 Custom Object/Field를 만들지 않는다.
+> 실제 기업 데이터를 활용한다. Agentforce는 이 기업 DB와 Fan 360 Insight를
+> 매칭해 **Top 10을 추천**하고, 추천마다 Recommendation Reason을 생성한다.
+>
+> **✅ 2026-08-19 확정 (Decision 020)**: 이 기업 DB(약 100개)는 **Salesforce
+> Object가 아니다** — Lead Status=Candidate로 표현하는 방식도 채택하지 않는다.
+> Agentforce Matching의 **External Input / Data Source**로만 취급하며,
+> Salesforce에 100개 전체를 저장하지 않는다. **Primary Data Source는 DART Open
+> API로 확정한다** — CSV를 기본 저장/확보 방식으로 삼지 않으며, CSV는 필요할 때만
+> 쓰는 개발/테스트용 대체 입력(Optional)일 뿐이다. Agentforce의 출력인 **Top 10
+> Recommendation** 역시 그 자체로 Salesforce Object가 아니고 **반드시 DB에
+> 저장해야 하는 레코드로 정의하지 않으며**, 아직 Lead가 아니다 — 이 중 담당자가
+> 실제 영업 대상으로 **선택한 기업만** Standard Lead로 등록한다.
+> 흐름은 다음과 같다: DART Open API → 약 100개 기업 데이터 조회 → Agentforce
+> Matching → Top 10 Recommendation → 담당자가 기업 선택 → (선택된 기업만) Lead.
+> 남은 TBD는 **DART Open API의 실제 Salesforce/Agentforce 연동 기술 방식(커넥터,
+> Apex 콜아웃, External Object 등)뿐**이다 — 임의로 새 Custom Object/Field는
+> 만들지 않는다.
 >
 > **⚠️ 중요 — Agentforce Fit/Recommendation Score ≠ Lead Score**: Agentforce가
 > 산출하는 값(§H Segment Match, §I Recommendation Reason)은 "팬덤과 기업의

@@ -183,7 +183,18 @@ flowchart LR
     L -->|Lead Qualification 통과| B["스폰서 발굴<br/>(Sponsor, Partner Contact) — §2.6 이어짐"]
 ```
 
-**새로 등장한 명사:** Fan Insight(팬층 분석 결과), 기업 DB(약 100개 기업 정보), Agentforce Matching(Fit/Recommendation Score 산출), Lead(Outbound 영업 대상). 이 개념들은 §2.6의 "스폰서 발굴" 앞에 붙는 새로운 단계이며, §2.6 이후(제안→계약→실행→성과→재계약)는 그대로 이어진다. Fan Insight는 새 저장 Entity가 아니라 §4의 기존 Fan Analytics Entity(Attendance Record, Engagement Signal, Fan Activity Pattern 등)를 활용하는 **분석 과정**이다 — Lead만 §4에 새 Entity로 추가한다. **기업 DB(약 100개)를 Salesforce에서 어떤 형태로 관리할지(Lead Status=Candidate로 표현할지, 별도 외부 데이터 소스로 유지하다 Top 10만 Lead로 승격할지)는 아직 확정하지 않았다(TBD)** — 임의로 새 Object/Field를 만들지 않는다.
+**새로 등장한 명사:** Fan Insight(팬층 분석 결과), 기업 DB(약 100개 기업 정보), Agentforce Matching(Fit/Recommendation Score 산출), Top 10 Recommendation(Agentforce 출력), Lead(Outbound 영업 대상). 이 개념들은 §2.6의 "스폰서 발굴" 앞에 붙는 새로운 단계이며, §2.6 이후(제안→계약→실행→성과→재계약)는 그대로 이어진다. Fan Insight는 새 저장 Entity가 아니라 §4의 기존 Fan Analytics Entity(Attendance Record, Engagement Signal, Fan Activity Pattern 등)를 활용하는 **분석 과정**이다 — Lead만 §4에 새 Entity로 추가한다.
+
+> **✅ 2026-08-19 확정 (Decision 020)**: 기업 DB(약 100개)는 **Salesforce Object가
+> 아니다** — Lead Status=Candidate로 표현하는 방식도 채택하지 않는다. **Primary
+> Data Source는 DART Open API**로 확정한다 — CSV는 기업 DB의 기본 저장 방식이
+> 아니라, 필요할 때만 쓰는 개발/테스트용 대체 입력(Optional)일 뿐이다. Agentforce의
+> 출력인 Top 10 Recommendation도 Salesforce Object가 아니고 반드시 DB에 저장해야
+> 하는 레코드로 정의하지 않으며, 아직 Lead가 아니다 — 이 중 담당자가 실제 영업
+> 대상으로 **선택한 기업만** Standard Lead가 된다: DART Open API → 약 100개 기업
+> 데이터 조회 → Agentforce Matching → Top 10 Recommendation → 담당자가 기업
+> 선택 → (선택된 기업만) Lead. 남은 TBD는 DART Open API의 실제 연동 기술 방식
+> (커넥터/Apex/External Object 등)뿐이다 — 임의로 새 Object/Field를 만들지 않는다.
 
 > **Agentforce Fit/Recommendation Score ≠ Lead Score**: Agentforce Matching이 산출하는 것은 "우리 팬덤과 이 기업이 잘 맞는가"(Fan 360 데이터 기반)이고, Lead Score는 "이 Lead가 실제 계약까지 이어질 가능성이 높은가"(담당자 권한, 접촉 이력, 예산 등 실제 영업 활동 기반)다. 두 값은 서로 다른 시점, 다른 근거로 산출되는 별개 개념이다 — §6.11에서 더 자세히 다룬다.
 

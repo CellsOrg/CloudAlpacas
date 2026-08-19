@@ -1249,8 +1249,91 @@ Account/Contact → Opportunity → 단기 Collaboration → 성과 검증 → �
 
 ### TBD (아직 확정하지 않은 것)
 
-- 기업 DB(약 100개)의 Salesforce Object 구현 형태
+- ~~기업 DB(약 100개)의 Salesforce Object 구현 형태~~ → **2026-08-19 [[Decision 020]]으로 해소**(Object 아님, External Input/Data Source로 확정)
 - 기업 데이터 출처(DART Open API 등) 실제 연동 여부
 - Pipeline/Revenue Dashboard의 구체적인 지표·계산식(목표 매출, 필요 신규 스폰서 수 등)
 - Fan Dummy Data 5,000명의 실제 분포 비율, CSV 생성/Org Insert 일정
 - `Lead_Score__c`의 실제 계산 방식(사람이 수동 입력하는지, 일부 자동화하는지)
+
+---
+
+## Decision 020 — [P2] Technical Decision: 기업 DB(약 100개)는 Salesforce Object가 아니다 — DART Open API 기반 구조 + Top 10 Recommendation 단계 명시
+
+**상태**: 확정
+**기록일**: 2026-08-19 (같은 날 내 갱신 — 아래 "2026-08-19 갱신" 참고)
+
+### 배경
+
+Decision 019는 "기업 DB(약 100개)를 Salesforce에서 어떤 Object 형태로 관리할지는
+확정하지 않는다(TBD)"로 열어뒀다 — Lead Status=Candidate로 표현하는 방식과, 별도
+외부 데이터 소스로 유지하는 방식 둘 다 가능성으로 남겨둔 상태였다. 이후 팀이 Excel
+Object/Field Design(`🦙 CloudAlpacas - 메타데이터 기록 [B2B 확장]`)을 실제로 작업하는
+과정에서, 기업 DB 행이 Account/Lead 같은 실제 Salesforce Object와 같은 표에 섞여
+있어 Object처럼 오해될 수 있다는 문제가 발견됐다. 이를 계기로 이 TBD를 명확히
+닫기로 했다.
+
+**2026-08-19 갱신 배경**: 위 결정 직후, "데이터 확보 방식(DART API 연동 vs CSV
+업로드)"을 대등한 두 선택지처럼 TBD로 남겨둔 표현이 여러 문서에 퍼졌다. 이는
+"CSV가 기업 DB의 저장소"라는 오해나 "100개를 어디서 가져오는지 여전히 미정"이라는
+인상을 줄 위험이 있었다. 이를 명확히 하기 위해 같은 Decision 안에서 Primary
+Data Source를 확정한다.
+
+### 결정
+
+1. **기업 DB(약 100개)는 Salesforce Object가 아니다.** Lead Status=Candidate로
+   표현하는 방식은 채택하지 않는다 — Agentforce Matching의 **External Input /
+   Data Source**로만 취급하며, 100개 전체를 Salesforce에 저장하지 않는다.
+2. **Primary Data Source는 DART Open API로 확정한다.** CSV를 기업 DB의 기본
+   저장/확보 방식으로 삼지 않는다 — CSV는 필요할 때만 쓰는 **개발/테스트용 대체
+   입력(Optional)**일 뿐이며, 현재 아키텍처의 확정 사항이 아니다.
+3. **Agentforce Matching의 출력을 "Top 10 Recommendation"이라는 별도 개념으로
+   명시한다.** 이 역시 Salesforce Object가 아니며, **반드시 DB에 저장해야 하는
+   레코드로 정의하지 않는다** — 아직 Lead가 아니다.
+4. **전체 흐름을 다음과 같이 확정한다**:
+   > DART Open API → 약 100개 기업 데이터 조회 → Agentforce Matching(Fan 360
+   > 데이터와 결합) → Top 10 Recommendation → **담당자가 기업을 선택** →
+   > (선택된 기업만) Standard Lead 생성 → Account/Contact → Opportunity →
+   > Sponsorship Product/Quote → Pipeline/Revenue
+5. **100개 기업 전체를 Lead 100개로 생성하지 않는다.** Top 10 중에서도 담당자가
+   실제 영업 대상으로 **선택한** 기업만 Lead가 된다 — Decision 018-A(Lead
+   흡수)·019(Fan Fit≠Lead Score)를 그대로 따른다.
+6. **새 Custom Object/Field는 만들지 않는다** — `Company Candidate Pool`,
+   `Partner_Candidate__c` 등은 이번에도 채택하지 않는다(Decision 018-A와 동일 원칙).
+7. **DART Open API의 실제 Salesforce/Agentforce 연동 기술 방식(커넥터, Apex
+   콜아웃, External Object 등)은 이번 Decision에서 구현 결정하지 않는다** —
+   "Primary Data Source가 DART Open API"라는 방향만 확정하며, 실제 연동 아키텍처는
+   별도 구현 TBD로 남긴다.
+
+### 이 Decision이 바꾸지 않는 것
+
+- Decision 017(Agentforce = Phase 2 AI Matching 예외), 018의 A~K 기술 선택,
+  019의 Business Story 방향·Fan Fit≠Lead Score 구분·d'Alba 대표 시나리오·Fan
+  5,000명 목표 — 전부 그대로 유지한다. 이번 Decision은 019가 TBD로 남겨둔
+  "기업 DB의 Object 형태"와 "데이터 출처"를 닫는다.
+
+### 이유
+
+Excel Object/Field Design에서 기업 DB가 Object 목록과 같은 표에 섞여 있으면,
+구현 단계에서 실수로 100개 기업을 Custom Object나 Lead 100개로 만들 위험이 있다.
+"기업 DB는 Object가 아니다"를 명시적으로 확정해두면 이 위험을 문서 차원에서
+차단할 수 있다. 또한 "DART API vs CSV"를 대등한 선택지로 남겨두면 실제 구현
+시 CSV를 기본값으로 오해할 위험이 있어, Primary Data Source를 DART Open API로
+못박아 이 위험도 함께 차단한다 — 다만 "어떻게 연동할지"(기술 구현)는 Business
+방향 결정과는 다른 문제이므로 별도 TBD로 분리한다.
+
+### 영향
+
+- `00_STORY.md §8.3`, `01_PROJECT.md §2.7`, `03_SYSTEM.md §7 B`, `04_DEMO.md
+  §12`, `02_TEAM_GUIDE.md §13`, `docs/members/03_HYEJUNE.md`가 이 Decision을
+  근거로 갱신됐다.
+- Excel Object/Field Design(`🦙 CloudAlpacas - 메타데이터 기록 [B2B 확장]`)의
+  `02_HYEJUN`, `00_OBJECT_MAP` 탭에 이미 이 구조(External Input → Agentforce →
+  Top 10 Recommendation → Lead)가 반영되어 있다 — Excel은 사라가 직접 관리한다.
+  Excel의 "DART API / 기업 CSV" 표기를 "DART Open API(Primary)"로 갱신할지는
+  사라가 판단한다(Excel은 이 세션에서 더 이상 수정하지 않는다).
+
+### TBD (아직 확정하지 않은 것)
+
+- DART Open API의 실제 Salesforce/Agentforce 연동 기술 방식(커넥터, Apex 콜아웃,
+  External Object 등) — Business 방향(Primary=DART)만 확정, 구현은 미정
+- CSV를 개발/테스트용으로 실제 사용할지 여부와 형식(필요할 때만 검토)

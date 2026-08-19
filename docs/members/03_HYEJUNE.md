@@ -29,9 +29,19 @@ Pipeline**으로 갱신됐다(Decision 019) — 이제 설계 판단보다 실�
 - **확정**: Segment Match = Agentforce Matching(`§7 H`), Recommendation Reason
   = Agentforce 결과 기반 자동 생성 Long Text(`§7 I`) — 둘 다 B의 Agentforce
   구현에 종속
+- **확정(2026-08-19, Decision 020)**: 기업 DB(약 100개)는 Salesforce Object가
+  아니다 — Agentforce Matching의 External Input/Data Source로만 쓰이고, 100개
+  전체를 Lead로 만들지 않는다. **Primary Data Source는 DART Open API**로 확정 —
+  CSV는 기본 저장 방식이 아니라 필요할 때만 쓰는 개발/테스트용 대체 입력
+  (Optional)일 뿐이다. Agentforce 출력인 Top 10 Recommendation도 Object가 아니고
+  반드시 DB에 저장해야 하는 레코드로 정의하지 않으며, 아직 Lead가 아니다 — 이 중
+  담당자가 실제 영업 대상으로 선택한 기업만 Lead가 된다(DART Open API → 약 100개
+  기업 조회 → Agentforce Matching → Top 10 Recommendation → 담당자가 기업 선택 →
+  선택된 기업만 Lead)
 - **TBD(상세 구현)**: Agentforce의 실제 구성(프롬프트/데이터 소스/평가 기준),
-  Lead Status Picklist Label, 기업 DB(약 100개)의 Salesforce Object 구현 형태
-  — 이번 회의는 "무엇을 쓸지"만 확정했고 "어떻게 구성할지"는 아직이다
+  Lead Status Picklist Label, **DART Open API의 실제 Salesforce/Agentforce
+  연동 기술 방식(커넥터/Apex 콜아웃/External Object 등)** — 이번 회의는
+  "무엇을 쓸지"만 확정했고 "어떻게 구성할지"는 아직이다
 
 > **⚠️ 가장 중요한 구분 — Agentforce Fit/Recommendation Score ≠ `Lead_Score__c`**
 > (2026-08-18 멘토링, Decision 019). 혜준이 직접 다루는 두 값이 서로 다른
@@ -57,8 +67,10 @@ Requirement(Wireframe Collab360/Lead 화면) → Business/Domain 이해
 
 ## [P2] Shared Scenario
 
-사라의 Fan Insight를 받아 Agentforce Matching으로 후보를 발굴하고, Lead(Status로
-Candidate 단계 표현)에 등록한 뒤 아론에게 넘긴다(Lead Convert, `02_TEAM_GUIDE.md §13`).
+사라의 Fan Insight를 받아, 기업 DB(External Input, 약 100개)를 대상으로 Agentforce
+Matching → Top 10 Recommendation을 만든다. 이 Top 10은 아직 Lead가 아니다 — 이 중
+실제 Outbound 대상으로 **선정된 기업만** Lead(Status로 Candidate 단계 표현)에 등록한
+뒤 아론에게 넘긴다(Lead Convert, `02_TEAM_GUIDE.md §13`).
 
 ## [P2] Collaboration
 

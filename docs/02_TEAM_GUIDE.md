@@ -329,12 +329,16 @@ Standard 기능으로 해결 가능한 것은 불필요하게 Apex/LWC를 만들
 Phase 2는 각자 따로 만드는 프로젝트가 아니라, 하나의 Shared Scenario(예:
 `SCN-B2B-001`)로 연결된다.
 
-> Fan Insight → 기업 DB/Agentforce Matching → Outbound Lead → Lead Qualification →
+> Fan Insight → DART Open API(Primary Data Source, External Input/Data Source) →
+> 약 100개 기업 데이터 조회 → Agentforce Matching → Top 10 Recommendation →
+> 담당자가 기업 선택 → (선택된 기업만) Outbound Lead → Lead Qualification →
 > Account/Contact → Opportunity → Sponsorship Package/Quote → Campaign(Collaboration
 > Record Type, 필요 시) → Pipeline/Revenue Dashboard
 >
 > (2026-08-18 멘토링으로 갱신 — `05_DECISIONS.md` Decision 019. 대표 시나리오는
-> d'Alba(달바)다.)
+> d'Alba(달바)다. 기업 DB/Top 10 Recommendation이 Salesforce Object가 아니라는 점,
+> Primary Data Source가 DART Open API(CSV는 개발/테스트용 Optional)라는 점은
+> 2026-08-19 Decision 020으로 확정됐다.)
 
 예: 혜준이 만든 Lead가 → 아론의 Account/Contact로 이어지고 → 은영의 Opportunity가
 되고 → 승우의 Product/Campaign과 연결되고 → 사라의 Fan Insight와 연결되어야 한다.

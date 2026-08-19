@@ -226,7 +226,7 @@ Revenue로 기록한다 → **Pipeline/Revenue Dashboard에서 목표 대비 현
 |---|---|---|---|---|---|---|
 | B2C-1. 팬 전체 조망 | 김매니저 | 우리 팬은 지금 어떤 상태인가? | Fan 360 Dashboard 조회 | Person Account 필드 기반 분포 | Current Segment/Engagement Level/Fan Value 분포 | 여러 세그먼트에 걸친 Fan 다수(§10 참고) |
 | B2C-2. Fan Insight/Grouping | 김매니저 → 이 매니저 | 특정 팬층이 뚜렷한 특징을 보이는가? | Report/Report Type 조회(연령대×성별×관심사×Engagement) | 그룹별 집계 결과 | "○○명, 최근 3개월 증가율, 선호 카테고리(뷰티/라이프스타일/F&B 등)" 같은 요약 | `Gender__c`/`Birthdate`/`Favorite_Player__c`/`Engagement_Signal__c` 채워진 Fan 다수 — 화면 구현은 Report/Dashboard로 확정(`03_SYSTEM.md §7 J`) |
-| B2B-1. 기업 DB/Agentforce Matching | 이 매니저 | 이 팬덤과 광고 가치가 높은 기업은? | Fan Insight 확인 → Agentforce Matching(기업 DB 약 100개 대상, Segment Match·Recommendation Reason 자동 생성) | 없음(Agentforce가 Top 10 + 근거 문장 생성, 상세 구현 TBD) | Top 10 추천 기업 목록(대표 예시: d'Alba) + 추천 근거 | B2C-2의 Fan Insight 결과, 기업 DB(약 100개, DART Open API 활용 방향 TBD), `03_SYSTEM.md §7 B/H/I` |
+| B2B-1. 기업 DB/Agentforce Matching | 이 매니저 | 이 팬덤과 광고 가치가 높은 기업은? | Fan Insight 확인 → Agentforce Matching(기업 DB 약 100개 대상, Segment Match·Recommendation Reason 자동 생성) | 없음(Agentforce가 Top 10 + 근거 문장 생성, 상세 구현 TBD) | Top 10 추천 기업 목록(대표 예시: d'Alba) + 추천 근거 | B2C-2의 Fan Insight 결과, 기업 DB(약 100개, DART Open API가 Primary Data Source — 연동 기술은 TBD), `03_SYSTEM.md §7 B/H/I` |
 | B2B-2. Outbound Lead 등록 | 이 매니저 | 이 추천 후보 중 실제로 영업을 시작할 곳은? | Lead 생성(Status로 후보/접촉/검토/Qualified 표현) | Lead 레코드 | Lead List/Detail | 추천 기업 정보 — 별도 Partner Candidate Object 없음(Lead로 흡수, `§7 A`). **추천 자체가 Lead가 아니다** — Outbound 대상 선정 시에만 Lead가 된다 |
 | B2B-3. Lead Qualification | 이 매니저 | 이 Lead가 실제로 계약까지 이어질 가능성이 높은가? | 접촉·미팅 진행, Lead Score 평가 | Lead Score(`Lead_Score__c`, `§7 E`) 갱신 | Lead Detail의 `Lead_Score__c` — **Agentforce Fit Score(B2B-1)와는 다른 값** | 접촉 이력, 담당자 반응 등(Dummy Data로 표현) |
 | B2B-4. Account/Contact 전환 | 이 매니저 | 누구와 논의를 이어가는가? | Convert Lead | Account+Contact(+Opportunity) 생성 | Account Detail, Related Contacts | Qualified된 Lead |
@@ -311,6 +311,15 @@ Business Story 중심축 = Sponsorship Sales/Pipeline(Collaboration 아님), 대
 d'Alba(Sanrio 아님), 기업 DB(약 100개, Agentforce Top 10 추천), Fan Fit/Recommendation
 Score ≠ Lead Score, Fan Dummy Data 최종 목표 = 최소 5,000명.
 
+**2026-08-19 추가로 확정된 것**(`05_DECISIONS.md` Decision 020): 기업 DB(약 100개)는
+**Salesforce Object가 아니다** — Agentforce Matching의 External Input/Data Source로만
+쓰이며, 100개 전체를 Lead로 만들지 않는다. **Primary Data Source는 DART Open API**로
+확정한다 — CSV는 기본 저장 방식이 아니라 필요할 때만 쓰는 개발/테스트용 대체 입력
+(Optional)일 뿐이다. Agentforce 출력인 Top 10 Recommendation도 Object가 아니고 반드시
+DB에 저장해야 하는 레코드로 정의하지 않으며, 아직 Lead가 아니다 — 이 중 담당자가
+선택한 기업만 Lead가 된다(DART Open API → 약 100개 기업 조회 → Agentforce Matching →
+Top 10 Recommendation → 담당자가 기업 선택 → 선택된 기업만 Lead).
+
 **구현 범위 밖 — Future Scope (§7, §8)**:
 
 - **계약 이후 실제 성과 분석** — 광고 효과·팬 반응 데이터를 근거로 한 성과 분석
@@ -323,8 +332,9 @@ Score ≠ Lead Score, Fan Dummy Data 최종 목표 = 최소 5,000명.
 - **실제 SNS/외부 데이터 소스 연동** — SNS 반응은 현재 `Engagement_Signal__c`의 Dummy
   Data로만 표현한다. Data Cloud 등을 통한 실시간 SNS Click 수집은 미구현이며, 연동
   가능 여부는 별도 Technical TBD로 남긴다(`03_SYSTEM.md §5`, `data/P2_DUMMY_DATA_MASTER.md §2.3`)
-- **기업 DB(약 100개)의 실제 외부 데이터 연동** — DART Open API 활용은 방향일 뿐 구현되지
-  않았다. 실제 기업 정보 수집/갱신 자동화는 Future Scope다
+- **기업 DB(약 100개)의 실제 외부 데이터 연동** — DART Open API를 Primary Data Source로
+  확정했으나(Decision 020), 실제 Salesforce/Agentforce 연동 기술(커넥터/Apex/External
+  Object 등)은 아직 구현되지 않았다. 실제 기업 정보 수집/갱신 자동화는 Future Scope다
 
 **여전히 미확정인 것**:
 
@@ -333,7 +343,7 @@ Score ≠ Lead Score, Fan Dummy Data 최종 목표 = 최소 5,000명.
 - Expected Benefit 필드의 정확한 API Name
 - Target Segment Picklist의 실제 값 목록
 - Agentforce AI Matching/Segment Match/Recommendation Reason의 상세 기술 구성(프롬프트·데이터 소스 등)
-- 기업 DB(약 100개)를 Salesforce에서 어떤 Object 형태로 관리할지(§7 B 참고)
+- DART Open API의 실제 Salesforce/Agentforce 연동 기술 방식(커넥터/Apex/External Object 등) — Primary Data Source는 Decision 020으로 확정(Object 아님, DART Open API 우선, §7 B 참고). CSV는 필요 시 개발/테스트용 대체 입력으로만 검토
 - Pipeline/Revenue Dashboard의 구체적인 지표·계산식(목표 매출, 필요 신규 스폰서 수 등)
 - 발표 일정·시간은 아직 확정되지 않았다.
 - **5,000 Fan Data의 Field/Distribution QA** — 헤드카운트(Org 5,024건)는 확인됐지만,
