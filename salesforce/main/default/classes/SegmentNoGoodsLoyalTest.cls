@@ -1,7 +1,6 @@
 @isTest
 private class SegmentNoGoodsLoyalTest {
 
-    // 공통 헬퍼: 특정 시즌에 과거 경기 N개 생성, 리턴은 생성된 Game 리스트
     private static List<Game__c> createPastGames(Id seasonId, Integer count) {
         List<Game__c> games = new List<Game__c>();
         for (Integer i = 0; i < count; i++) {
@@ -20,7 +19,6 @@ private class SegmentNoGoodsLoyalTest {
 
     @isTest
     static void testLoyalNoGoodsFanCounted() {
-        // 시즌 내 10경기 중 5경기 관람(50% >= 40%) + 굿즈 구매 없음 → 카운트되어야 함
         Season__c season = new Season__c(Total_Games__c = 144);
         insert season;
         List<Game__c> games = createPastGames(season.Id, 10);
@@ -33,14 +31,17 @@ private class SegmentNoGoodsLoyalTest {
 
         Test.startTest();
         Integer count = SegmentNoGoodsLoyal.getCount();
+        List<SegmentFanListItem> fanListResult = SegmentNoGoodsLoyal.getFanList();
+        Id repId = SegmentNoGoodsLoyal.getRepresentativeFanId();
         Test.stopTest();
 
         System.assertEquals(1, count, '관람 비율 40% 이상 + 굿즈 미구매 팬은 카운트되어야 함');
+        System.assertEquals(1, fanListResult.size(), 'getFanList()도 동일하게 1건이어야 함');
+        System.assertEquals(fan.Id, repId, '대표 팬 Id가 해당 팬이어야 함');
     }
 
     @isTest
     static void testLoyalWithGoodsExcluded() {
-        // 관람 비율은 충분하지만 굿즈를 구매한 팬 → 제외되어야 함
         Season__c season = new Season__c(Total_Games__c = 144);
         insert season;
         List<Game__c> games = createPastGames(season.Id, 10);
@@ -62,14 +63,13 @@ private class SegmentNoGoodsLoyalTest {
 
     @isTest
     static void testLowAttendanceExcluded() {
-        // 관람 비율이 40% 미만인 팬 → 제외되어야 함
         Season__c season = new Season__c(Total_Games__c = 144);
         insert season;
         List<Game__c> games = createPastGames(season.Id, 10);
 
         Account fan = new Account(LastName = '저조관람팬');
         insert fan;
-        insertAdmission(fan.Id, games[0].Id); // 1/10 = 10%
+        insertAdmission(fan.Id, games[0].Id);
 
         Test.startTest();
         Integer count = SegmentNoGoodsLoyal.getCount();

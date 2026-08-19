@@ -3,7 +3,6 @@ private class SegmentNoVisitAfterSignupTest {
 
     @isTest
     static void testMatchingFanCounted() {
-        // 가입 30일 전 + 앱 방문 있음 + 티켓 구매 없음 → 카운트 되어야 함
         Account fan = new Account(LastName = '미관람팬');
         insert fan;
         Test.setCreatedDate(fan.Id, DateTime.now().addDays(-30));
@@ -13,14 +12,17 @@ private class SegmentNoVisitAfterSignupTest {
 
         Test.startTest();
         Integer count = SegmentNoVisitAfterSignup.getCount();
+        List<SegmentFanListItem> fanListResult = SegmentNoVisitAfterSignup.getFanList();
+        Id repId = SegmentNoVisitAfterSignup.getRepresentativeFanId();
         Test.stopTest();
 
         System.assertEquals(1, count, '조건을 만족하는 팬 1명이 카운트되어야 함');
+        System.assertEquals(1, fanListResult.size(), 'getFanList()도 동일하게 1건이어야 함');
+        System.assertEquals(fan.Id, repId, '대표 팬 Id가 해당 팬이어야 함');
     }
 
     @isTest
     static void testTicketPurchasedFanExcluded() {
-        // 조건은 다 맞지만 티켓을 구매한 팬 → 제외되어야 함
         Account fan = new Account(LastName = '티켓구매팬');
         insert fan;
         Test.setCreatedDate(fan.Id, DateTime.now().addDays(-30));
@@ -40,9 +42,8 @@ private class SegmentNoVisitAfterSignupTest {
 
     @isTest
     static void testRecentSignupExcluded() {
-        // 가입한 지 21일이 안 된 팬 → 제외되어야 함
         Account fan = new Account(LastName = '최근가입팬');
-        insert fan; // 기본 CreatedDate = 지금
+        insert fan;
 
         insert new Engagement_Signal__c(Fan__c = fan.Id, Signal_Type__c = 'App Open',
             Signal_Date__c = DateTime.now());
@@ -56,7 +57,6 @@ private class SegmentNoVisitAfterSignupTest {
 
     @isTest
     static void testNoAppOpenExcluded() {
-        // 앱 방문 기록이 없는 팬 → 제외되어야 함
         Account fan = new Account(LastName = '무방문팬');
         insert fan;
         Test.setCreatedDate(fan.Id, DateTime.now().addDays(-30));

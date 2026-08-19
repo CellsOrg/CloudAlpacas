@@ -23,9 +23,14 @@ private class SegmentMembershipCompletedTest {
 
         Test.startTest();
         Integer count = SegmentMembershipCompleted.getCount();
+        List<SegmentFanListItem> fanListResult = SegmentMembershipCompleted.getFanList();
+        Id repId = SegmentMembershipCompleted.getRepresentativeFanId();
         Test.stopTest();
 
         System.assertEquals(1, count, '가입 후 순서대로 완주한 팬은 카운트되어야 함');
+        System.assertEquals(1, fanListResult.size(), 'getFanList()도 동일하게 1건이어야 함');
+        System.assertEquals(fan.Id, fanListResult[0].fanId, '리스트의 팬 Id가 일치해야 함');
+        System.assertEquals(fan.Id, repId, '대표 팬 Id가 해당 팬이어야 함');
     }
 
     @isTest
@@ -50,9 +55,11 @@ private class SegmentMembershipCompletedTest {
 
         Test.startTest();
         Integer count = SegmentMembershipCompleted.getCount();
+        Id repId = SegmentMembershipCompleted.getRepresentativeFanId();
         Test.stopTest();
 
         System.assertEquals(0, count, '가입 이전 활동은 제외되어야 함');
+        System.assertEquals(null, repId, '조건 미충족 시 대표 팬은 null이어야 함');
     }
 
     @isTest

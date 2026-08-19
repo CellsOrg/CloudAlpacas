@@ -1,15 +1,15 @@
 <template>
     <lightning-card>
-        <!-- 팬 미선택: 안내 -->
         <template if:true={isEmpty}>
             <div class="empty-hint">
                 왼쪽에서 <strong>대표 팬 검토</strong>를 눌러<br>Fan 360 데이터를 확인하세요.
             </div>
         </template>
-
-        <!-- 데이터 있음 -->
         <template if:true={hasData}>
             <div class="fan360">
+                <template if:true={showBackToList}>
+                    <button class="back-to-list-btn" onclick={handleBackToList}>← 리스트로 돌아가기</button>
+                </template>
                 <div class="fan-header">
                     <div class="fan-avatar">{fan.fanName}</div>
                     <div class="fan-headline">
@@ -19,10 +19,9 @@
                                 <span class="tier-badge">{fan.fanValueTier}</span>
                             </template>
                         </div>
-                        <div class="fan-sub">{segmentLabel} 대표 팬</div>
+                        <div class="fan-sub">{segmentLabel}</div>
                     </div>
                 </div>
-
                 <div class="section-label">Fan 360 요약</div>
                 <div class="summary-grid">
                     <div class="summary-cell">
@@ -50,7 +49,6 @@
                         <div class="cell-value cell-value--accent">{fan.ltv}</div>
                     </div>
                 </div>
-
                 <div class="section-label">타임라인 요약</div>
                 <div class="timeline">
                     <template for:each={fan.timeline} for:item="t">
@@ -63,7 +61,6 @@
                 </div>
             </div>
         </template>
-
         <template if:true={error}>
             <div class="error-box">데이터를 불러오지 못했습니다. 팬 데이터가 있는지 확인해주세요.</div>
         </template>
