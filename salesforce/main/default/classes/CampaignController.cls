@@ -2,10 +2,15 @@
  * CampaignController
  * 캠페인 탭 카드 데이터. 우리 팀 4개 캠페인만 이름으로 필터링해서 조회.
  * (org에 있는 Salesforce 데모/샘플 Campaign은 제외)
+ *
+ * 실시간 계산 방식 (2026-08 개편):
+ *   발송(numberSent)   = Notification_Log__c 건수 (실제 발송 기록)
+ *   진행률(progress)   = 발송 수 ÷ CampaignMember 전체 수 × 100 (목표 대비 발송 진행률)
+ *   클릭률(clickRate)  = CampaignMember 중 Responded 수 ÷ (Sent+Responded) × 100
+ *   대상 인원(targetCount) = CampaignMember 전체 수
  */
 public with sharing class CampaignController {
 
-    // 우리 팀이 관리하는 캠페인 4개 (고정 목록)
     private static final Set<String> TEAM_CAMPAIGNS = new Set<String>{
         'Welcome Campaign',
         'First Ticket Campaign',
@@ -18,30 +23,64 @@ public with sharing class CampaignController {
         List<CampaignCard> cards = new List<CampaignCard>();
 
         List<Campaign> camps = [
-            SELECT Id, Name, Status, Description, NumberSent, StartDate
+            SELECT Id, Name, Status, Description, StartDate
             FROM Campaign
             WHERE Name IN :TEAM_CAMPAIGNS
             ORDER BY StartDate
         ];
 
-        if (!camps.isEmpty()) {
-            for (Campaign c : camps) {
-                CampaignCard card = new CampaignCard();
-                card.name = c.Name;
-                card.status = mapStatus(c.Status);
-                card.target = c.Description != null ? c.Description : '대상 미지정';
-                card.numberSent = c.NumberSent != null ? c.NumberSent.intValue() : 0;
-                card.targetCount = 0;
-                card.scheduledDate = c.StartDate != null ? c.StartDate.format() : '';
-                card.progress = defaultProgress(card.status);
-                card.clickRate = 0;
-                card.isScheduled = (card.status == '예약됨');
-                cards.add(card);
-            }
-        } else {
-            cards = demoCards();
+        if (camps.isEmpty()) {
+            return demoCards();
         }
 
+        Set<Id> campaignIds = new Set<Id>();
+        for (Campaign c : camps) campaignIds.add(c.Id);
+
+        // 캠페인별 발송(Notification_Log__c) 건수
+        Map<Id, Integer> sentCounts = new Map<Id, Integer>();
+        for (AggregateResult ar : [
+            SELECT Campaign__c c, COUNT(Id) cnt FROM Notification_Log__c
+            WHERE Campaign__c IN :campaignIds GROUP BY Campaign__c
+        ]) {
+            sentCounts.put((Id) ar.get('c'), (Integer) ar.get('cnt'));
+        }
+
+        // 캠페인별 CampaignMember 전체 수 / Responded 수
+        Map<Id, Integer> memberTotal = new Map<Id, Integer>();
+        Map<Id, Integer> memberResponded = new Map<Id, Integer>();
+        for (AggregateResult ar : [
+            SELECT CampaignId c, Status s, COUNT(Id) cnt FROM CampaignMember
+            WHERE CampaignId IN :campaignIds GROUP BY CampaignId, Status
+        ]) {
+            Id campId = (Id) ar.get('c');
+            String status = (String) ar.get('s');
+            Integer cnt = (Integer) ar.get('cnt');
+
+            memberTotal.put(campId, (memberTotal.containsKey(campId) ? memberTotal.get(campId) : 0) + cnt);
+            if (status == 'Responded') {
+                memberResponded.put(campId, (memberResponded.containsKey(campId) ? memberResponded.get(campId) : 0) + cnt);
+            }
+        }
+
+        for (Campaign c : camps) {
+            CampaignCard card = new CampaignCard();
+            card.name = c.Name;
+            card.status = mapStatus(c.Status);
+            card.target = c.Description != null ? c.Description : '대상 미지정';
+            card.scheduledDate = c.StartDate != null ? c.StartDate.format() : '';
+
+            Integer totalMembers = memberTotal.containsKey(c.Id) ? memberTotal.get(c.Id) : 0;
+            Integer sentCount = sentCounts.containsKey(c.Id) ? sentCounts.get(c.Id) : 0;
+            Integer respondedCount = memberResponded.containsKey(c.Id) ? memberResponded.get(c.Id) : 0;
+
+            card.numberSent = sentCount;
+            card.targetCount = totalMembers;
+            card.progress = totalMembers > 0 ? Math.round((sentCount * 100.0) / totalMembers) : 0;
+            card.clickRate = totalMembers > 0 ? Math.round((respondedCount * 100.0) / totalMembers) : 0;
+            card.isScheduled = (card.status == '예약됨');
+
+            cards.add(card);
+        }
         return cards;
     }
 
@@ -52,12 +91,7 @@ public with sharing class CampaignController {
         return '진행 중';
     }
 
-    private static Integer defaultProgress(String status) {
-        if (status == '종료') return 100;
-        if (status == '예약됨') return 0;
-        return 50;
-    }
-
+    // 실제 Campaign 레코드가 없을 때만 쓰는 데모 fallback (기존 유지)
     private static List<CampaignCard> demoCards() {
         List<CampaignCard> lst = new List<CampaignCard>();
         lst.add(makeCard('Welcome Campaign', '진행 중', 'New Fan', 43, 512, 48, false, 0, ''));
