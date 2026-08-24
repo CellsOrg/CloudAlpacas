@@ -138,13 +138,75 @@ Quote Template PDF 발신자 정보 전체
 
 ---
 
-## 9. 기존 문서와의 관계
+## 9. 필드 Help Text 정리 (2026-08-25 반영)
+
+Product2/Quote/Campaign의 표준 필드 중, 값의 뜻이 한눈에 안 들어오는 필드에 한글 Help Text를 추가했습니다(Setup → 필드 편집 화면의 ⓘ 아이콘에 노출). `Name`/`StartDate`/`EndDate`처럼 뜻이 자명한 필드는 일부러 넣지 않았습니다.
+
+| 오브젝트 | 필드 | Help Text |
+| --- | --- | --- |
+| Product2 | `Family` | 이 상품이 어떤 계열인지 구분하는 값입니다. Sponsorship Package는 항상 'Sponsorship'으로 둡니다. |
+| Product2 | `RevenueScheduleType` | 이 상품의 매출을 기간에 걸쳐 나눠 인식할지 정합니다. 'Divide'로 설정하면 전체 금액을 개월 수만큼 균등하게 나눠 월별 매출로 잡습니다(예: 3개월 전광판 노출). |
+| Product2 | `RevenueInstallmentPeriod` | 매출을 나눌 주기입니다. 스폰서십 상품은 보통 'Monthly'(월별)로 관리합니다. |
+| Quote | `Status` | 이 견적서가 지금 어느 단계인지 나타냅니다. 새로 작성하면 Draft이고, 검토·승인을 거쳐 상대방에게 전달(Presented)한 뒤 최종적으로 Accepted 또는 Rejected로 마무리됩니다. |
+| Quote | `ExpirationDate` | 이 견적의 유효기한입니다. 이 날짜가 지나면 동일한 조건으로 계약을 보장할 수 없습니다. |
+| Campaign | `Type` | 이 Campaign의 목적을 구분하는 값입니다. 스폰서십 협업은 항상 'Sponsorship'을 사용합니다. |
+| Campaign | `Status` | 이 협업이 지금 어느 단계인지 나타냅니다. Planned(계획 수립) → In Progress(실행 중) → Completed(정상 종료) 또는 Aborted(중단) 순서로 관리합니다. |
+| Campaign | `IsActive` | 지금 실제로 실행 중인 협업인지 표시합니다. 계약은 됐지만 아직 실행 전(Planned)이면 체크를 해제한 상태로 둡니다. |
+| Campaign | `ParentId` | 이 협업이 속한 상위 스폰서 관계입니다. 같은 스폰서 기업과 여러 번(단기·장기 등) 협업할 때, 상위 Campaign 아래로 묶어서 합산 관리합니다. |
+| Campaign | `BudgetedCost` | 이 협업을 실행하기 위해 미리 잡아둔 예산입니다. |
+| Campaign | `ActualCost` | 이 협업을 실행하면서 실제로 집행한 비용입니다. Budgeted Cost와 비교해서 예산 대비 집행률을 확인할 수 있습니다. |
+| Campaign | `ExpectedRevenue` | 이 협업으로 예상되는 매출(스폰서십 계약 금액)입니다. 연결된 Opportunity의 Amount를 기준으로 입력합니다. |
+| Campaign_Deliverable__c | `Due_Date__c`/`Completed_Date__c`/`Evidence_URL__c`/`Notes__c` | §2 참고 — 필드 재생성과 함께 Help Text도 함께 반영됨 |
+
+---
+
+## 10. Picklist 단계별 의미 (Quote Status / Campaign Status / Campaign Member Status)
+
+Salesforce는 필드 전체에는 Help Text를 붙일 수 있지만, **Picklist 값 하나하나에는 시스템상 Help Text를 붙일 수 없습니다.** 그래서 아래 내용은 Org에 입력한 것이 아니라, 팀원이 각 단계의 의미를 헷갈리지 않도록 이 문서에 정리해둔 참고 자료입니다 — 값 이름만 나열하지 않고 "이 상태가 실제로 뭘 뜻하는지"를 적었습니다.
+
+### 10.1 Quote Status (Standard Quote 기본값, 8단계)
+
+| 값 | 의미 |
+| --- | --- |
+| Draft | 견적서를 작성하는 중입니다. 아직 상대방에게 전달되지 않은 내부 초안 상태입니다. |
+| Needs Review | 작성은 끝났지만, 발송 전에 내부 검토가 필요하다고 표시된 상태입니다. |
+| In Review | 내부 검토가 실제로 진행되고 있는 상태입니다. |
+| Approved | 내부 검토·승인이 끝나 상대방에게 발송할 준비가 된 상태입니다. |
+| Presented | 승인된 견적서를 실제로 스폰서(상대 회사)에게 전달한 상태입니다. |
+| Accepted | 상대방이 이 견적 내용을 최종적으로 수락한 상태입니다. |
+| Rejected | **내부 승인 절차에서** 반려되어, 상대방에게 전달되지 못하고 끝난 상태입니다. |
+| Denied | **상대방에게 전달한 뒤** 상대방이 거절한 상태입니다. |
+
+> ⚠️ `Rejected`와 `Denied`는 Standard Quote 기본 제공 값이라 그대로 두었지만, 이름만으로는 구분이 잘 안 됩니다. 위 구분("내부 반려" vs "상대방 거절")은 제가 제안하는 해석이며, **팀이 실제로 이렇게 나눠 쓸지 합의가 필요합니다** — 현재 실제 Quote 2건은 모두 Draft라 아직 이 두 값이 실사용된 적은 없습니다.
+
+### 10.2 Campaign Status (Sponsorship Collaboration, 4단계)
+
+| 값 | 의미 |
+| --- | --- |
+| Planned | 협업이 확정(계약 체결)됐지만, 아직 실제 실행(광고 노출, 이벤트 진행 등)을 시작하지 않은 단계입니다. |
+| In Progress | 실제로 실행 중인 단계입니다 — 전광판 광고가 노출되고 있거나 Brand Day 행사가 진행되는 등. |
+| Completed | 계획했던 실행이 정상적으로 끝난 단계입니다. |
+| Aborted | 실행 도중 또는 그 전에 중단된 단계입니다 — 계약 해지, 상호 합의에 의한 중단 등. |
+
+### 10.3 Campaign Member Status (팬 반응 5단계 퍼널)
+
+| 값 | 의미 |
+| --- | --- |
+| Targeted | 이번 협업의 타겟 Fan으로 선정된 상태입니다. 아직 실제 접촉은 이뤄지지 않았습니다. |
+| Reached | 실제로 접촉(발송, 노출 등)이 이뤄진 상태입니다. 아직 Fan의 반응은 확인되지 않았습니다. |
+| Engaged | Fan이 실제로 반응(클릭, 참여 의사 표현 등)을 보인 상태입니다. 여기서부터 `HasResponded = Yes`로 집계됩니다. |
+| Attended | 오프라인 행사(Brand Day 부스 등)에 실제로 참여한 상태입니다. |
+| Converted | 이 협업을 통해 목표했던 최종 행동(구매, 가입 등)까지 이어진 상태입니다. |
+
+---
+
+## 11. 기존 문서와의 관계
 
 `P2_RESULT_REPORT/승우(Product, Quote, Campaign 구현).md`(2026-08-20 작성, 이미 커밋됨)는 이 문서의 내용을 반영하기 전 시점의 상태를 기록하고 있습니다 — 특히 Company Information과 Quote Status 필드는 그 문서 작성 시점에는 없었고 이번에 보완됐습니다. 두 문서를 통합할지, 이 문서를 보완 기록으로 별도 유지할지는 팀이 정합니다.
 
 ---
 
-## 10. 다음 세션 To-Do
+## 12. 다음 세션 To-Do
 
 | 우선순위 | 작업 | 상태 |
 | --- | --- | --- |
@@ -154,10 +216,11 @@ Quote Template PDF 발신자 정보 전체
 | P1 | Budgeted Cost/Actual Cost 실제 값으로 교체 | 진행 전 |
 | P2 | 위 5개 Report를 `PRM Sponsorship Campaign Performance` Dashboard에 위젯으로 확정 반영(Dashboard REST API가 막혀 있어 UI 작업 필요) | 진행 전 |
 | P2 | `Postal Code` 등 Company Information 나머지 값 보완 | 진행 전 |
+| P2 | Quote Status의 `Rejected`/`Denied` 두 값을 §10.1 제안대로("내부 반려" vs "상대방 거절") 실제로 나눠 쓸지 팀 합의 | 진행 전 |
 
 ---
 
-## 11. GitHub 반영 제안
+## 13. GitHub 반영 제안
 
 권장 경로:
 
