@@ -29,9 +29,9 @@ Sponsorship Collaboration Campaign이 "체결"이 아니라 "실행" 단계에 �
 | 구분 | 상태 |
 | --- | --- |
 | Object/관계 | Master-Detail(Master = Campaign) — `Campaign__c` |
-| 필드 7개 중 3개 (`Status__c`, `Weight__c`, `Campaign__c`) | **정상 — SOQL/UI 모두 조회 가능** |
-| 필드 7개 중 4개 (`Due_Date__c`, `Completed_Date__c`, `Evidence_URL__c`, `Notes__c`) | **비정상 — 2026-08-20 배포 이후 5일이 지난 지금(2026-08-25)도 SOQL/describe에서 계속 "존재하지 않는 필드"로 조회 실패.** Tooling API로는 메타데이터 존재가 확인되나, 쿼리 엔진/Lightning 렌더링에는 반영되지 않음. 재배포로 해결되는 문제가 아니며 **Salesforce Support 케이스가 필요**합니다. |
-| 실데이터 | `d'Alba Sponsorship Campaign`에 4건(Completed 2건/In Progress 1건/Not Started 1건, 가중치 합 100%) |
+| 필드 7개 전부 (`Status__c`, `Weight__c`, `Campaign__c`, `Due_Date__c`, `Completed_Date__c`, `Evidence_URL__c`, `Notes__c`) | **정상 — SOQL/describe/UI 모두 조회 가능(2026-08-25 해결)** |
+| ~~비정상~~ (해결됨) | ~~`Due_Date__c`/`Completed_Date__c`/`Evidence_URL__c`/`Notes__c` 4개 필드가 배포 후 5일간 SOQL/describe에서 조회 실패했던 문제~~ — **승우가 4개 필드를 직접 삭제 후 동일 설정(Label/Type/Help Text 한글化 포함)으로 재생성해서 해결**. Salesforce Support 케이스 없이 재생성만으로 스키마 레지스트리 문제가 풀림. |
+| 실데이터 | `d'Alba Sponsorship Campaign`에 4건(Completed 2건/In Progress 1건/Not Started 1건, 가중치 합 100%) — **Due Date/Completed Date/Notes까지 전부 입력 완료(2026-08-25)** |
 | 소스 반영 | **미완료** — 임시 스크래치패드 SFDX 프로젝트에서 배포되어 `force-app`(이 저장소 기준 `salesforce/`)에 소스로 남아있지 않음 |
 
 ### 쓰이는 용도
@@ -146,13 +146,14 @@ Quote Template PDF 발신자 정보 전체
 
 ## 10. 다음 세션 To-Do
 
-| 우선순위 | 작업 |
-| --- | --- |
-| P1 | Campaign_Deliverable__c의 4개 필드 조회 불가 문제 — Salesforce Support 케이스 오픈 |
-| P1 | Campaign_Deliverable__c / PRM_Revenue_Target__c(혜준 담당 추정) 유지 여부를 팀 Decision으로 확정 |
-| P1 | Budgeted Cost/Actual Cost 실제 값으로 교체 |
-| P2 | 위 5개 Report를 `PRM Sponsorship Campaign Performance` Dashboard에 위젯으로 확정 반영(Dashboard REST API가 막혀 있어 UI 작업 필요) |
-| P2 | `Postal Code` 등 Company Information 나머지 값 보완 |
+| 우선순위 | 작업 | 상태 |
+| --- | --- | --- |
+| ~~P1~~ | ~~Campaign_Deliverable__c의 4개 필드 조회 불가 문제 — Salesforce Support 케이스 오픈~~ | ✅ **완료(2026-08-25)** — 필드 삭제 후 재생성으로 해결, Support 케이스 불필요했음 |
+| ~~P1~~ | ~~4개 필드에 실제 값(Due Date/Completed Date/Notes) 입력~~ | ✅ **완료(2026-08-25)** |
+| P1 | Campaign_Deliverable__c / PRM_Revenue_Target__c(혜준 담당 추정) 유지 여부를 팀 Decision으로 확정 | 진행 전 |
+| P1 | Budgeted Cost/Actual Cost 실제 값으로 교체 | 진행 전 |
+| P2 | 위 5개 Report를 `PRM Sponsorship Campaign Performance` Dashboard에 위젯으로 확정 반영(Dashboard REST API가 막혀 있어 UI 작업 필요) | 진행 전 |
+| P2 | `Postal Code` 등 Company Information 나머지 값 보완 | 진행 전 |
 
 ---
 
