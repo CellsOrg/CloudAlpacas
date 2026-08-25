@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Decision_Maker_Accessible__c</fullName>
     <externalId>false</externalId>
-    <label>의사결정자 접촉 가능 여부</label>
+    <label>Decision Maker Access</label>
     <required>false</required>
     <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>false</trackHistory>

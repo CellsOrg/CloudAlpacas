@@ -71,7 +71,7 @@
         <customLabel>true</customLabel>
         <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
-        <label>Potential &amp; Fit</label>
+        <label>Potential</label>
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -102,10 +102,6 @@
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Brand_Fan_Fit__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Interest_Direction__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

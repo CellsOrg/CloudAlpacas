@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Sponsorship_Interest_Level__c</fullName>
     <externalId>false</externalId>
-    <label>Sponsorship 관심도</label>
+    <label>Interest Level</label>
     <required>false</required>
     <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>false</trackHistory>

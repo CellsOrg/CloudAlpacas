@@ -328,16 +328,6 @@
                 <identifier>CA_PotentialFit_BrandFanFit</identifier>
             </fieldInstance>
         </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Interest_Direction__c</fieldItem>
-                <identifier>CA_PotentialFit_InterestDirection</identifier>
-            </fieldInstance>
-        </itemInstances>
         <name>CA_PotentialFit_Col2Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -535,6 +525,24 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
+                    <value>CA_PotentialFit_Columns</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>horizontalAlignment</name>
+                    <value>false</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>label</name>
+                    <value>Potential</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:fieldSection</componentName>
+                <identifier>CA_fieldSection_PotentialFit</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>columns</name>
                     <value>CA_ContactDecision_Columns</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
@@ -547,24 +555,6 @@
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>CA_fieldSection_ContactDecision</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>columns</name>
-                    <value>CA_PotentialFit_Columns</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>horizontalAlignment</name>
-                    <value>false</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>label</name>
-                    <value>Potential &amp; Fit</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:fieldSection</componentName>
-                <identifier>CA_fieldSection_PotentialFit</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>
