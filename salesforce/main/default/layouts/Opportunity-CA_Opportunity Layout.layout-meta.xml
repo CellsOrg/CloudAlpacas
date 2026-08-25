@@ -79,10 +79,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Expected_Close_Window__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Expected_Timing__c</field>
             </layoutItems>
             <layoutItems>

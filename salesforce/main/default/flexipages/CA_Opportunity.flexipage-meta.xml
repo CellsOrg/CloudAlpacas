@@ -290,16 +290,6 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Expected_Close_Window__c</fieldItem>
-                <identifier>CA_PotentialFit_EstimatedBudget</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
                 <fieldItem>Record.Expected_Timing__c</fieldItem>
                 <identifier>CA_PotentialFit_ExpectedTiming</identifier>
             </fieldInstance>
