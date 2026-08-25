@@ -6,6 +6,5 @@
     <fields>Amount</fields>
     <fields>CloseDate</fields>
     <fields>OwnerId</fields>
-    <fields>IqScore</fields>
     <label>CA Opportunity Compact Layout</label>
 </CompactLayout>
