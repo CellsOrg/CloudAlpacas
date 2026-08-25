@@ -301,23 +301,9 @@
                     <value>none</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Sponsorship_Interest_Level__c</fieldItem>
-                <identifier>CA_CommercialPotential_InterestLevel</identifier>
+                <identifier>CA_PotentialFit_InterestLevel</identifier>
             </fieldInstance>
         </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Amount</fieldItem>
-                <identifier>CA_CommercialPotential_Amount</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <name>CA_CommercialPotential_Col1Fields</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
         <itemInstances>
             <fieldInstance>
                 <fieldInstanceProperties>
@@ -325,7 +311,7 @@
                     <value>none</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Expected_Close_Window__c</fieldItem>
-                <identifier>CA_CommercialPotential_ExpectedCloseWindow</identifier>
+                <identifier>CA_PotentialFit_EstimatedBudget</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -335,34 +321,10 @@
                     <value>none</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Expected_Timing__c</fieldItem>
-                <identifier>CA_CommercialPotential_ExpectedTiming</identifier>
+                <identifier>CA_PotentialFit_ExpectedTiming</identifier>
             </fieldInstance>
         </itemInstances>
-        <name>CA_CommercialPotential_Col2Fields</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>CA_CommercialPotential_Col1Fields</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>CA_CommercialPotential_Column1</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>CA_CommercialPotential_Col2Fields</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>CA_CommercialPotential_Column2</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>CA_CommercialPotential_Columns</name>
+        <name>CA_PotentialFit_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -373,21 +335,7 @@
                     <value>none</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Target_Segment__c</fieldItem>
-                <identifier>CA_StrategicFit_TargetSegment</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <name>CA_StrategicFit_Col1Fields</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Expected_Benefit_Short_Term__c</fieldItem>
-                <identifier>CA_StrategicFit_BenefitShort</identifier>
+                <identifier>CA_PotentialFit_TargetSegment</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -396,8 +344,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Expected_Benefit_Mid_Term__c</fieldItem>
-                <identifier>CA_StrategicFit_BenefitMid</identifier>
+                <fieldItem>Record.Brand_Fan_Fit__c</fieldItem>
+                <identifier>CA_PotentialFit_BrandFanFit</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -406,11 +354,11 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Expected_Benefit_Long_Term__c</fieldItem>
-                <identifier>CA_StrategicFit_BenefitLong</identifier>
+                <fieldItem>Record.Interest_Direction__c</fieldItem>
+                <identifier>CA_PotentialFit_InterestDirection</identifier>
             </fieldInstance>
         </itemInstances>
-        <name>CA_StrategicFit_Col2Fields</name>
+        <name>CA_PotentialFit_Col2Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -418,23 +366,23 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>body</name>
-                    <value>CA_StrategicFit_Col1Fields</value>
+                    <value>CA_PotentialFit_Col1Fields</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:column</componentName>
-                <identifier>CA_StrategicFit_Column1</identifier>
+                <identifier>CA_PotentialFit_Column1</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
                     <name>body</name>
-                    <value>CA_StrategicFit_Col2Fields</value>
+                    <value>CA_PotentialFit_Col2Fields</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:column</componentName>
-                <identifier>CA_StrategicFit_Column2</identifier>
+                <identifier>CA_PotentialFit_Column2</identifier>
             </componentInstance>
         </itemInstances>
-        <name>CA_StrategicFit_Columns</name>
+        <name>CA_PotentialFit_Columns</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -452,54 +400,10 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Partnership_Type__c</fieldItem>
-                <identifier>CA_DealSnapshot_PartnershipType</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Contract_Term__c</fieldItem>
-                <identifier>CA_DealSnapshot_ContractTerm</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.SDO_Sales_Primary_Contact__c</fieldItem>
-                <identifier>CA_DealSnapshot_PrimaryContact</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <name>CA_DealSnapshot_Col1Fields</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
                     <value>required</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.StageName</fieldItem>
                 <identifier>CA_DealSnapshot_Stage</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Probability</fieldItem>
-                <identifier>CA_DealSnapshot_Probability</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -520,6 +424,30 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.CloseDate</fieldItem>
                 <identifier>CA_DealSnapshot_CloseDate</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <name>CA_DealSnapshot_Col1Fields</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Partnership_Type__c</fieldItem>
+                <identifier>CA_DealSnapshot_PartnershipType</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Contract_Term__c</fieldItem>
+                <identifier>CA_DealSnapshot_ContractTerm</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -639,60 +567,6 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
-                    <value>CA_ContactDecision_Columns</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>horizontalAlignment</name>
-                    <value>false</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>label</name>
-                    <value>Contact &amp; Decision</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:fieldSection</componentName>
-                <identifier>CA_fieldSection_ContactDecision</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>columns</name>
-                    <value>CA_CommercialPotential_Columns</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>horizontalAlignment</name>
-                    <value>false</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>label</name>
-                    <value>Commercial Potential</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:fieldSection</componentName>
-                <identifier>CA_fieldSection_CommercialPotential</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>columns</name>
-                    <value>CA_StrategicFit_Columns</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>horizontalAlignment</name>
-                    <value>false</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>label</name>
-                    <value>Strategic Fit</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:fieldSection</componentName>
-                <identifier>CA_fieldSection_StrategicFit</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>columns</name>
                     <value>CA_DealSnapshot_Columns</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
@@ -705,6 +579,42 @@
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>CA_fieldSection_DealSnapshot</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>columns</name>
+                    <value>CA_ContactDecision_Columns</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>horizontalAlignment</name>
+                    <value>false</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>label</name>
+                    <value>Contact</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:fieldSection</componentName>
+                <identifier>CA_fieldSection_ContactDecision</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>columns</name>
+                    <value>CA_PotentialFit_Columns</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>horizontalAlignment</name>
+                    <value>false</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>label</name>
+                    <value>Potential &amp; Fit</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:fieldSection</componentName>
+                <identifier>CA_fieldSection_PotentialFit</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>
