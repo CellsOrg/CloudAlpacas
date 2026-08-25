@@ -352,6 +352,16 @@
                     <name>uiBehavior</name>
                     <value>readonly</value>
                 </fieldInstanceProperties>
+                <fieldItem>Record.AccountId</fieldItem>
+                <identifier>CA_DealSnapshot_Account</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.Amount</fieldItem>
                 <identifier>CA_DealSnapshot_Amount</identifier>
             </fieldInstance>
@@ -374,10 +384,20 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>readonly</value>
+                    <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Partnership_Type__c</fieldItem>
-                <identifier>CA_DealSnapshot_PartnershipType</identifier>
+                <fieldItem>Record.Partner_Tier__c</fieldItem>
+                <identifier>CA_DealSnapshot_PartnerTier</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>required</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.StageName</fieldItem>
+                <identifier>CA_DealSnapshot_Stage</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -386,8 +406,8 @@
                     <name>uiBehavior</name>
                     <value>readonly</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Contract_Term__c</fieldItem>
-                <identifier>CA_DealSnapshot_ContractTerm</identifier>
+                <fieldItem>Record.Probability</fieldItem>
+                <identifier>CA_DealSnapshot_Probability</identifier>
             </fieldInstance>
         </itemInstances>
         <name>CA_DealSnapshot_Col2Fields</name>

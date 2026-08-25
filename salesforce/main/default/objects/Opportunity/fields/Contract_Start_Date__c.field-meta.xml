@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Contract_Start_Date__c</fullName>
+    <label>Contract Start Date</label>
+    <type>Date</type>
+    <description>스폰서십 계약/권리가 실제로 시작되는 날짜. 표준 Close Date(영업 종결 예상일)와는 다른 개념 - Close Date는 계약을 언제 체결하는지, 이 필드는 계약 효력이 언제부터인지를 나타냄.</description>
+</CustomField>
