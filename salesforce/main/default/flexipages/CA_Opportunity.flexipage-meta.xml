@@ -223,6 +223,16 @@
                 <identifier>CA_ContactDecision_PrimaryContact</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Contact_Role__c</fieldItem>
+                <identifier>CA_ContactDecision_ContactRole</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>CA_ContactDecision_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -235,6 +245,16 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.Decision_Maker_Accessible__c</fieldItem>
                 <identifier>CA_ContactDecision_DecisionMakerAccessible</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Decision_Maker_Name__c</fieldItem>
+                <identifier>CA_ContactDecision_DecisionMakerName</identifier>
             </fieldInstance>
         </itemInstances>
         <name>CA_ContactDecision_Col2Fields</name>
@@ -295,8 +315,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.CloseDate</fieldItem>
-                <identifier>CA_CommercialPotential_CloseDate</identifier>
+                <fieldItem>Record.Expected_Close_Window__c</fieldItem>
+                <identifier>CA_CommercialPotential_ExpectedCloseWindow</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -367,10 +387,30 @@
                 <identifier>CA_StrategicFit_ContractTerm</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Brand_Fan_Fit__c</fieldItem>
+                <identifier>CA_StrategicFit_BrandFanFit</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>CA_StrategicFit_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Interest_Direction__c</fieldItem>
+                <identifier>CA_StrategicFit_InterestDirection</identifier>
+            </fieldInstance>
+        </itemInstances>
         <itemInstances>
             <fieldInstance>
                 <fieldInstanceProperties>
@@ -647,6 +687,16 @@
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
+                    <name>richTextValue</name>
+                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Guide to Success&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Qualification → Discovery로 이동하려면 다음이 확인되어야 합니다.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;✓ 실제 예산 또는 구매 의향 확인&lt;/li&gt;&lt;li&gt;✓ 실무 담당자 또는 의사결정자 접촉 가능&lt;/li&gt;&lt;li&gt;✓ 추진 시기(타임라인) 확인&lt;/li&gt;&lt;li&gt;○ 구체적인 요구사항 논의의 가치 확인&lt;/li&gt;&lt;li&gt;✓ 고객과 구체적인 스폰서십 가치 논의&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:richText</componentName>
+                <identifier>CA_richText_GuideToSuccess</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
                     <name>columns</name>
                     <value>CA_ContactDecision_Columns</value>
                 </componentInstanceProperties>
@@ -869,6 +919,16 @@
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>richTextValue</name>
+                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Opportunity Score&lt;/b&gt;&lt;/p&gt;&lt;p&gt;실시간 Deal Health Score(점수, 상승/하락 요인, 추이 그래프)는 Apex/LWC 기반 자동 계산이 필요한 영역이라 이번 단계에서는 표준 기능만으로 구현하지 않았습니다. 향후 개발 예정입니다.&lt;/p&gt;&lt;/div&gt;</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:richText</componentName>
+                <identifier>CA_richText_OpportunityScore</identifier>
+            </componentInstance>
+        </itemInstances>
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>

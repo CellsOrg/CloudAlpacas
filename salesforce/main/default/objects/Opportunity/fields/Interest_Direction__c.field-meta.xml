@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Interest_Direction__c</fullName>
+    <label>관심 방향</label>
+    <length>255</length>
+    <type>Text</type>
+</CustomField>
