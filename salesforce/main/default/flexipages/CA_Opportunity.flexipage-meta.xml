@@ -45,17 +45,6 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>force:detailPanel</componentName>
-                <identifier>force_detailPanel</identifier>
-            </componentInstance>
-        </itemInstances>
-        <mode>Replace</mode>
-        <name>detailTabContent</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
                 <componentInstanceProperties>
                     <name>parentFieldApiName</name>
                     <value>Opportunity.Id</value>
@@ -233,6 +222,26 @@
                 <identifier>CA_ContactDecision_ContactRole</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Primary_Contact_Phone__c</fieldItem>
+                <identifier>CA_ContactDecision_Phone</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Primary_Contact_Email__c</fieldItem>
+                <identifier>CA_ContactDecision_Email</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>CA_ContactDecision_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -367,50 +376,10 @@
                 <identifier>CA_StrategicFit_TargetSegment</identifier>
             </fieldInstance>
         </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Partnership_Type__c</fieldItem>
-                <identifier>CA_StrategicFit_PartnershipType</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Contract_Term__c</fieldItem>
-                <identifier>CA_StrategicFit_ContractTerm</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Brand_Fan_Fit__c</fieldItem>
-                <identifier>CA_StrategicFit_BrandFanFit</identifier>
-            </fieldInstance>
-        </itemInstances>
         <name>CA_StrategicFit_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Interest_Direction__c</fieldItem>
-                <identifier>CA_StrategicFit_InterestDirection</identifier>
-            </fieldInstance>
-        </itemInstances>
         <itemInstances>
             <fieldInstance>
                 <fieldInstanceProperties>
@@ -509,16 +478,6 @@
                 <identifier>CA_DealSnapshot_PrimaryContact</identifier>
             </fieldInstance>
         </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.RecordTypeId</fieldItem>
-                <identifier>CA_DealSnapshot_RecordType</identifier>
-            </fieldInstance>
-        </itemInstances>
         <name>CA_DealSnapshot_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -527,7 +486,7 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>readonly</value>
+                    <value>required</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.StageName</fieldItem>
                 <identifier>CA_DealSnapshot_Stage</identifier>
@@ -557,7 +516,7 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>readonly</value>
+                    <value>required</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.CloseDate</fieldItem>
                 <identifier>CA_DealSnapshot_CloseDate</identifier>
@@ -605,25 +564,7 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>active</name>
-                    <value>false</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>detailTabContent</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>title</name>
-                    <value>Standard.Tab.detail</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:tab</componentName>
-                <identifier>detailTab</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>active</name>
-                    <value>false</value>
+                    <value>true</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>body</name>
@@ -688,7 +629,7 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>richTextValue</name>
-                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Guide to Success&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Qualification → Discovery로 이동하려면 다음이 확인되어야 합니다.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;✓ 실제 예산 또는 구매 의향 확인&lt;/li&gt;&lt;li&gt;✓ 실무 담당자 또는 의사결정자 접촉 가능&lt;/li&gt;&lt;li&gt;✓ 추진 시기(타임라인) 확인&lt;/li&gt;&lt;li&gt;○ 구체적인 요구사항 논의의 가치 확인&lt;/li&gt;&lt;li&gt;✓ 고객과 구체적인 스폰서십 가치 논의&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</value>
+                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Guide to Success — Qualification&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Qualification → Discovery로 이동하려면 다음이 확인되어야 합니다.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;실제 예산 또는 구매 영향력 확인&lt;/li&gt;&lt;li&gt;실무 담당자 또는 의사결정자 접촉 가능 여부 확인&lt;/li&gt;&lt;li&gt;구체적인 고객 요구/가치 확인&lt;/li&gt;&lt;li&gt;추진 시기(타임라인) 확인&lt;/li&gt;&lt;/ul&gt;&lt;p style=&quot;font-size:12px;color:#706e6b;&quot;&gt;체크 상태는 이 페이지가 아니라 상단 Path의 안내 패널에서 실시간으로 반영됩니다.&lt;/p&gt;&lt;/div&gt;</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:richText</componentName>
                 <identifier>CA_richText_GuideToSuccess</identifier>
@@ -710,32 +651,6 @@
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>CA_fieldSection_ContactDecision</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>parentFieldApiName</name>
-                    <value>Opportunity.Id</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>relatedListApiName</name>
-                    <value>OpportunityContactRoles</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>relatedListComponentOverride</name>
-                    <value>ADVGRID</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>rowsToDisplay</name>
-                    <value>5</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>showActionBar</name>
-                    <value>true</value>
-                </componentInstanceProperties>
-                <componentName>force:relatedListSingleContainer</componentName>
-                <identifier>CA_relatedListContactRoles_Main</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>
@@ -901,6 +816,46 @@
                 <identifier>CA_NextAction_NextStep</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Next_Activity_Subject__c</fieldItem>
+                <identifier>CA_NextAction_NextActivity</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Next_Activity_Date__c</fieldItem>
+                <identifier>CA_NextAction_NextActivityDate</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Open_Tasks_Count__c</fieldItem>
+                <identifier>CA_NextAction_OpenTasks</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Overdue_Tasks_Count__c</fieldItem>
+                <identifier>CA_NextAction_OverdueTasks</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>CA_NextAction_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -923,7 +878,7 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>richTextValue</name>
-                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Opportunity Score&lt;/b&gt;&lt;/p&gt;&lt;p&gt;실시간 Deal Health Score(점수, 상승/하락 요인, 추이 그래프)는 Apex/LWC 기반 자동 계산이 필요한 영역이라 이번 단계에서는 표준 기능만으로 구현하지 않았습니다. 향후 개발 예정입니다.&lt;/p&gt;&lt;/div&gt;</value>
+                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Opportunity Score&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Future LWC/Apex Enhancement&lt;/b&gt;&lt;/p&gt;&lt;p&gt;이 Org의 Einstein Opportunity Scoring은 꺼져 있고, 실 Opportunity 데이터도 아직 학습 가능한 양이 아니라서 지금 켜도 의미 있는 점수가 나오지 않습니다. 아래 항목은 표준 기능만으로는 구현할 수 없어 커스텀 개발이 필요합니다:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Score /100 및 등급(Good/Fair/Risk 등)&lt;/li&gt;&lt;li&gt;Positive / Negative Factors&lt;/li&gt;&lt;li&gt;Score Trend(최근 4주 추이)&lt;/li&gt;&lt;li&gt;Activity 데이터 기반 신호 반영&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:richText</componentName>
                 <identifier>CA_richText_OpportunityScore</identifier>

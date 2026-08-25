@@ -30,10 +30,9 @@
     <pathAssistantSteps>
         <fieldNames>SDO_Sales_Project_Budgeted__c</fieldNames>
         <fieldNames>Decision_Maker_Accessible__c</fieldNames>
-        <fieldNames>Expected_Timing__c</fieldNames>
-        <fieldNames>Interest_Direction__c</fieldNames>
         <fieldNames>Expected_Benefit_Short_Term__c</fieldNames>
-        <info>&lt;p&gt;&lt;b&gt;Qualification → Discovery로 이동하려면 다음이 확인되어야 합니다.&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;실제 예산 또는 구매 의향이 있는가&lt;/li&gt;&lt;li&gt;실무 담당자 또는 의사결정자와 접촉 가능한가&lt;/li&gt;&lt;li&gt;추진 시기(타임라인)가 확인되는가&lt;/li&gt;&lt;li&gt;구체적인 요구사항을 논의할 가치가 있는가&lt;/li&gt;&lt;li&gt;고객과 구체적인 스폰서십 가치를 논의했는가&lt;/li&gt;&lt;/ul&gt;</info>
+        <fieldNames>Expected_Timing__c</fieldNames>
+        <info>&lt;p&gt;&lt;b&gt;Qualification → Discovery로 이동하려면 다음이 확인되어야 합니다.&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;실제 예산 또는 구매 영향력이 있는가&lt;/li&gt;&lt;li&gt;실무 담당자 또는 의사결정자와 접촉 가능한가&lt;/li&gt;&lt;li&gt;구체적인 고객 요구/가치가 확인되는가&lt;/li&gt;&lt;li&gt;추진 시기(타임라인)가 확인되는가&lt;/li&gt;&lt;/ul&gt;</info>
         <picklistValueName>Qualification</picklistValueName>
     </pathAssistantSteps>
     <recordTypeName>SimpleOpportunity</recordTypeName>

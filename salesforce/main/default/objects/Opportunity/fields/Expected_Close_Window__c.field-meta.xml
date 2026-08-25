@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Expected_Close_Window__c</fullName>
-    <label>Expected Close Date</label>
+    <description>Qualification 단계에서 확인한 대략적인 예산 범위 (예: KRW 300M ~ 500M). 확정 금액은 표준 Amount 필드를 사용합니다.</description>
+    <externalId>false</externalId>
+    <label>Estimated Budget</label>
     <length>60</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
     <type>Text</type>
-    <description>Qualification 단계의 대략적인 예상 시기 (예: 2027 Q4 ~ 2028 Q1). 정확한 계약 마감일은 표준 Close Date 필드를 사용합니다.</description>
+    <unique>false</unique>
 </CustomField>
