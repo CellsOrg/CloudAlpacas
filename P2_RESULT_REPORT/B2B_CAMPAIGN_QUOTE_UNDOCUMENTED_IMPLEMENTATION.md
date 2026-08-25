@@ -200,13 +200,96 @@ Salesforce는 필드 전체에는 Help Text를 붙일 수 있지만, **Picklist 
 
 ---
 
-## 11. 기존 문서와의 관계
+## 11. Dashboard 최종 구성 (2026-08-25)
+
+`PRM Sponsorship Campaign Performance` Dashboard에 §6의 Report 5종을 전부 위젯으로 반영하고, 기존 2개(Total Deliverables, Member Funnel)와 합쳐 총 7개 위젯 구성을 완료했습니다.
+
+| 위젯 | 원본 Report | 타입 |
+| --- | --- | --- |
+| 진행 중인 스폰서십 패키지 | Sponsorship Open Package Count | Metric |
+| 평균 견적 금액 | Sponsorship Average Quote Amount | Metric |
+| 스폰서십 협업별 예상 매출 | Sponsorship Collaboration ROI | Bar Chart |
+| 스폰서십 진행 현황 (구 "Collaboration 진행 현황") | Sponsorship Collaboration Status | Table |
+| 스폰서십 파이프라인 | Sponsorship Pipeline by Stage | Table |
+| 실행 과업 진행률 (구 Total Deliverables) | Sponsorship Deliverable Status | Metric |
+| 팬 반응 퍼널 (구 Member Funnel) | Sponsorship Member Funnel | Table |
+
+**이름 변경 배경**: "Collaboration 진행 현황"을 "스폰서십 진행 현황"으로 바꿨습니다 — `05_DECISIONS.md` Decision 019가 이미 "B2B Story의 중심을 Collaboration에서 Sponsorship Sales/Pipeline으로 전환"하기로 확정해뒀는데, 위젯 이름에는 이게 반영되지 않고 있었습니다. Dashboard 이름 자체도 `스폰서십 통합 현황판`으로 바꾸는 걸 제안드립니다(현재 "PRM Sponsorship Campaign Performance"는 영문이고, 지금은 실행 성과뿐 아니라 파이프라인·재무·진행상태·반응까지 다 포함하는 통합 현황판이 됐기 때문입니다) — 대시보드 이름 자체를 바꿀지는 팀 확인 후 진행하는 걸 권장합니다.
+
+### 발견 및 수정한 버그 — Report 형식(Tabular) 문제
+
+`Sponsorship Open Package Count`/`Sponsorship Average Quote Amount` 두 Report를 Dashboard 위젯으로 추가하려 하면 **"We can't get data for this widget right now"** 오류가 났습니다. 원인은 데이터가 아니라 Report 형식이었습니다 — Salesforce는 그룹핑이 하나도 없는 Report를 "Summary" 형식으로 저장해도 내부적으로 "Tabular"로 되돌리는데, Dashboard 위젯(특히 Metric 타입)은 Tabular Report를 지원하지 않습니다. **의미 있는 그룹(Stage)을 하나씩 추가해서 진짜 Summary 형식으로 고정**해 해결했습니다 — Metric 위젯은 어차피 전체 합계(Grand Total)만 쓰기 때문에, 그룹이 추가돼도 화면에 보이는 숫자는 그대로입니다.
+
+---
+
+## 12. Net Profit Custom Summary Formula 추가
+
+### 배경
+"구단 재정 상태 개선"이라는 Business Goal(CLAUDE.md §2, Decision 019)에 맞춰, 스폰서십 협업이 실제로 얼마나 순이익을 내는지 확인할 방법이 필요했습니다. Salesforce 표준 Campaign ROI(%)는 이미 있었지만, 원(KRW) 단위의 순이익 금액을 보여주는 지표는 없었습니다.
+
+### 구현
+`Sponsorship Collaboration ROI` Report에 Custom Summary Formula를 추가했습니다.
+- **Column Name**: `Net Profit`
+- **Formula**: `EXP_REVENUE:SUM - ACTUAL_COST:SUM` (Expected Revenue 합계 − Actual Cost 합계)
+- **Format**: Currency, Display: All Summary Levels
+
+### 검증
+전체 합계 기준 `예상 매출 33억 − 실집행 비용 6천만 = 순이익 32억 4천만`으로 정확히 계산되는 것을 API로 재조회해 확인했습니다.
+
+### 쓰이는 용도
+`스폰서십 협업별 예상 매출` Dashboard 위젯의 Report에 그대로 반영되어, Parent Campaign(스폰서)별 실제 순이익을 원 단위로 바로 확인할 수 있습니다.
+
+---
+
+## 13. Campaign.ExpectedRevenue 자동 동기화 (Flow 3종 신설)
+
+### 배경
+`Campaign.ExpectedRevenue`는 원래 승우가 연결된 Opportunity의 Amount 값을 **손으로 복사해 넣은 것**이었습니다(§5 참고). `03_SYSTEM.md` Decision 014가 B2C 쪽에 이미 경고해둔 것과 똑같은 함정입니다 — "원천 데이터를 다른 곳에 복제하면 나중에 어긋난다." Opportunity Amount가 바뀌면 Campaign 쪽은 자동으로 안 바뀌므로, 두 값이 서로 다른 숫자를 보여줄 위험이 있었습니다.
+
+### 왜 Roll-Up Summary가 아니라 Flow인가
+Opportunity → Campaign 연결(Primary Campaign Source)은 표준 **Lookup** 관계입니다. Roll-Up Summary는 **Master-Detail** 관계에서만 가능해서 못 씁니다 — 이건 `05_DECISIONS.md` Decision 018-K(Account 집계 필드 On Hold)가 Account-Opportunity 관계에서 이미 겪은 것과 동일한 제약입니다. Flow가 Salesforce에서 이 경우 쓰는 표준적인 대안입니다(Decision 003 "Standard First"의 연장).
+
+### 구현 — Flow 3개 (Subflow 패턴)
+
+같은 계산 로직(Campaign에 연결된 Opportunity 금액 합산)을 여러 트리거(생성/수정/삭제)가 공유해야 해서, 로직 중복으로 인한 정합성 어긋남을 막기 위해 **Subflow로 분리**했습니다.
+
+| Flow | Label | API Name | 역할 |
+| --- | --- | --- | --- |
+| Subflow | `Campaign 예상 매출 계산` | `Recalculate_Campaign_Expected_Revenue` | 계산 로직 본체 — Campaign Id와 "제외할 Opportunity Id"(선택)를 입력받아 합산 후 Campaign.ExpectedRevenue 갱신 |
+| Flow 1 | `Campaign 예상 매출 동기화` | `Campaign_Expected_Revenue_Sync` | Opportunity 생성/수정 시 Subflow 호출(제외 Id 없음) |
+| Flow 2 | `Campaign 예상 매출 동기화 (Opportunity 삭제 시)` | `Campaign_Expected_Revenue_Sync_On_Delete` | Opportunity 삭제 시 Subflow 호출(삭제되는 자기 자신 Id를 제외 Id로 전달) |
+
+> Salesforce Record-Triggered Flow는 "생성/수정"과 "삭제"를 하나의 Flow에서 동시에 트리거할 수 없어서 Flow가 2개로 나뉩니다. 삭제 시 제외 로직은 "제외할 Opportunity Id가 비어있으면 아무것도 제외되지 않는다"는 성질을 이용해, 조건 분기 없이 하나의 Subflow로 생성/수정/삭제를 전부 처리하도록 설계했습니다.
+
+### 검증 (2026-08-25, 실제 테스트)
+
+| 시나리오 | 결과 |
+| --- | --- |
+| 테스트 Opportunity 생성(연결 Campaign에 2,000,000 추가) | ✅ Campaign.ExpectedRevenue: 300,000,000 → 302,000,000 |
+| 그 Opportunity 삭제 | ✅ Campaign.ExpectedRevenue: 302,000,000 → 300,000,000 (수동 개입 없이 자동 복구) |
+
+### 알려진 한계
+- Opportunity의 Campaign(Primary Campaign Source)이 **변경**되는 경우(A Campaign → B Campaign으로 재연결)는 Flow 1이 "새 Campaign(B)"의 합계는 갱신하지만, **"예전 Campaign(A)"의 합계는 갱신하지 않습니다** — A는 여전히 예전 Opportunity가 포함된 금액으로 남습니다. 이 케이스가 실제로 발생할 가능성이 있으면 추가 보완이 필요합니다.
+
+---
+
+## 14. 이번 작업 중 발견한 플랫폼 제약사항
+
+### Product Schedule이 걸린 Line Item은 단가 변경 불가
+Revenue Schedule이 설정된 OpportunityLineItem/QuoteLineItem은 **단가(Sales Price/Unit Price)를 직접 수정할 수 없습니다**(`Invalid unit price change on Quote Line Item; cannot modify unit price when the item is revenue scheduled`). 스케줄이 이미 그 가격을 기준으로 월별 분할돼 있어서, 가격을 바꾸려면 기존 스케줄을 먼저 삭제해야 합니다. `d'Alba Short-Term Sponsorship`의 전광판 광고 상품이 여기 해당됩니다 — 향후 이 딜의 금액을 조정할 일이 생기면 스케줄부터 지워야 한다는 걸 팀이 알고 있어야 합니다.
+
+### Quote Sync 중에는 Opportunity Line Item을 직접 고치면 안 됨 (기존 경고 재확인)
+Quote가 Syncing 중일 때 OpportunityLineItem 쪽 필드(예: UnitPrice)를 직접 수정하면, Sync 엔진이 QuoteLineItem 값 기준으로 **조용히 되돌립니다**(에러 없이 원래 값으로 리셋됨). 이건 2026-08-21 Daily Report에 이미 기록된 "동시 추가 시 금액 2배" 이슈와 같은 뿌리의 문제입니다 — Syncing 중에는 반드시 Quote Line Item 쪽만 고쳐야 합니다.
+
+---
+
+## 15. 기존 문서와의 관계
 
 `P2_RESULT_REPORT/승우(Product, Quote, Campaign 구현).md`(2026-08-20 작성, 이미 커밋됨)는 이 문서의 내용을 반영하기 전 시점의 상태를 기록하고 있습니다 — 특히 Company Information과 Quote Status 필드는 그 문서 작성 시점에는 없었고 이번에 보완됐습니다. 두 문서를 통합할지, 이 문서를 보완 기록으로 별도 유지할지는 팀이 정합니다.
 
 ---
 
-## 12. 다음 세션 To-Do
+## 16. 다음 세션 To-Do
 
 | 우선순위 | 작업 | 상태 |
 | --- | --- | --- |
@@ -214,13 +297,16 @@ Salesforce는 필드 전체에는 Help Text를 붙일 수 있지만, **Picklist 
 | ~~P1~~ | ~~4개 필드에 실제 값(Due Date/Completed Date/Notes) 입력~~ | ✅ **완료(2026-08-25)** |
 | P1 | Campaign_Deliverable__c / PRM_Revenue_Target__c(혜준 담당 추정) 유지 여부를 팀 Decision으로 확정 | 진행 전 |
 | P1 | Budgeted Cost/Actual Cost 실제 값으로 교체 | 진행 전 |
-| P2 | 위 5개 Report를 `PRM Sponsorship Campaign Performance` Dashboard에 위젯으로 확정 반영(Dashboard REST API가 막혀 있어 UI 작업 필요) | 진행 전 |
+| ~~P2~~ | ~~위 5개 Report를 `PRM Sponsorship Campaign Performance` Dashboard에 위젯으로 확정 반영~~ | ✅ **완료(2026-08-25)** — §11 참고, Report 형식(Tabular) 버그도 함께 해결 |
+| ~~P2~~ | ~~Campaign.ExpectedRevenue를 Opportunity Amount와 자동 동기화~~ | ✅ **완료(2026-08-25)** — §13 참고, Flow 3종(Subflow + 생성/수정 + 삭제) 신설·테스트 완료 |
 | P2 | `Postal Code` 등 Company Information 나머지 값 보완 | 진행 전 |
 | P2 | Quote Status의 `Rejected`/`Denied` 두 값을 §10.1 제안대로("내부 반려" vs "상대방 거절") 실제로 나눠 쓸지 팀 합의 | 진행 전 |
+| P2 | Dashboard 이름을 `스폰서십 통합 현황판`으로 바꿀지 팀 확인(§11) | 진행 전 |
+| P3 | §13에서 발견한 한계 — Opportunity의 Campaign이 재연결(A→B)될 때 예전 Campaign(A) 합계가 갱신 안 되는 문제 보완 | 진행 전 |
 
 ---
 
-## 13. GitHub 반영 제안
+## 17. GitHub 반영 제안
 
 권장 경로:
 
