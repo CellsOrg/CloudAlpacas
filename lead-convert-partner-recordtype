@@ -1,0 +1,59 @@
+# Lead Convert 시 Partner Record Type 자동 설정
+
+**날짜:** 2026-08-25  
+**브랜치:** `aaron/lead-convert-partner-recordtype`  
+**트리거:** `LeadConvertPartnerContact`
+
+---
+
+## 배경
+
+Lead를 Convert할 때 생성되는 Account와 Contact의 Record Type이 기본값인 **Fan / Player**로 고정되는 문제가 있었음. Partner 영업 플로우에서는 두 오브젝트 모두 **Partner** Record Type이어야 함.
+
+---
+
+## 변경 내용
+
+### 1. Account Record Type 수정 (Fan → Partner)
+
+- Lead Convert 후 생성된 Account의 Record Type을 `SDO_Account_Partner`로 자동 변경
+- 트리거에 Account 조회 및 update 로직 추가
+
+### 2. Contact Record Type 수정 (Player → Partner)
+
+- Lead Convert 후 생성된 Contact의 Record Type을 `Partner_Contact`으로 자동 변경
+- 기존 `Lead_Partner_Application` 레코드 타입 조건 제거 → **모든 Lead에 일괄 적용**
+
+### 3. 오류 수정 (SDO_PRM_Region__c)
+
+- Contact SOQL에 존재하지 않는 필드(`SDO_PRM_Region__c`, `SDO_PRM_Service_Delivery__c`) 참조로 인한 convert 에러 발생
+- 해당 필드 복사 로직 제거
+
+---
+
+## 최종 트리거 동작
+
+```
+Lead (after update) → IsConverted 전환 감지
+    └─ Account (ConvertedAccountId) → RecordType = SDO_Account_Partner (Partner)
+    └─ Contact (ConvertedContactId) → RecordType = Partner_Contact (Partner)
+```
+
+- Lead RecordType 무관하게 모든 convert에 적용
+- Account / Contact 모두 단일 SOQL + bulk update로 처리
+
+---
+
+## 확인된 Record Type Developer Name
+
+| Object  | Developer Name       | Label   |
+|---------|----------------------|---------|
+| Account | `SDO_Account_Partner`| Partner |
+| Contact | `Partner_Contact`    | Partner |
+
+---
+
+## 테스트 결과
+
+- `SDO_Lead_Default` 레코드 타입 Lead로 convert → Account: Partner, Contact: Partner 확인
+- Convert 에러 없음 (필드 참조 오류 수정 후)
