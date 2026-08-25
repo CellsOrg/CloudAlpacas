@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Open_Tasks_Count__c</fullName>
+    <label>Open Tasks</label>
+    <type>Number</type>
+    <precision>18</precision>
+    <scale>0</scale>
+    <defaultValue>0</defaultValue>
+    <description>완료되지 않은(미완료) Task 개수. Record-Triggered Flow(CA_Update_Opportunity_Next_Activity)가 자동으로 계산합니다.</description>
+</CustomField>

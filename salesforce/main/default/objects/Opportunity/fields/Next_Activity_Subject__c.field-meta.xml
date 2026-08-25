@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Next_Activity_Subject__c</fullName>
+    <label>Next Activity</label>
+    <length>255</length>
+    <type>Text</type>
+    <description>가장 가까운 예정된(미완료) Task의 제목. Record-Triggered Flow(CA_Update_Opportunity_Next_Activity)가 Task 생성/수정/삭제 시 자동으로 채웁니다.</description>
+</CustomField>

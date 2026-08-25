@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Next_Activity_Date__c</fullName>
+    <label>Next Activity Date</label>
+    <type>Date</type>
+    <description>가장 가까운 예정된(미완료) Task의 기한일. Record-Triggered Flow(CA_Update_Opportunity_Next_Activity)가 자동으로 채웁니다.</description>
+</CustomField>
