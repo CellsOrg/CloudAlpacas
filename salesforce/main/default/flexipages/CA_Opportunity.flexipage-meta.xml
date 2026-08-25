@@ -290,8 +290,18 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Expected_Timing__c</fieldItem>
-                <identifier>CA_PotentialFit_ExpectedTiming</identifier>
+                <fieldItem>Record.Target_Segment__c</fieldItem>
+                <identifier>CA_PotentialFit_TargetSegment</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Client_Budget__c</fieldItem>
+                <identifier>CA_PotentialFit_ClientBudget</identifier>
             </fieldInstance>
         </itemInstances>
         <name>CA_PotentialFit_Col1Fields</name>
@@ -304,8 +314,18 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Target_Segment__c</fieldItem>
-                <identifier>CA_PotentialFit_TargetSegment</identifier>
+                <fieldItem>Record.Brand_Fan_Fit__c</fieldItem>
+                <identifier>CA_PotentialFit_BrandFanFit</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Target_Start_Season_Display__c</fieldItem>
+                <identifier>CA_PotentialFit_TargetStartSeason</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -314,8 +334,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Brand_Fan_Fit__c</fieldItem>
-                <identifier>CA_PotentialFit_BrandFanFit</identifier>
+                <fieldItem>Record.Client_Budget_Status__c</fieldItem>
+                <identifier>CA_PotentialFit_ClientBudgetStatus</identifier>
             </fieldInstance>
         </itemInstances>
         <name>CA_PotentialFit_Col2Fields</name>
@@ -507,10 +527,10 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>richTextValue</name>
-                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Guide to Success — Qualification&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Qualification → Discovery로 이동하려면 다음이 확인되어야 합니다.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;실제 예산 또는 구매 영향력 확인&lt;/li&gt;&lt;li&gt;실무 담당자 또는 의사결정자 접촉 가능 여부 확인&lt;/li&gt;&lt;li&gt;구체적인 고객 요구/가치 확인&lt;/li&gt;&lt;li&gt;추진 시기(타임라인) 확인&lt;/li&gt;&lt;/ul&gt;&lt;p style=&quot;font-size:12px;color:#706e6b;&quot;&gt;체크 상태는 이 페이지가 아니라 상단 Path의 안내 패널에서 실시간으로 반영됩니다.&lt;/p&gt;&lt;/div&gt;</value>
+                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Stage Progress — Qualification&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Qualification 단계에서 확인/수행되어야 하는 업무 항목입니다.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;잠재 스폰서의 관심 수준 확인 (Interest Level)&lt;/li&gt;&lt;li&gt;구단·팬과의 브랜드 적합성 평가 (Brand/Fan Fit)&lt;/li&gt;&lt;li&gt;스폰서의 주요 타깃 고객층 파악 (Target Segment)&lt;/li&gt;&lt;li&gt;실무 담당자 확보 (Primary Contact)&lt;/li&gt;&lt;li&gt;고객 측 스폰서십 예산 파악 (Client Budget / Client Budget Status)&lt;/li&gt;&lt;li&gt;스폰서십 시작 희망 시즌 파악 (Target Start Season)&lt;/li&gt;&lt;li&gt;의사결정권자 접근 가능 여부 파악 (Decision Maker Access)&lt;/li&gt;&lt;li&gt;고객과 실제 접촉 수행 (Call / Email / Meeting)&lt;/li&gt;&lt;/ul&gt;&lt;p style=&quot;font-size:12px;color:#706e6b;&quot;&gt;완료 여부 자동 체크, 진행률(%) 표시, 항목별 CTA 버튼은 추후 LWC 개발이 필요한 영역입니다. 현재는 참고용 체크리스트입니다.&lt;/p&gt;&lt;/div&gt;</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:richText</componentName>
-                <identifier>CA_richText_GuideToSuccess</identifier>
+                <identifier>CA_richText_StageProgress</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>
@@ -672,11 +692,11 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.NextStep</fieldItem>
-                <identifier>CA_NextAction_NextStep</identifier>
+                <fieldItem>Record.Deal_Note__c</fieldItem>
+                <identifier>CA_DealNote_DealNote</identifier>
             </fieldInstance>
         </itemInstances>
-        <name>CA_NextAction_Col1Fields</name>
+        <name>CA_DealNote_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -684,13 +704,13 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>body</name>
-                    <value>CA_NextAction_Col1Fields</value>
+                    <value>CA_DealNote_Col1Fields</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:column</componentName>
-                <identifier>CA_NextAction_Column1</identifier>
+                <identifier>CA_DealNote_Column1</identifier>
             </componentInstance>
         </itemInstances>
-        <name>CA_NextAction_Columns</name>
+        <name>CA_DealNote_Columns</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -708,7 +728,7 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
-                    <value>CA_NextAction_Columns</value>
+                    <value>CA_DealNote_Columns</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>horizontalAlignment</name>
@@ -716,10 +736,10 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>label</name>
-                    <value>Next Action</value>
+                    <value>Deal Note</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
-                <identifier>CA_fieldSection_NextAction</identifier>
+                <identifier>CA_fieldSection_DealNote</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>

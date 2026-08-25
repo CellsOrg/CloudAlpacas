@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Target_Start_Season_Display__c</fullName>
+    <label>Target Start Season</label>
+    <type>Text</type>
+    <formula>TEXT(Target_Start_Season__c)</formula>
+    <formulaTreatBlanksAs>BlankAsBlank</formulaTreatBlanksAs>
+    <description>Target_Start_Season__c(Number)을 천 단위 구분자 없이 표시하기 위한 read-only formula 필드. Qualification 페이지에는 이 필드가 노출되고, 실제 값 수정은 Target_Start_Season__c(Edit 모달/Page Layout)에서 합니다.</description>
+</CustomField>

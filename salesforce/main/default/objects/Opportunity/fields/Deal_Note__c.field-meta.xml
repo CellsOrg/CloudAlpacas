@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Deal_Note__c</fullName>
+    <label>Deal Note</label>
+    <type>LongTextArea</type>
+    <length>4000</length>
+    <visibleLines>4</visibleLines>
+    <description>A freeform note capturing important current context that the salesperson should remember about this Opportunity. This is not Activity history, not a task list, and not the same as Next Step.</description>
+</CustomField>

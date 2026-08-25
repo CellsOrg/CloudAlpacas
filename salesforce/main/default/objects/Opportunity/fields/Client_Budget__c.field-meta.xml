@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Client_Budget__c</fullName>
+    <label>Client Budget</label>
+    <type>Currency</type>
+    <precision>18</precision>
+    <scale>0</scale>
+    <required>false</required>
+    <description>The approximate sponsorship budget available on the prospective sponsor's side, based on customer discussion or salesperson estimation. Not to be confused with Amount, which is our current expected Sponsorship Deal Value from Cloud Alpacas' side.</description>
+</CustomField>
