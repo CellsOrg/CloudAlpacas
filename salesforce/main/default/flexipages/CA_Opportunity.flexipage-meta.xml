@@ -222,16 +222,6 @@
                 <identifier>CA_ContactDecision_Phone</identifier>
             </fieldInstance>
         </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Primary_Contact_Email__c</fieldItem>
-                <identifier>CA_ContactDecision_Email</identifier>
-            </fieldInstance>
-        </itemInstances>
         <name>CA_ContactDecision_Col1Fields</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -244,6 +234,16 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.Decision_Maker_Accessible__c</fieldItem>
                 <identifier>CA_ContactDecision_DecisionMakerAccessible</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Primary_Contact_Email__c</fieldItem>
+                <identifier>CA_ContactDecision_Email</identifier>
             </fieldInstance>
         </itemInstances>
         <name>CA_ContactDecision_Col2Fields</name>
