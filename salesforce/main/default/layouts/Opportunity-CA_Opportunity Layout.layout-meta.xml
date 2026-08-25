@@ -51,10 +51,6 @@
                 <field>SDO_Sales_Primary_Contact__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Contact_Role__c</field>
-            </layoutItems>
-            <layoutItems>
                 <behavior>Readonly</behavior>
                 <field>Primary_Contact_Phone__c</field>
             </layoutItems>
@@ -67,10 +63,6 @@
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Decision_Maker_Accessible__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Decision_Maker_Name__c</field>
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>
