@@ -687,11 +687,11 @@
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
-                    <name>tabs</name>
-                    <value>facet-9750c67c-edc5-421f-bc24-392cb3b3a3aa</value>
+                    <name>richTextValue</name>
+                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Opportunity Score&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Future LWC/Apex Enhancement&lt;/b&gt;&lt;/p&gt;&lt;p&gt;이 Org의 Einstein Opportunity Scoring은 꺼져 있고, 실 Opportunity 데이터도 아직 학습 가능한 양이 아니라서 지금 켜도 의미 있는 점수가 나오지 않습니다. Highlights Panel에 표준 Opportunity Score 필드 자리는 이미 준비되어 있습니다. 아래 항목은 표준 기능만으로는 구현할 수 없어 커스텀 개발이 필요합니다:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Score /100 및 등급(Good/Fair/Risk 등)&lt;/li&gt;&lt;li&gt;Positive / Negative Factors&lt;/li&gt;&lt;li&gt;Score Trend(최근 4주 추이)&lt;/li&gt;&lt;li&gt;Activity 데이터 기반 신호 반영&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</value>
                 </componentInstanceProperties>
-                <componentName>flexipage:tabset</componentName>
-                <identifier>flexipage_tabset2</identifier>
+                <componentName>flexipage:richText</componentName>
+                <identifier>CA_richText_OpportunityScore</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>
@@ -710,6 +710,16 @@
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>CA_fieldSection_NextAction</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>tabs</name>
+                    <value>facet-9750c67c-edc5-421f-bc24-392cb3b3a3aa</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:tabset</componentName>
+                <identifier>flexipage_tabset2</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>
