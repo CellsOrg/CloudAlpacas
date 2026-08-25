@@ -19,6 +19,7 @@ build/
 
 # Personal
 0nlySara/
+0nlySara/*
 
 # Salesforce CLI local state
 .sf/
