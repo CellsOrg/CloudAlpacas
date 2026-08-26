@@ -5,7 +5,7 @@
 | 항목 | 내용 |
 | --- | --- |
 | 작성자 | 승우(Rafael) |
-| 기준일 | 2026-08-25 |
+| 기준일 | 2026-08-26 |
 | 대상 Org | CloudAlpacas Production |
 | 문서 목적 | Org에는 있지만 문서화되지 않은 구현을 팀이 검토·Decision화할 수 있도록 근거 자료로 남김 |
 | 전제 | 이 문서는 그 자체로 공식 Decision이 아닙니다. 팀 논의 후 `05_DECISIONS.md`/`03_SYSTEM.md` 반영 여부를 결정합니다. |
@@ -283,30 +283,165 @@ Quote가 Syncing 중일 때 OpportunityLineItem 쪽 필드(예: UnitPrice)를 �
 
 ---
 
-## 15. 기존 문서와의 관계
+## 15. Campaign Record Type 확장 (2종 → 4종)
+
+### 배경
+기존에는 Campaign Record Type이 `Fan_Campaign`(팬 대상 일반 마케팅)과 `Sponsorship_Collaboration`(계약 체결 후 실행) 2종뿐이었습니다. 실제 B2B 세일즈 흐름을 보면 계약 체결 **전** 단계(잠재 스폰서사 담당자 발굴)와 계약 만료 임박 시 **갱신 제안** 단계도 Campaign으로 관리할 필요가 있는데, 이 두 시나리오를 담을 Record Type이 없었습니다.
+
+### 구현된 상태
+| Record Type (신규) | Label | 대상(Target) | 용도 |
+| --- | --- | --- | --- |
+| `Sponsorship_Prospecting` | Sponsorship Prospecting | 잠재 스폰서사 담당자(Lead) | 계약 체결 전, 리드 모집 단계 |
+| `Sponsorship_Renewal` | Sponsorship Renewal | 기존 스폰서사 담당자(Contact) | 계약 만료 임박 시 갱신 제안 |
+
+- Metadata API로 RecordType 2종 배포 완료. 다만 **Profile의 Record Type 가시성/Layout 배정은 Metadata API로 자동 반영되지 않아서**, System Administrator Profile → Object Settings → Campaigns 화면에서 수동으로 Enable 처리하고 Layout을 기존 `Sponsorship Collaboration Layout`으로 지정(2026-08-26 완료, describe API로 `"available": true` 확인).
+- 전체 Campaign Record Type 4종: `Fan_Campaign`, `Sponsorship_Prospecting`, `Sponsorship_Collaboration`, `Sponsorship_Renewal`.
+- Member Status 퍼널을 새로 만든 실제 Prospecting 캠페인 1건("2026 Q4 스폰서십 데이 - 잠재 스폰서사 발굴")에 세팅: 후보 선정(기본값)→메일 발송→콜드콜 완료→참석 확정(Responded)→리마인드 완료→행사 참석(Responded).
+
+### 쓰이는 용도
+Campaign 생성 시 스폰서 관계의 생애주기 단계(발굴→실행→갱신)를 Record Type으로 구분해서 관리.
+
+### 팀 검토가 필요한 이유
+Decision 018-D("Campaign vs Collaboration → Campaign Record Type으로 구현")를 그대로 따른 확장이지만, Record Type 종류 자체가 늘어난 건 아직 문서화되지 않은 변경입니다. 새 Decision(예: Decision 020)으로 기록 후 혜준님 확인을 권장합니다.
+
+---
+
+## 16. Campaign List View 4종 신규 (Record Type별)
+
+### 배경
+Record Type이 4종으로 늘어나면서, Campaign 탭에서 유형별로 빠르게 필터링해서 볼 수 있는 List View가 필요했습니다.
+
+### 구현된 상태
+| List View (API Name) | 라벨(한글) | 필터 |
+| --- | --- | --- |
+| `Fan_Campaign_List` | 팬 캠페인 목록 | RecordType = Fan_Campaign |
+| `Sponsorship_Prospecting_List` | 스폰서십 발굴 캠페인 목록 | RecordType = Sponsorship_Prospecting |
+| `Sponsorship_Collaboration_List` | 스폰서십 협업 캠페인 목록 | RecordType = Sponsorship_Collaboration |
+| `Sponsorship_Renewal_List` | 스폰서십 갱신 캠페인 목록 | RecordType = Sponsorship_Renewal |
+
+> ⚠️ `ExpectedRevenue`는 이 org의 통화 설정 관련 이슈로 List View 컬럼 토큰(`CAMPAIGN.EXPECTED_REVENUE`)이 인식되지 않아 제외했습니다 — Collaboration/Renewal 목록은 대신 예산(BudgetedCost)/실집행비(ActualCost)를 표시합니다.
+
+---
+
+## 17. Campaign Hierarchy 확장 — 스폰서 관계 5곳
+
+### 배경
+기존 Hierarchy는 d'Alba 한 곳뿐이었습니다. §15의 새 Record Type들이 생기면서, "이 스폰서 관계의 전체 생애주기(발굴/실행/갱신) 누적 성과"를 Campaign Hierarchy Rollup(표준 기능, `HierarchyAmountWonOpportunities` 등)으로 보기 위해 확장했습니다.
+
+### 구현된 상태
+| 회사 | 최상위 루트 Campaign | 하위 연결 |
+| --- | --- | --- |
+| d'Alba | d'Alba Sponsorship Partnership | 협업 2개 + 갱신 1개 |
+| 그린빈 커피 | 그린빈 커피 스폰서십 협업 캠페인 | 갱신 1개 |
+| 루나 뷰티 | 루나 뷰티 시즌 스폰서십 캠페인 | 갱신 1개 |
+| 파인베이스 스포츠 | 파인베이스 스포츠 스폰서십 갱신 협상 캠페인 | (하위 없음, 자기 자신이 루트) |
+| 오르빗 통신 | 오르빗 통신 스폰서십 갱신 제안 캠페인 | (하위 없음, 자기 자신이 루트) |
+
+Sponsorship_Prospecting 캠페인(5건)은 의도적으로 Hierarchy에서 제외했습니다 — 하나의 Prospecting 캠페인이 여러 회사를 동시에 타겟하는 대량 아웃바운드라서, 특정 회사 하나의 Hierarchy Tree에 묶는 게 구조적으로 맞지 않기 때문입니다.
+
+### 검증
+`d'Alba Sponsorship Partnership`의 `HierarchyExpectedRevenue`가 300,000,000으로 정상 롤업되는 것을 API로 확인(연결된 Opportunity 1건 기준). 별도 배치 작업 없이 실시간 계산되는 표준 기능임을 확인.
+
+### 알려진 제약
+`HierarchyAmountAllOpportunities`/`HierarchyAmountWonOpportunities`는 `Opportunity.CampaignId`(Primary Campaign Source)가 채워져 있어야 집계됩니다. 확인 결과 전체 Opportunity 103건 중 **1건만** 이 필드가 채워져 있어서, 지금은 d'Alba 외에는 실질적인 Rollup 값이 0으로 나옵니다 — 영업 프로세스에 "Opportunity 생성 시 Primary Campaign Source 입력"을 정착시키는 게 팀 차원에서 필요합니다.
+
+---
+
+## 18. Partner Tier(Gold/Platinum/Diamond) 및 Sponsorship Package 재설계
+
+### 배경
+동료분(Opportunity Qualification 담당)이 `Partner_Tier__c`(Gold/Platinum/Diamond, Opportunity 필드, 종합 판단 기반·자동산정 없음)를 이미 배포하셨고, 이걸 Product/Quote 쪽과 어떻게 연결할지 논의가 있었습니다. 최종적으로 **"Product에서 Tier를 자동 계산하지 않는다"**는 원칙을 유지하면서, Tier별 제안 패키지를 참고용 Product로 준비하는 방향으로 정리했습니다.
+
+### 핵심 설계 원칙 (동료분 피드백 반영)
+- **Gold — Visibility**: 반복 노출이 목적, 단일 채널
+- **Platinum — Engagement**: 노출을 넘어 팬과의 실제 접점이 목적, 복수 채널
+- **Diamond — Strategic Partnership**: 상품 총량이 아니라 **"공식 파트너" 지위 자체가 핵심 가치** — 노출성 상품(유니폼 메인 패치 등)은 의도적으로 배제하고, 지위/독점 자산만 구성
+
+### 신규 Product 7종
+| 분류 | Product | 비고 |
+| --- | --- | --- |
+| 개별 상품 5종 | 업종 독점 스폰서십 권리, 유니폼 메인(가슴) 패치 광고, 홈경기 중계 방송 배너 노출권, 개막전/올스타전 스페셜 게임 타이틀 스폰서십, 공식 파트너 지위 인증권 | 기존 카탈로그(13종)에 없던 "독점/지위/방송" 자산 갭을 채움 |
+| 티어 패키지 3종 | Gold 스타터 패키지, Platinum 통합 마케팅 패키지, Diamond 전략 파트너십 패키지 | 개별 구매 대비 10% 할인 적용, 담당자가 그대로 제안하거나 개별 조정 가능 |
+
+전체 Sponsorship Product 카탈로그: 13종 → **21종**(개별 18 + 사전 번들 3, 신규 5개 개별 상품 중 4개는 단품·1개는 최종적으로 Diamond 패키지 구성품으로만 편입)
+
+### 가격 조정 이력 (총 3차례, 2026-08-26)
+실제 KBO/MLB 스폰서십 시세를 조사해서 3단계에 걸쳐 조정했습니다.
+
+1. **1차**: 명명권이 유니폼 패치보다 저렴한 등 상대적 순위 오류 수정 + 독점/지위 자산군을 카탈로그 최상위로 재배치
+2. **2차**: "적자 구단 → 프리미엄 구단으로 성장" 스토리 반영, 전체 1.5배 상향
+3. **3차**: 한국 프로야구 기준 벤치마크(키움 히어로즈 팀명 스폰서십 연 100억원+, 수원삼성 유니폼 메인 스폰서 연 190.8억원) 조사 결과, 이 수치들은 **계열사/모기업 관계형 스폰서십**이라 순수 제3자 시장가와는 성격이 다르다는 점을 반영해 전체 1.3배 추가 상향(계열사 벤치마크의 절반 이하 수준으로 유지 — "제3자 스폰서 현실선")
+
+### 최종 가격표 (2026-08-26 기준)
+| Product | 코드 | 최종가 | 기본 계약 단위 |
+| --- | --- | --- | --- |
+| Diamond 전략 파트너십 패키지 | SPN-PKG-DIAMOND | 52.2억 | 최소 3년 이상 |
+| 구장 내 특별 구역 명명권 | SPN-NAMING-ZONE | 24억 | 최소 3년 이상 |
+| 유니폼 메인(가슴) 패치 광고 | SPN-UNIFORM-MAIN | 20억 | 1년(시즌), 권장 2~3년 |
+| 공식 파트너 지위 인증권 | SPN-OFFICIAL-PARTNER-STATUS | 18억 | 1년(갱신형), 권장 2년+ |
+| 업종 독점 스폰서십 권리 | SPN-CATEGORY-EXCLUSIVE | 16억 | 1년(갱신형), 권장 2년+ |
+| Platinum 통합 마케팅 패키지 | SPN-PKG-PLATINUM | 12.42억 | 1년 |
+| 전광판 광고 + Brand Day 패키지 | SPN-LED-BRANDDAY | 11억 | 1년(Brand Day 1회 포함) |
+| 백네트 후면 LED 전광판 광고 | SPN-LED-BACKNET | 10억 | 1년(정규시즌) |
+| 유니폼 소매 패치 광고 | SPN-UNIFORM-SLEEVE | 8억 | 1년(시즌) |
+| 외야 보조 전광판 광고 | SPN-LED-OUTFIELD | 5억 | 1년(정규시즌) |
+| 개막전/올스타전 타이틀 스폰서십 | SPN-MARQUEE-TITLE | 4.3억 | 경기 1회 |
+| 홈경기 중계 방송 배너 노출권 | SPN-BROADCAST-BANNER | 4억 | 1시즌 홈경기 전체 |
+| 헬멧 로고 광고 | SPN-HELMET-LOGO | 3억 | 1년(정규시즌) |
+| Gold 스타터 패키지 | SPN-PKG-GOLD | 2.61억 | 1년 |
+| 외야 펜스 광고 | SPN-FENCE-OUTFIELD | 2.3억 | 1년(정규시즌) |
+| 덕아웃/포수석 후면 광고보드 | SPN-BOARD-DUGOUT | 2억 | 1년(정규시즌) |
+| Brand Day 단독 패키지 | SPN-BRANDDAY-SOLO | 1.6억 | 경기 1회 |
+| 경품 증정 프로모션 데이 | SPN-PROMO-GIVEAWAY | 1.2억 | 경기 1회 |
+| 공식 SNS 브랜디드 콘텐츠 | SPN-SNS-CONTENT | 1억 | 연 12회(월 1건) |
+| 콜라보 굿즈 공동기획 | SPN-COLLAB-GOODS | 0.8억 | 시즌당 1회 |
+| 공식 앱/홈페이지 배너 광고 | SPN-APP-BANNER | 0.6억 | 1년(상시 노출) |
+
+### 티어별 패키지 구성
+| 패키지 | 구성 상품 | 가격 |
+| --- | --- | --- |
+| Gold | 외야 펜스 광고 + 공식 앱/홈페이지 배너 광고 | 2.61억 |
+| Platinum | 백네트 후면 LED 전광판 광고 + 공식 SNS 브랜디드 콘텐츠 + 경품 증정 프로모션 데이 + Brand Day 단독 패키지 | 12.42억 |
+| Diamond | 공식 파트너 지위 인증권 + 업종 독점 스폰서십 권리 + 구장 내 특별 구역 명명권 | 52.2억 |
+
+### 팀 검토가 필요한 이유
+- "기본 계약 단위"(연/경기/다년)는 아직 Product2에 필드로 저장돼 있지 않고 이 문서에만 정리돼 있습니다 — Quote 작성 시 참고할 수 있게 필드화할지 팀 결정이 필요합니다.
+- 가격 전체가 3차례에 걸쳐 크게 상향됐습니다(최초 0.2~5억 → 최종 0.6~52.2억) — 팀 최종 검토를 권장합니다.
+- Diamond 패키지가 유니폼 메인 패치·SNS 콘텐츠를 제외한 이유(재고 1개뿐인 물리 자산은 반복 판매 가능한 등급 상품에 부적합)는 §18 본문 논의를 참고해주세요.
+
+---
+
+## 19. 기존 문서와의 관계
 
 `P2_RESULT_REPORT/승우(Product, Quote, Campaign 구현).md`(2026-08-20 작성, 이미 커밋됨)는 이 문서의 내용을 반영하기 전 시점의 상태를 기록하고 있습니다 — 특히 Company Information과 Quote Status 필드는 그 문서 작성 시점에는 없었고 이번에 보완됐습니다. 두 문서를 통합할지, 이 문서를 보완 기록으로 별도 유지할지는 팀이 정합니다.
 
 ---
 
-## 16. 다음 세션 To-Do
+## 20. 다음 세션 To-Do
 
 | 우선순위 | 작업 | 상태 |
 | --- | --- | --- |
 | ~~P1~~ | ~~Campaign_Deliverable__c의 4개 필드 조회 불가 문제 — Salesforce Support 케이스 오픈~~ | ✅ **완료(2026-08-25)** — 필드 삭제 후 재생성으로 해결, Support 케이스 불필요했음 |
 | ~~P1~~ | ~~4개 필드에 실제 값(Due Date/Completed Date/Notes) 입력~~ | ✅ **완료(2026-08-25)** |
+| P1 | `CampaignMember.Is_Converted__c`(전환율 계산용 Formula 필드) — 배포 성공(Tooling API 확인됨)했지만 재배포 이후에도 SOQL/Describe에서 계속 조회 불가. Campaign_Deliverable__c와 동일한 스키마 전파 지연 버그로 추정 — Setup UI에서 직접 삭제 후 재생성하는 방식으로 해결 시도 필요(§2 사례 참고) | **미해결** |
 | P1 | Campaign_Deliverable__c / PRM_Revenue_Target__c(혜준 담당 추정) 유지 여부를 팀 Decision으로 확정 | 진행 전 |
 | P1 | Budgeted Cost/Actual Cost 실제 값으로 교체 | 진행 전 |
 | ~~P2~~ | ~~위 5개 Report를 `PRM Sponsorship Campaign Performance` Dashboard에 위젯으로 확정 반영~~ | ✅ **완료(2026-08-25)** — §11 참고, Report 형식(Tabular) 버그도 함께 해결 |
 | ~~P2~~ | ~~Campaign.ExpectedRevenue를 Opportunity Amount와 자동 동기화~~ | ✅ **완료(2026-08-25)** — §13 참고, Flow 3종(Subflow + 생성/수정 + 삭제) 신설·테스트 완료 |
+| ~~P2~~ | ~~Campaign Record Type을 Prospecting/Renewal로 확장하고 List View·Hierarchy 정비~~ | ✅ **완료(2026-08-26)** — §15~17 참고 |
+| P2 | Campaign Record Type 확장(§15)을 정식 Decision(예: Decision 020)으로 기록하고 혜준님 확인 | 진행 전 |
+| P2 | Sponsorship Product 21종 신설·3차 가격 조정(§18) 팀 최종 승인 | 진행 전 |
+| P2 | "기본 계약 단위" 정보를 Product2 필드로 구조화할지 결정(§18) | 진행 전 |
 | P2 | `Postal Code` 등 Company Information 나머지 값 보완 | 진행 전 |
 | P2 | Quote Status의 `Rejected`/`Denied` 두 값을 §10.1 제안대로("내부 반려" vs "상대방 거절") 실제로 나눠 쓸지 팀 합의 | 진행 전 |
 | P2 | Dashboard 이름을 `스폰서십 통합 현황판`으로 바꿀지 팀 확인(§11) | 진행 전 |
 | P3 | §13에서 발견한 한계 — Opportunity의 Campaign이 재연결(A→B)될 때 예전 Campaign(A) 합계가 갱신 안 되는 문제 보완 | 진행 전 |
+| P3 | Opportunity.CampaignId(Primary Campaign Source) 입력을 영업 프로세스에 정착 — Campaign Hierarchy Rollup이 d'Alba 외 회사에서도 실질적으로 작동하려면 필요(§17) | 진행 전 |
+| P3 | 새로 만든 Sponsorship Prospecting 캠페인 4건(2026 Q4 스폰서십 데이 외)에 Campaign Member Status 퍼널 세팅 — 첫 캠페인 1건만 완료됨(§15) | 진행 전 |
 
 ---
 
-## 17. GitHub 반영 제안
+## 21. GitHub 반영 제안
 
 권장 경로:
 
@@ -317,7 +452,7 @@ P2_RESULT_REPORT/B2B_CAMPAIGN_QUOTE_UNDOCUMENTED_IMPLEMENTATION.md
 권장 Commit Message:
 
 ```text
-docs: log undocumented Campaign/Quote P2 builds since 2026-08-20
+docs: log Campaign record type expansion and sponsorship product repricing
 ```
 
 권장 브랜치: `feature/campaign-quote-undocumented-log` → PR to `dev`(`02_TEAM_GUIDE.md` §4 Phase 2 브랜치 전략).
