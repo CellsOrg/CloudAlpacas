@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Follow_up__c</fullName>
+    <label>Follow-up</label>
+    <type>Text</type>
+    <length>255</length>
+    <required>false</required>
+    <description>What was agreed as the follow-up during this meeting. This records intent only - it does not replace creating a Task/Event when actual follow-up work needs to be scheduled. Defined on the shared Activity entity but only intended for use on Event. Text(255) - LongTextArea is not a supported type on the shared Activity entity in this org.</description>
+</CustomField>

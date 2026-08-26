@@ -48,6 +48,45 @@
         <style>TwoColumnsTopToBottom</style>
     </layoutSections>
     <layoutSections>
+        <customLabel>true</customLabel>
+        <detailHeading>true</detailHeading>
+        <editHeading>true</editHeading>
+        <label>Meeting Capture</label>
+        <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Meeting_Type__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Key_Discussion__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Concerns_Objections__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Description</field>
+            </layoutItems>
+        </layoutColumns>
+        <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Customer_Reaction__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Key_Decision__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Follow_up__c</field>
+            </layoutItems>
+        </layoutColumns>
+        <style>TwoColumnsTopToBottom</style>
+    </layoutSections>
+    <layoutSections>
         <customLabel>false</customLabel>
         <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
@@ -73,19 +112,6 @@
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsTopToBottom</style>
-    </layoutSections>
-    <layoutSections>
-        <customLabel>false</customLabel>
-        <detailHeading>true</detailHeading>
-        <editHeading>true</editHeading>
-        <label>Description Information</label>
-        <layoutColumns>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Description</field>
-            </layoutItems>
-        </layoutColumns>
-        <style>OneColumn</style>
     </layoutSections>
     <layoutSections>
         <customLabel>false</customLabel>
