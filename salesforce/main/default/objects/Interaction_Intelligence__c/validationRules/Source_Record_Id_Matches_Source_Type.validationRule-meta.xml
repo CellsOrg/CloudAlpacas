@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Source_Record_Id_Matches_Source_Type</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Source_Record_Id__c)),
+    OR(
+        AND(ISPICKVAL(Source_Type__c, &quot;Call&quot;), LEFT(Source_Record_Id__c, 3) &lt;&gt; &quot;00T&quot;),
+        AND(ISPICKVAL(Source_Type__c, &quot;Email&quot;), LEFT(Source_Record_Id__c, 3) &lt;&gt; &quot;02s&quot;),
+        AND(ISPICKVAL(Source_Type__c, &quot;Online Meeting&quot;), LEFT(Source_Record_Id__c, 3) &lt;&gt; &quot;00U&quot;),
+        AND(ISPICKVAL(Source_Type__c, &quot;Offline Meeting&quot;), LEFT(Source_Record_Id__c, 3) &lt;&gt; &quot;00U&quot;)
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Source_Record_Id__c</errorDisplayField>
+    <errorMessage>Source Record Id의 앞 3자리가 Source Type과 일치하지 않습니다. Call은 Task(00T), Email은 EmailMessage(02s), Online/Offline Meeting은 Event(00U) ID여야 합니다.</errorMessage>
+</ValidationRule>

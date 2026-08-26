@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Source_Type__c</fullName>
+    <label>Source Type</label>
+    <type>Picklist</type>
+    <required>true</required>
+    <description>원본 상호작용의 유형. Source_Record_Id__c가 어떤 오브젝트(Task/Event/EmailMessage)를 가리키는지 UI 표시, 필터, 향후 검증에 사용하는 보조 필드입니다.</description>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Call</fullName>
+                <default>false</default>
+                <label>Call</label>
+            </value>
+            <value>
+                <fullName>Email</fullName>
+                <default>false</default>
+                <label>Email</label>
+            </value>
+            <value>
+                <fullName>Online Meeting</fullName>
+                <default>false</default>
+                <label>Online Meeting</label>
+            </value>
+            <value>
+                <fullName>Offline Meeting</fullName>
+                <default>false</default>
+                <label>Offline Meeting</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

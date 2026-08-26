@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Summary__c</fullName>
+    <label>Summary</label>
+    <type>LongTextArea</type>
+    <length>1000</length>
+    <visibleLines>4</visibleLines>
+    <required>false</required>
+    <description>이 개별 상호작용(Call/Email/Online Meeting/Offline Meeting)에 대한 한 줄~여러 줄 요약.</description>
+</CustomField>

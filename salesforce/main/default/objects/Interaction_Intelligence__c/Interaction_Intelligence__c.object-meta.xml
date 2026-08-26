@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>고객과의 개별 상호작용(Call/Email/Online Meeting/Offline Meeting) 하나에 대한 정규화된 분석 결과를 저장합니다. 원본 컨텐츠는 원본 Activity(Task/Event/EmailMessage)에 그대로 남아있고, 이 오브젝트는 그 해석/요약만 보관합니다.</description>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>false</enableHistory>
+    <enableLicensing>false</enableLicensing>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <externalSharingModel>Private</externalSharingModel>
+    <label>Interaction Intelligence</label>
+    <nameField>
+        <displayFormat>II-{00000000}</displayFormat>
+        <label>Interaction Intelligence Name</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Interaction Intelligence</pluralLabel>
+    <sharingModel>ReadWrite</sharingModel>
+    <visibility>Public</visibility>
+</CustomObject>
