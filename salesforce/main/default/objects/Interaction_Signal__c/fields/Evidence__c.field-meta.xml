@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Evidence__c</fullName>
+    <label>Evidence</label>
+    <type>Text</type>
+    <length>255</length>
+    <required>false</required>
+    <description>이 신호를 뒷받침하는 원본 상호작용 내용의 짧은 근거(한 문장 이내 인용/요약). 전체 트랜스크립트를 반복 저장하지 않고, 신호별로 왜 이렇게 판단했는지 추적하기 위한 최소 근거입니다.</description>
+</CustomField>

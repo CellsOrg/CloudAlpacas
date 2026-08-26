@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Interaction_Intelligence__c</fullName>
+    <label>Interaction Intelligence</label>
+    <type>MasterDetail</type>
+    <referenceTo>Interaction_Intelligence__c</referenceTo>
+    <relationshipLabel>Interaction Signals</relationshipLabel>
+    <relationshipName>Interaction_Signals</relationshipName>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+    <description>이 Signal이 추출된 원본 Interaction Intelligence 레코드. Opportunity는 이 관계를 통해서만 조회합니다(Interaction_Signal__c에 직접 저장하지 않음).</description>
+</CustomField>
