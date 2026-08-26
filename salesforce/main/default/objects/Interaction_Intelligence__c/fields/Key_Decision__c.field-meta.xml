@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Key_Decision__c</fullName>
+    <label>Key Decision</label>
+    <type>LongTextArea</type>
+    <length>500</length>
+    <visibleLines>3</visibleLines>
+    <required>false</required>
+    <description>이 상호작용에서 나온 핵심 의사결정 사항.</description>
+</CustomField>

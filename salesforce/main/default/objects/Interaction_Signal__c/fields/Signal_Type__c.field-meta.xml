@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Signal_Type__c</fullName>
+    <label>Signal Type</label>
+    <type>Picklist</type>
+    <required>true</required>
+    <description>Signal_Category__c보다 세부적인 신호 유형. 초기 값 목록은 예시 태그 모음이며, 값 목록을 제한(restricted)하지 않아 향후 새로운 유형을 배포 없이 추가할 수 있도록 합니다. 실제로 자주 쓰이는 값이 안정화되면 restricted picklist로 전환을 검토합니다.</description>
+    <valueSet>
+        <restricted>false</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>High Interest</fullName><default>false</default><label>High Interest</label></value>
+            <value><fullName>Low Interest</fullName><default>false</default><label>Low Interest</label></value>
+            <value><fullName>Budget Confirmed</fullName><default>false</default><label>Budget Confirmed</label></value>
+            <value><fullName>Budget Concern</fullName><default>false</default><label>Budget Concern</label></value>
+            <value><fullName>Decision Maker Engaged</fullName><default>false</default><label>Decision Maker Engaged</label></value>
+            <value><fullName>Internal Approval Pending</fullName><default>false</default><label>Internal Approval Pending</label></value>
+            <value><fullName>Decision Process Unclear</fullName><default>false</default><label>Decision Process Unclear</label></value>
+            <value><fullName>Strong Brand Fit</fullName><default>false</default><label>Strong Brand Fit</label></value>
+            <value><fullName>Competitor Mentioned</fullName><default>false</default><label>Competitor Mentioned</label></value>
+            <value><fullName>Category Conflict</fullName><default>false</default><label>Category Conflict</label></value>
+            <value><fullName>Next Step Agreed</fullName><default>false</default><label>Next Step Agreed</label></value>
+            <value><fullName>Timing Confirmed</fullName><default>false</default><label>Timing Confirmed</label></value>
+            <value><fullName>Timing Risk</fullName><default>false</default><label>Timing Risk</label></value>
+            <value><fullName>Stalled</fullName><default>false</default><label>Stalled</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

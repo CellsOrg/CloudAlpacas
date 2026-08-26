@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Source_Record_Id__c</fullName>
+    <label>Source Record Id</label>
+    <type>Text</type>
+    <length>18</length>
+    <required>true</required>
+    <unique>true</unique>
+    <caseSensitive>false</caseSensitive>
+    <externalId>false</externalId>
+    <description>원본 Task/Event/EmailMessage의 18자리 Record Id. 이 상호작용 분석 레코드가 어떤 원본 Activity로부터 생성되었는지를 나타내는 단일 소스 키입니다. 원본 레코드가 삭제되면 이 값은 더 이상 유효하지 않은(dangling) Id로 남을 수 있으며, 이는 MVP 단계의 알려진 한계로 별도 자동 정리(Apex Batch 등)는 이번 라운드에서 구현하지 않습니다.</description>
+</CustomField>

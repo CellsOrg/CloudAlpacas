@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Direction__c</fullName>
+    <label>Direction</label>
+    <type>Picklist</type>
+    <required>true</required>
+    <description>이 신호가 긍정/부정/중립 중 어느 방향인지. Signal_Type__c에 고정적으로 매핑되지 않고 매 신호마다 맥락에 따라 개별 판단합니다(예: Competitor Mentioned가 항상 부정은 아님).</description>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Positive</fullName><default>false</default><label>Positive</label></value>
+            <value><fullName>Negative</fullName><default>false</default><label>Negative</label></value>
+            <value><fullName>Neutral</fullName><default>false</default><label>Neutral</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

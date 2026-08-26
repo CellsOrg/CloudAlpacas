@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Confidence__c</fullName>
+    <label>Confidence</label>
+    <type>Picklist</type>
+    <required>true</required>
+    <description>이 신호에 대한 AI의 확신 수준. Opportunity Score에서 신호 가중치를 다르게 반영하거나, Agent가 설명 시 신뢰도를 함께 제시하는 데 사용합니다.</description>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>High</fullName><default>false</default><label>High</label></value>
+            <value><fullName>Medium</fullName><default>false</default><label>Medium</label></value>
+            <value><fullName>Low</fullName><default>false</default><label>Low</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
