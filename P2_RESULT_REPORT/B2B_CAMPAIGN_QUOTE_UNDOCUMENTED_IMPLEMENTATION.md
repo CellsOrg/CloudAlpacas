@@ -411,37 +411,119 @@ Sponsorship_Prospecting 캠페인(5건)은 의도적으로 Hierarchy에서 제�
 
 ---
 
-## 19. 기존 문서와의 관계
+## 19. Campaign 레코드 재점검 및 개선 (Opportunity Stage 조정 제외)
+
+### 배경
+Record Type 확장 후, 실제 22개 Campaign 레코드를 연결된 Opportunity와 교차 검증하는 재점검을 진행했습니다. Opportunity 담당자(은영)가 Stage별 작업을 진행 중이라, Stage 조정은 이번 범위에서 제외했습니다.
+
+### 발견한 문제 및 조치
+| 문제 | 조치 |
+| --- | --- |
+| d'Alba 장기 캠페인이 ExpectedRevenue=0, 연결된 Opportunity 없음 | 신규 Opportunity(`d'Alba Long-Term Sponsorship`, 30억, Qualification 단계)를 생성해 연결 → Flow가 즉시 ExpectedRevenue 3,000,000,000으로 자동 반영되는 것을 확인 |
+| `d'Alba Sponsorship Partnership`(Parent)의 StartDate/EndDate 미입력 | 하위 3개 캠페인 전체 범위(2027-01-15~03-12)로 채움 |
+| 그린빈 커피/루나 뷰티 협업 캠페인 재무 필드 전부 null | BudgetedCost 시나리오 값 입력(0.5억/0.8억), ActualCost=0 |
+| Sponsorship Prospecting 5건 중 4건 Member Status 퍼널 미설정 | 나머지 4건에도 §15와 동일한 6단계 퍼널 적용 |
+
+### 알려진 한계(의도적으로 미해결)
+d'Alba의 두 Opportunity 모두 Stage가 `Qualification`(7단계 중 첫 단계)입니다. `Sponsorship_Collaboration` Record Type의 정의(계약 체결 후 실행)와 맞지 않지만, Opportunity 담당자의 진행 중인 작업과 충돌하지 않기 위해 이번엔 Stage를 조정하지 않았습니다 — 은영님 작업이 끝난 뒤 재조정이 필요합니다.
+
+---
+
+## 20. Campaign 레코드 스토리 공백 분석 및 보완 — Win-back 시나리오 추가
+
+### 배경
+22개 Campaign 전체를 Record Type 정의와 대조하며 재점검한 결과, 두 가지 공백을 발견했습니다.
+1. Sponsorship_Renewal 5건 전부 Member Status 퍼널이 기본값(Sent/Responded)에 머물러 있었음
+2. Renewal Record Type 설계 당시 "이탈 후 재유치(Win-back)는 별도 Record Type이 아니라 Renewal 내 Member Status로 구분한다"고 결정했는데, 이를 실제로 보여주는 데이터가 하나도 없었음(기존 5건 전부 "계약 중, 만료 임박" 시나리오뿐)
+
+### 조치
+- 신규 Campaign 1건 추가: `테라핏 헬스 이탈 스폰서 재유치 캠페인`(Sponsorship_Renewal) — 이미 계약이 만료되어 이탈한 스폰서를 재접촉하는 시나리오
+- Renewal 6건(기존 5 + 신규 1) 전체에 공통 Member Status 5단계 적용: 리포트 발송 → 미팅 요청 → 협상 중(응답) → 갱신 확정(응답) → 이탈
+
+### 결과
+전체 Campaign은 23건(Fan_Campaign 7 + Prospecting 5 + Collaboration 5 + Renewal 6)이 됐습니다.
+
+---
+
+## 21. d'Alba 시나리오를 "단기→장기 전환"에서 "티어 승급"으로 재정렬 (멘토 피드백 반영)
+
+### 배경
+멘토 피드백에 따라 B2B 대표 시나리오가 "단기 스폰서십으로 효과 증명 → 장기 계약 전환"에서 **"Gold→Platinum→Diamond 티어가 승급하는 여정"**으로 방향이 바뀌었습니다. 기존 d'Alba 데이터(§4, §13에서 이미 문서화된 단기/장기 이중 구조)는 구 시나리오를 기준으로 만들어져 있어 재정렬이 필요했습니다.
+
+### 조치
+기존 두 Collaboration 캠페인의 실행 기간이 이미 시간 순서(1월 단기 → 2월 갱신 협상 → 3월 "장기") 그대로 순차적 흐름과 맞아떨어져서, 날짜는 그대로 두고 이름·설명·연결된 Opportunity의 Tier만 재정렬했습니다.
+
+| 캠페인 | 변경 전 | 변경 후 |
+| --- | --- | --- |
+| 701bm00002i0da6AAA | d'Alba Short-Term Sponsorship Campaign | **d'Alba 1년차 협업 캠페인 (Gold)** |
+| 701bm00002hfEJlAAM | d'Alba Sponsorship Campaign(장기) | **d'Alba 2년차 협업 캠페인 (Platinum)** |
+
+- 두 캠페인 모두 기존 `[SCN-B2B-001]`/`[SCN-B2B-002]` 시나리오 태그는 유지(다른 문서에서 참조할 가능성이 있어 보존), 태그 뒤 설명 문구만 티어 성장 스토리로 재작성
+- Parent(`d'Alba Sponsorship Partnership`)와 Renewal 캠페인 설명도 "Gold→Platinum 승급 여정"을 명시하도록 갱신
+- 연결된 Opportunity에 실제 Tier 반영: `d'Alba Short-Term Sponsorship`(3억) → `Partner_Tier__c = Gold`, `d'Alba Long-Term Sponsorship`(30억) → `Partner_Tier__c = Platinum`
+
+### 확정된 설계 원칙 (재점검 과정에서 정리)
+- **계약 전체 상황 추적과 제품별 실행률 추적은 별도 Campaign이 아닙니다** — Campaign(전체) + `Campaign_Deliverable__c`(제품/과업별, Master-Detail 자식) 구조로 이미 해결돼 있습니다(§2).
+- **갱신 시점의 "동일 조건 갱신/upsell/티어 승급" 시나리오도 별도 Campaign으로 분기하지 않습니다** — Renewal Campaign은 협상 과정 자체를 추적하는 1건이면 충분하고, 실제 결과(어떤 Product/Tier로 체결됐는지)는 그 협상에서 새로 생기는 Opportunity와 `Partner_Tier__c`에 담깁니다. 다음 실행 주기가 시작되면 새 Collaboration Campaign이 생기고 같은 Parent 아래 Hierarchy로 연결됩니다(§20의 Win-back과 동일한 설계 원칙의 연장선입니다).
+
+---
+
+## 22. 스키마 전파 지연 버그 — 2건 추가 확인 및 해결
+
+### 배경
+`Campaign_Deliverable__c`(§2)에서 처음 발견했던 "필드는 배포/Tooling API상 존재하지만 SOQL/Describe에서 조회 안 됨" 버그가 이번 세션에서 2건 더 재발했습니다.
+
+### CampaignMember.Is_Converted__c
+- 배포 직후 SOQL 조회 실패 → 삭제 후 즉시 재배포까지 시도했으나 여전히 실패
+- 백그라운드로 SOQL 폴링을 걸어두고 다른 작업을 진행하던 중, **시간이 더 지난 뒤 자연적으로 해결**됨을 확인 — 수동 재생성이 필요 없었습니다. 이 버그가 항상 즉각적인 삭제·재생성으로 해결되는 게 아니라, 단순히 전파 시간이 더 필요한 경우도 있다는 걸 보여주는 사례입니다.
+
+### Opportunity.Partner_Tier__c (은영 담당 필드)
+- 승우가 만든 필드가 아닌데도 동일한 증상이 발생 — **이 org 자체의 플랫폼 버그**라는 근거가 더 명확해졌습니다(특정 개발자의 배포 방식 문제가 아님).
+- 삭제 시도 중 "`CA_Opportunity` Lightning Record Page의 컴포넌트에서 사용 중"이라는 이유로 삭제가 차단됨 → Lightning App Builder에서 해당 컴포넌트를 먼저 제거한 뒤 필드 삭제 → 동일 스펙(Description, Picklist 값 Gold/Platinum/Diamond, Restricted 등)으로 재생성 → Lightning Page에 컴포넌트 재배치
+- 삭제 전 UI로 기존 값이 비어있었음을 확인해 데이터 손실 없이 해결
+- 재생성 후 SOQL 조회 정상 확인, d'Alba 두 Opportunity에 각각 Gold/Platinum 값 입력 완료(§21)
+
+### 팀 공유 필요
+이 버그가 승우·은영 양쪽이 만든 필드에서 모두 재현된 건 org 차원의 스키마 전파 지연 이슈라는 강한 증거입니다. Salesforce Support 문의 시 세 사례(Campaign_Deliverable__c, Is_Converted__c, Partner_Tier__c) 모두 함께 전달하는 걸 권장합니다.
+
+---
+
+## 23. 기존 문서와의 관계
 
 `P2_RESULT_REPORT/승우(Product, Quote, Campaign 구현).md`(2026-08-20 작성, 이미 커밋됨)는 이 문서의 내용을 반영하기 전 시점의 상태를 기록하고 있습니다 — 특히 Company Information과 Quote Status 필드는 그 문서 작성 시점에는 없었고 이번에 보완됐습니다. 두 문서를 통합할지, 이 문서를 보완 기록으로 별도 유지할지는 팀이 정합니다.
 
 ---
 
-## 20. 다음 세션 To-Do
+## 24. 다음 세션 To-Do
 
 | 우선순위 | 작업 | 상태 |
 | --- | --- | --- |
-| ~~P1~~ | ~~Campaign_Deliverable__c의 4개 필드 조회 불가 문제 — Salesforce Support 케이스 오픈~~ | ✅ **완료(2026-08-25)** — 필드 삭제 후 재생성으로 해결, Support 케이스 불필요했음 |
+| ~~P1~~ | ~~Campaign_Deliverable__c의 4개 필드 조회 불가 문제~~ | ✅ **완료(2026-08-25)** — 필드 삭제 후 재생성으로 해결 |
 | ~~P1~~ | ~~4개 필드에 실제 값(Due Date/Completed Date/Notes) 입력~~ | ✅ **완료(2026-08-25)** |
-| P1 | `CampaignMember.Is_Converted__c`(전환율 계산용 Formula 필드) — 배포 성공(Tooling API 확인됨)했지만 재배포 이후에도 SOQL/Describe에서 계속 조회 불가. Campaign_Deliverable__c와 동일한 스키마 전파 지연 버그로 추정 — Setup UI에서 직접 삭제 후 재생성하는 방식으로 해결 시도 필요(§2 사례 참고) | **미해결** |
+| ~~P1~~ | ~~CampaignMember.Is_Converted__c SOQL 조회 불가 문제~~ | ✅ **완료(2026-08-26)** — §22 참고, 재생성 없이 시간 경과로 자연 해결 |
+| ~~P1~~ | ~~Opportunity.Partner_Tier__c(은영 담당) SOQL 조회 불가 문제~~ | ✅ **완료(2026-08-26)** — §22 참고, Lightning Page 컴포넌트 제거 후 삭제·재생성으로 해결 |
+| P1 | Opportunity Stage 담당자(은영) 작업 완료 후, d'Alba 1·2년차 Opportunity의 Stage를 실제 스토리(계약 체결 완료)에 맞게 조정 | 대기 중 — §19 참고 |
 | P1 | Campaign_Deliverable__c / PRM_Revenue_Target__c(혜준 담당 추정) 유지 여부를 팀 Decision으로 확정 | 진행 전 |
 | P1 | Budgeted Cost/Actual Cost 실제 값으로 교체 | 진행 전 |
-| ~~P2~~ | ~~위 5개 Report를 `PRM Sponsorship Campaign Performance` Dashboard에 위젯으로 확정 반영~~ | ✅ **완료(2026-08-25)** — §11 참고, Report 형식(Tabular) 버그도 함께 해결 |
-| ~~P2~~ | ~~Campaign.ExpectedRevenue를 Opportunity Amount와 자동 동기화~~ | ✅ **완료(2026-08-25)** — §13 참고, Flow 3종(Subflow + 생성/수정 + 삭제) 신설·테스트 완료 |
+| ~~P2~~ | ~~위 5개 Report를 Dashboard 위젯으로 확정 반영~~ | ✅ **완료(2026-08-25)** — §11 참고 |
+| ~~P2~~ | ~~Campaign.ExpectedRevenue를 Opportunity Amount와 자동 동기화~~ | ✅ **완료(2026-08-25)** — §13 참고 |
 | ~~P2~~ | ~~Campaign Record Type을 Prospecting/Renewal로 확장하고 List View·Hierarchy 정비~~ | ✅ **완료(2026-08-26)** — §15~17 참고 |
-| P2 | Campaign Record Type 확장(§15)을 정식 Decision(예: Decision 020)으로 기록하고 혜준님 확인 | 진행 전 |
+| ~~P2~~ | ~~Campaign 22건 재점검 및 데이터 완성도 보완, Win-back 시나리오 추가~~ | ✅ **완료(2026-08-26)** — §19~20 참고 |
+| ~~P2~~ | ~~d'Alba 시나리오를 단기/장기 전환에서 티어 승급으로 재정렬~~ | ✅ **완료(2026-08-26)** — §21 참고 |
+| P2 | Campaign Record Type 확장(§15) 및 d'Alba 티어 재정렬(§21)을 정식 Decision(예: Decision 020)으로 기록하고 팀(혜준·은영) 확인 | 진행 전 |
 | P2 | Sponsorship Product 21종 신설·3차 가격 조정(§18) 팀 최종 승인 | 진행 전 |
 | P2 | "기본 계약 단위" 정보를 Product2 필드로 구조화할지 결정(§18) | 진행 전 |
 | P2 | `Postal Code` 등 Company Information 나머지 값 보완 | 진행 전 |
-| P2 | Quote Status의 `Rejected`/`Denied` 두 값을 §10.1 제안대로("내부 반려" vs "상대방 거절") 실제로 나눠 쓸지 팀 합의 | 진행 전 |
+| P2 | Quote Status의 `Rejected`/`Denied` 두 값을 §10.1 제안대로 실제로 나눠 쓸지 팀 합의 | 진행 전 |
 | P2 | Dashboard 이름을 `스폰서십 통합 현황판`으로 바꿀지 팀 확인(§11) | 진행 전 |
-| P3 | §13에서 발견한 한계 — Opportunity의 Campaign이 재연결(A→B)될 때 예전 Campaign(A) 합계가 갱신 안 되는 문제 보완 | 진행 전 |
+| P3 | §13 한계 — Opportunity의 Campaign이 재연결(A→B)될 때 예전 Campaign(A) 합계가 갱신 안 되는 문제 보완 | 진행 전 |
 | P3 | Opportunity.CampaignId(Primary Campaign Source) 입력을 영업 프로세스에 정착 — Campaign Hierarchy Rollup이 d'Alba 외 회사에서도 실질적으로 작동하려면 필요(§17) | 진행 전 |
-| P3 | 새로 만든 Sponsorship Prospecting 캠페인 4건(2026 Q4 스폰서십 데이 외)에 Campaign Member Status 퍼널 세팅 — 첫 캠페인 1건만 완료됨(§15) | 진행 전 |
+| P3 | 파인베이스 스포츠/오르빗 통신/테라핏 헬스 Renewal 캠페인에 실제 Lead/Opportunity 연결 — 현재 전부 0건(§17, §20) | 진행 전 |
+| P3 | 그린빈 커피·루나 뷰티도 d'Alba처럼 실제 Opportunity/Partner Tier를 연결해 스토리를 완성할지 결정 | 진행 전 |
 
 ---
 
-## 21. GitHub 반영 제안
+## 25. GitHub 반영 제안
 
 권장 경로:
 
@@ -452,7 +534,7 @@ P2_RESULT_REPORT/B2B_CAMPAIGN_QUOTE_UNDOCUMENTED_IMPLEMENTATION.md
 권장 Commit Message:
 
 ```text
-docs: log Campaign record type expansion and sponsorship product repricing
+docs: log campaign re-audit, win-back scenario, tier realignment, and schema-lag fixes
 ```
 
 권장 브랜치: `feature/campaign-quote-undocumented-log` → PR to `dev`(`02_TEAM_GUIDE.md` §4 Phase 2 브랜치 전략).
