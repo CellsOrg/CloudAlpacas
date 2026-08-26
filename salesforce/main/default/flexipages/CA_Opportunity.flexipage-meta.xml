@@ -744,6 +744,12 @@
         </itemInstances>
         <itemInstances>
             <componentInstance>
+                <componentName>c:activityOverview</componentName>
+                <identifier>c_activityOverview</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>tabs</name>
                     <value>facet-9750c67c-edc5-421f-bc24-392cb3b3a3aa</value>

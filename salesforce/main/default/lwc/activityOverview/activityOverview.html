@@ -1,0 +1,53 @@
+<template>
+    <lightning-card title="Activity Overview" icon-name="standard:event">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template if:true={error}>
+                <p class="slds-text-body_small slds-text-color_error">Activity Overview를 불러오지 못했습니다.</p>
+            </template>
+
+            <template if:false={error}>
+                <div class="slds-grid slds-gutters_small slds-m-bottom_small">
+                    <div class="slds-col">
+                        <p class="slds-text-title slds-text-color_weak">Last Contact</p>
+                        <template if:true={hasLastContact}>
+                            <p class="slds-text-heading_small">{lastContactDateDisplay} · {lastContactType}</p>
+                        </template>
+                        <template if:false={hasLastContact}>
+                            <p class="slds-text-body_regular slds-text-color_weak">기록 없음</p>
+                        </template>
+                    </div>
+                    <div class="slds-col">
+                        <p class="slds-text-title slds-text-color_weak">Days Since Contact</p>
+                        <template if:true={hasLastContact}>
+                            <p class="slds-text-heading_small">{daysSinceLastContact}</p>
+                        </template>
+                        <template if:false={hasLastContact}>
+                            <p class="slds-text-body_regular slds-text-color_weak">—</p>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="slds-m-bottom_small">
+                    <p class="slds-text-title slds-text-color_weak">다음 활동</p>
+                    <template if:true={hasNextActivity}>
+                        <p class="slds-text-heading_small">{nextActivityDateDisplay} · {nextActivitySubject}</p>
+                    </template>
+                    <template if:false={hasNextActivity}>
+                        <p class="slds-text-body_regular slds-text-color_weak">예정된 활동 없음</p>
+                    </template>
+                </div>
+
+                <div class="slds-grid slds-gutters_small">
+                    <div class="slds-col">
+                        <p class="slds-text-title slds-text-color_weak">Open Tasks</p>
+                        <p class="slds-text-heading_small">{openTasksCount}</p>
+                    </div>
+                    <div class="slds-col">
+                        <p class="slds-text-title slds-text-color_weak">Overdue</p>
+                        <p class={overdueClass}>{overdueTasksCount}</p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

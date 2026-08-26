@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+
+    <assignments>
+        <name>Prepare_Last_Contact_Update</name>
+        <label>Prepare Last Contact Update</label>
+        <locationX>176</locationX>
+        <locationY>560</locationY>
+        <assignmentItems>
+            <assignToReference>Get_Related_Opportunity.Last_Contact_Date__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Call_Contact_DateTime</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>Get_Related_Opportunity.Last_Contact_Type__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Call</stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Update_Opportunity_Last_Contact</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Fault_End</name>
+        <label>Fault End — log and swallow</label>
+        <locationX>400</locationX>
+        <locationY>96</locationY>
+        <assignmentItems>
+            <assignToReference>faultMessage</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Flow.FaultMessage</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+
+    <decisions>
+        <name>Opportunity_Found</name>
+        <label>Opportunity Found?</label>
+        <locationX>176</locationX>
+        <locationY>192</locationY>
+        <defaultConnectorLabel>No — end</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Opportunity_Found</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Related_Opportunity</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Is_Qualifying_Call</targetReference>
+            </connector>
+            <label>Yes — Opportunity found</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Is_Qualifying_Call</name>
+        <label>Is Qualifying Customer Call?</label>
+        <locationX>176</locationX>
+        <locationY>328</locationY>
+        <defaultConnectorLabel>Not a qualifying call — end</defaultConnectorLabel>
+        <rules>
+            <name>Qualifying_Call</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.TaskSubtype</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Call</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Status</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Completed</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.WhoId</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Is_Newer_Than_Current</targetReference>
+            </connector>
+            <label>Qualifying Call (Completed, has Contact)</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Is_Newer_Than_Current</name>
+        <label>Is This Call Newer Than Current Last Contact?</label>
+        <locationX>176</locationX>
+        <locationY>448</locationY>
+        <defaultConnectorLabel>Not newer — end</defaultConnectorLabel>
+        <rules>
+            <name>Newer_Or_Blank</name>
+            <conditionLogic>or</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Related_Opportunity.Last_Contact_Date__c</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>Call_Contact_DateTime</leftValueReference>
+                <operator>GreaterThan</operator>
+                <rightValue>
+                    <elementReference>Get_Related_Opportunity.Last_Contact_Date__c</elementReference>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Prepare_Last_Contact_Update</targetReference>
+            </connector>
+            <label>Newer or currently blank</label>
+        </rules>
+    </decisions>
+
+    <description>완료된 Call(TaskSubtype='Call', Status='Completed', WhoId 존재)이 저장될 때, 연결된 Opportunity의 Last Contact Date/Type을 갱신합니다. 일반 Task 완료는 대상이 아닙니다(Customer Contact 정의). 기존 Last Contact보다 최신인 경우에만 갱신하며(forward-only), 삭제/역행 수정에 대한 재계산은 하지 않습니다(V1 알려진 한계).</description>
+    <environments>Default</environments>
+
+    <formulas>
+        <name>Call_Contact_DateTime</name>
+        <dataType>DateTime</dataType>
+        <expression>DATETIMEVALUE({!$Record.ActivityDate})</expression>
+    </formulas>
+
+    <interviewLabel>CA Update Opportunity Last Contact From Call {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>CA Update Opportunity Last Contact From Call</label>
+
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+
+    <recordLookups>
+        <name>Get_Related_Opportunity</name>
+        <label>Get Related Opportunity</label>
+        <locationX>176</locationX>
+        <locationY>96</locationY>
+        <connector>
+            <targetReference>Opportunity_Found</targetReference>
+        </connector>
+        <faultConnector>
+            <targetReference>Fault_End</targetReference>
+        </faultConnector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.WhatId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Opportunity</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+
+    <recordUpdates>
+        <name>Update_Opportunity_Last_Contact</name>
+        <label>Update Opportunity Last Contact</label>
+        <locationX>176</locationX>
+        <locationY>656</locationY>
+        <faultConnector>
+            <targetReference>Fault_End</targetReference>
+        </faultConnector>
+        <inputReference>Get_Related_Opportunity</inputReference>
+    </recordUpdates>
+
+    <start>
+        <locationX>176</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Related_Opportunity</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>WhatId</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
+        <object>Task</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+
+    <status>Active</status>
+
+    <variables>
+        <name>faultMessage</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Meeting_Type__c</fullName>
+    <label>Meeting Type</label>
+    <type>Picklist</type>
+    <required>false</required>
+    <description>Whether this Event represents an Online or Offline customer meeting. Defined on the shared Activity entity but only intended for use on Event.</description>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Online</fullName>
+                <default>false</default>
+                <label>Online</label>
+            </value>
+            <value>
+                <fullName>Offline</fullName>
+                <default>false</default>
+                <label>Offline</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
