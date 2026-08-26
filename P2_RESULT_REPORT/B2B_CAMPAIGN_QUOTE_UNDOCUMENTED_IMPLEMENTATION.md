@@ -488,13 +488,85 @@ d'Alba의 두 Opportunity 모두 Stage가 `Qualification`(7단계 중 첫 단계
 
 ---
 
-## 23. 기존 문서와의 관계
+## 23. 스폰서사 5곳 Account/Contact/Opportunity 신규 연결
+
+### 배경
+파인베이스 스포츠·오르빗 통신·테라핏 헬스(Renewal Campaign만 존재)와 그린빈 커피·루나 뷰티(Collaboration+Renewal Campaign만 존재), 5곳 전부 실제 Account/Contact/Opportunity가 하나도 없었습니다. 각 회사의 스토리 단계에 맞춰 Stage를 다르게 부여해서 연결했습니다 — 은영님이 진행 중인 기존 Opportunity의 Stage는 건드리지 않고, 전부 신규 레코드로만 작업했습니다.
+
+### 구현된 상태
+| 회사 | Stage | Amount | Partner Tier | 비고 |
+| --- | --- | --- | --- | --- |
+| 파인베이스 스포츠 | Negotiation | 12.42억 | Platinum | 갱신 협상 진행 중 시나리오 |
+| 오르빗 통신 | Negotiation | 2.61억 | Gold | 갱신 협상 진행 중 시나리오 |
+| 테라핏 헬스 | Qualification | (미정) | (미정) | Win-back 초기 단계, 목표 금액·티어 아직 미정 |
+| 그린빈 커피 | **Closed Won** | 2.61억 | Gold | 신규 레코드라 Stage 자유 설정 가능해 최초로 "완료된 성공 사례" 확보 |
+| 루나 뷰티 | **Closed Won** | 12.42억 | Platinum | 위와 동일 |
+
+Campaign.ExpectedRevenue는 5건 전부 Flow(§13)가 자동으로 반영하는 것을 확인했습니다(예: 파인베이스 12.42억, 그린빈 2.61억).
+
+### 팀 검토가 필요한 이유
+그린빈 커피·루나 뷰티를 Closed Won으로 만든 건 d'Alba와 동일한 승급 여정(2사이클)이 아니라 각각 1개 티어에서 완결된 성공 사례로 설계한 것입니다 — 이후 이 두 회사의 Renewal이 실제로 진행되면 d'Alba처럼 다음 사이클 Collaboration Campaign을 Hierarchy로 이어붙이는 방식을 권장합니다.
+
+---
+
+## 24. Campaign Member 등록 누락 보완 (그린빈 커피 · 루나 뷰티) 및 Path 3종 신설
+
+### Campaign Member 등록 누락
+루나 뷰티 캠페인 화면을 점검하던 중 Campaign Members가 0건인 걸 발견했습니다 — Contact/Opportunity를 만드는 것과 Campaign Member로 등록하는 건 완전히 별개의 액션이라, 명시적으로 "Add Contacts"를 하지 않으면 연결되지 않습니다. 같은 점검에서 그린빈 커피·루나 뷰티의 Collaboration Campaign Member Status가 기본값(Sent/Responded)에 머물러 있는 것도 함께 발견했습니다 — d'Alba엔 이미 있던 5단계(Targeted→Reached→Engaged→Attended→Converted) 세팅이 이 둘엔 빠져있었습니다. 두 캠페인 모두 d'Alba와 동일한 5단계를 적용하고, 담당자 Contact를 Member로 등록(Status = `Converted`)했습니다.
+
+### Campaign Path(진행 단계 시각화) 3종 신설
+Opportunity의 `CA_Opportunity` Lightning Page엔 Path(단계별 안내 진행바)가 있는데 Campaign엔 없어서 추가했습니다. 은영님이 이미 만들어두신 `Sales_Path`(Opportunity용, 한글 가이드 포함)를 템플릿으로 삼았습니다.
+
+| PathAssistant | Record Type | 단계별 안내 |
+| --- | --- | --- |
+| Sponsorship Prospecting Path | Sponsorship_Prospecting | Planned(채널 확정)→In Progress(Lead 유입 확인)→Completed(Opportunity 연결)→Aborted |
+| Sponsorship Collaboration Path | Sponsorship_Collaboration | Planned(예산/예상매출)→In Progress(Deliverable 진행률)→Completed(Net Profit·갱신 검토)→Aborted |
+| Sponsorship Renewal Path | Sponsorship_Renewal | Planned(성과 리포트 준비)→In Progress(Member Status 확인)→Completed(Opportunity 결과 확인)→Aborted |
+
+> ⚠️ PathAssistant를 배포하는 것과 화면에 실제로 노출되는 건 별개입니다 — Lightning Record Page에 Path 컴포넌트를 App Builder에서 수동으로 배치해야 보입니다. 승우님이 직접 배치 완료해서 확인했습니다.
+
+---
+
+## 25. 갱신 캠페인 성과 요약 자동화 — 티어별 성과지표 Flow (진행 중, 미완료)
+
+### 배경
+갱신 제안 시 스폰서사에게 보여줄 성과 리포트를 자동 생성하는 기능을 설계했습니다. 처음엔 예상매출·순이익을 넣으려 했으나, **이건 구단 입장의 이득(PRM 담당자 KPI)이지 스폰서사에게 제시할 근거가 아니라는 지적**을 받고 전면 재설계했습니다.
+
+### 티어별 성과지표 설계 (최종)
+| Tier | 판매한 가치 | 제시할 성과지표 |
+| --- | --- | --- |
+| Gold | Visibility(반복 노출) | 총 노출된 팬(Contact) 수 |
+| Platinum | Engagement(팬과의 접점) | 팬 도달 수 + 반응 수 + 반응율 |
+| Diamond | Strategic Partnership(지위) | 독점 도달/반응(경쟁사와 미공유 프레이밍) + 계약 규모 성장률 + 완료 시즌 수 |
+
+3개 Tier 공통으로 "약속 이행 신뢰도"(Campaign_Deliverable__c 기반 실행 이행률)도 포함됩니다. "전략적 지위가 유지됐다"는 검증 불가능한 주장은 넣지 않고, `Partner_Tier__c` 실제 저장값을 조건으로 건 경우에만 그 프레이밍을 쓰도록 설계해서 근거 없는 단정을 피했습니다.
+
+### 구현 시도 — Flow 직접 작성/배포
+`Renewal_Campaign_Performance_Summary`(Record-Triggered, Before Save)를 XML로 직접 작성해 배포했습니다. Campaign Hierarchy로 연결된 형제 Collaboration 캠페인들을 순회하며 팬 도달/반응/Deliverable 이행률/계약 성장률을 집계하고, 연결된 Opportunity의 `Partner_Tier__c`로 티어를 판별해 3가지 요약문 중 하나를 `Performance_Summary__c`(신규 필드)에 자동으로 채웁니다.
+
+### 부딪힌 문제 — 스키마 전파 지연 버그 + Flow 버전 잠금의 이중 충돌
+1. `Performance_Summary__c` 필드가 배포 직후 또 조회 불가 상태(§22와 동일 패턴, 이 세션 5번째 재발)에 빠졌고, 이 상태에서 Flow를 실행하니 "unhandled fault" 런타임 오류 발생
+2. 필드를 삭제하려 하니 방금 만든 Flow가 참조 중이라 막힘
+3. Flow를 Draft로 내리고 참조를 빼도, **예전 버전이 org에 남아있어서** 계속 막힘
+4. Flow 자체를 삭제하려 해도 `insufficient access rights on cross-reference id` 오류로 API 삭제 불가 → Setup UI에서 수동으로 Flow Delete(→ 실제로는 Obsolete 처리만 됨을 확인)
+5. Obsolete 버전도 여전히 참조 오류로 삭제 불가 → 원인 추적 결과, 테스트 중 실패했던 **Flow Interview(실행 기록)가 남아서 버전을 물고 있었음**을 발견 → `sf data delete record`로 FlowInterview 삭제
+6. 그제서야 Tooling API(`DELETE .../tooling/sobjects/Flow/{id}`)로 예전 Flow 버전 완전 삭제 성공 → 필드 삭제 성공 → 필드 재생성까지 완료
+
+### 현재 상태 (미완료)
+재생성한 `Performance_Summary__c`가 **다시 SOQL 조회 불가 상태**입니다(같은 세션에서 이 필드만 벌써 2번째). 백그라운드 폴링 중이며, 해결되는 대로 Flow를 Active로 전환하고 실제 캠페인에 저장해 테스트할 예정입니다. Flow 자체는 완성본으로 Draft 상태 배포까지 완료해둔 상태입니다.
+
+### 팀 공유 필요
+이번에 겪은 "Flow 버전이 필드 삭제를 막고, Flow 삭제는 또 다른 오류로 막히고, 그 원인이 실패한 Flow Interview 잔재였다"는 연쇄는 상당히 특이한 사례라, Salesforce Support 문의 시 Is_Converted__c·Partner_Tier__c 사례와 함께 전달할 가치가 있어 보입니다.
+
+---
+
+## 26. 기존 문서와의 관계
 
 `P2_RESULT_REPORT/승우(Product, Quote, Campaign 구현).md`(2026-08-20 작성, 이미 커밋됨)는 이 문서의 내용을 반영하기 전 시점의 상태를 기록하고 있습니다 — 특히 Company Information과 Quote Status 필드는 그 문서 작성 시점에는 없었고 이번에 보완됐습니다. 두 문서를 통합할지, 이 문서를 보완 기록으로 별도 유지할지는 팀이 정합니다.
 
 ---
 
-## 24. 다음 세션 To-Do
+## 27. 다음 세션 To-Do
 
 | 우선순위 | 작업 | 상태 |
 | --- | --- | --- |
@@ -502,6 +574,8 @@ d'Alba의 두 Opportunity 모두 Stage가 `Qualification`(7단계 중 첫 단계
 | ~~P1~~ | ~~4개 필드에 실제 값(Due Date/Completed Date/Notes) 입력~~ | ✅ **완료(2026-08-25)** |
 | ~~P1~~ | ~~CampaignMember.Is_Converted__c SOQL 조회 불가 문제~~ | ✅ **완료(2026-08-26)** — §22 참고, 재생성 없이 시간 경과로 자연 해결 |
 | ~~P1~~ | ~~Opportunity.Partner_Tier__c(은영 담당) SOQL 조회 불가 문제~~ | ✅ **완료(2026-08-26)** — §22 참고, Lightning Page 컴포넌트 제거 후 삭제·재생성으로 해결 |
+| P1 | `Campaign.Performance_Summary__c` SOQL 조회 불가 문제 — 같은 세션에서 2번째 재발, 이번엔 참조 중인 Flow 버전 때문에 삭제도 막혀서 Flow Interview까지 지워야 했음(§25) | **미해결, 진행 중** |
+| P1 | `Renewal_Campaign_Performance_Summary` Flow를 Active로 전환하고 실제 캠페인에 저장해 테스트 | 필드 해결 후 진행(§25) |
 | P1 | Opportunity Stage 담당자(은영) 작업 완료 후, d'Alba 1·2년차 Opportunity의 Stage를 실제 스토리(계약 체결 완료)에 맞게 조정 | 대기 중 — §19 참고 |
 | P1 | Campaign_Deliverable__c / PRM_Revenue_Target__c(혜준 담당 추정) 유지 여부를 팀 Decision으로 확정 | 진행 전 |
 | P1 | Budgeted Cost/Actual Cost 실제 값으로 교체 | 진행 전 |
@@ -510,20 +584,21 @@ d'Alba의 두 Opportunity 모두 Stage가 `Qualification`(7단계 중 첫 단계
 | ~~P2~~ | ~~Campaign Record Type을 Prospecting/Renewal로 확장하고 List View·Hierarchy 정비~~ | ✅ **완료(2026-08-26)** — §15~17 참고 |
 | ~~P2~~ | ~~Campaign 22건 재점검 및 데이터 완성도 보완, Win-back 시나리오 추가~~ | ✅ **완료(2026-08-26)** — §19~20 참고 |
 | ~~P2~~ | ~~d'Alba 시나리오를 단기/장기 전환에서 티어 승급으로 재정렬~~ | ✅ **완료(2026-08-26)** — §21 참고 |
+| ~~P2~~ | ~~Sponsorship Product 21종 신설·3차 가격 조정(§18) 팀 최종 승인~~ | ✅ **완료** — 팀 승인됨 |
+| ~~P2~~ | ~~파인베이스/오르빗 통신/테라핏 헬스/그린빈 커피/루나 뷰티에 실제 Account·Contact·Opportunity 연결~~ | ✅ **완료(2026-08-26)** — §23 참고 |
+| ~~P2~~ | ~~Campaign Member 등록 누락 보완, Campaign Path 3종 신설~~ | ✅ **완료(2026-08-26)** — §24 참고 |
 | P2 | Campaign Record Type 확장(§15) 및 d'Alba 티어 재정렬(§21)을 정식 Decision(예: Decision 020)으로 기록하고 팀(혜준·은영) 확인 | 진행 전 |
-| P2 | Sponsorship Product 21종 신설·3차 가격 조정(§18) 팀 최종 승인 | 진행 전 |
 | P2 | "기본 계약 단위" 정보를 Product2 필드로 구조화할지 결정(§18) | 진행 전 |
 | P2 | `Postal Code` 등 Company Information 나머지 값 보완 | 진행 전 |
 | P2 | Quote Status의 `Rejected`/`Denied` 두 값을 §10.1 제안대로 실제로 나눠 쓸지 팀 합의 | 진행 전 |
 | P2 | Dashboard 이름을 `스폰서십 통합 현황판`으로 바꿀지 팀 확인(§11) | 진행 전 |
 | P3 | §13 한계 — Opportunity의 Campaign이 재연결(A→B)될 때 예전 Campaign(A) 합계가 갱신 안 되는 문제 보완 | 진행 전 |
 | P3 | Opportunity.CampaignId(Primary Campaign Source) 입력을 영업 프로세스에 정착 — Campaign Hierarchy Rollup이 d'Alba 외 회사에서도 실질적으로 작동하려면 필요(§17) | 진행 전 |
-| P3 | 파인베이스 스포츠/오르빗 통신/테라핏 헬스 Renewal 캠페인에 실제 Lead/Opportunity 연결 — 현재 전부 0건(§17, §20) | 진행 전 |
-| P3 | 그린빈 커피·루나 뷰티도 d'Alba처럼 실제 Opportunity/Partner Tier를 연결해 스토리를 완성할지 결정 | 진행 전 |
+| P3 | 그린빈 커피·루나 뷰티 Renewal이 실제로 진행되면 d'Alba처럼 다음 사이클 Collaboration Campaign을 Hierarchy로 연결(§23) | 진행 전 |
 
 ---
 
-## 25. GitHub 반영 제안
+## 28. GitHub 반영 제안
 
 권장 경로:
 
@@ -534,7 +609,7 @@ P2_RESULT_REPORT/B2B_CAMPAIGN_QUOTE_UNDOCUMENTED_IMPLEMENTATION.md
 권장 Commit Message:
 
 ```text
-docs: log campaign re-audit, win-back scenario, tier realignment, and schema-lag fixes
+docs: log sponsor account/opportunity linking and renewal performance summary flow (WIP)
 ```
 
 권장 브랜치: `feature/campaign-quote-undocumented-log` → PR to `dev`(`02_TEAM_GUIDE.md` §4 Phase 2 브랜치 전략).
