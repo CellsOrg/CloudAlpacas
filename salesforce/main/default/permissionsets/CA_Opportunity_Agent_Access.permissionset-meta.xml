@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>CA Opportunity Agent Access</label>
+    <description>Minimum Object/Field access for the Opportunity Agent and its Subagents (Discovery Management, Activity Management, Deal Intelligence). Separate from CA_Opportunity_Qualification_Access, which stays for the existing Qualification/Discovery screens.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+
+    <!-- Task / Event / EmailMessage are intentionally NOT listed here as objectPermissions.
+         Verified against this org: there is not a single ObjectPermissions row for Task,
+         Event, or EmailMessage on any Profile or Permission Set (org-wide query returned 0).
+         Salesforce does not expose Activity-family object CRUD through the standard
+         ObjectPermissions mechanism the way it does for Opportunity or custom objects —
+         internal users get baseline Task/Event access implicitly. An objectPermissions
+         block for these was deployed once during setup and Salesforce silently dropped it
+         (confirmed by retrieving the deployed PermissionSet back from the org). -->
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Opportunity</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Interaction_Intelligence__c</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Interaction_Signal__c</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+
+    <!-- Opportunity — Discovery Management fields (V1 scope only).
+         Target_Start_Season_Display__c (read-only formula, UI-only) is deliberately
+         excluded — the Agent reads the underlying Target_Start_Season__c Number field. -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Customer_Needs__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Customer_KPI__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Key_Requirements__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Target_Segment__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Client_Budget__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Client_Budget_Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Target_Start_Season__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
+    <!-- Event / Task — Meeting_Type__c is an Activity custom field shared by both objects
+         (Salesforce links their FLS as a pair). Activity Management needs to set it when
+         creating/editing an Event; Deal Intelligence's origin lookup
+         (ActivityIntelligenceController.fetchOrigins) reads it. -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Event.Meeting_Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Task.Meeting_Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
+    <!-- Interaction_Intelligence__c — Deal Intelligence, read only.
+         Source_Type__c / Source_Record_Id__c are required fields, so Salesforce does not
+         allow (and does not need) an explicit fieldPermissions entry for them — they are
+         implicitly readable whenever object Read is granted. -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Interaction_Intelligence__c.Opportunity__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Interaction_Intelligence__c.Summary__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Interaction_Intelligence__c.Customer_Reaction__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Interaction_Intelligence__c.Key_Decision__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Interaction_Intelligence__c.Concerns_Objections__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Interaction_Intelligence__c.Follow_Up__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
+    <!-- Interaction_Signal__c — Deal Intelligence, read only.
+         Interaction_Intelligence__c (Master-Detail parent) / Signal_Category__c /
+         Signal_Type__c / Direction__c / Confidence__c are required fields, so Salesforce
+         does not allow (and does not need) an explicit fieldPermissions entry for them. -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Interaction_Signal__c.Evidence__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+</PermissionSet>
