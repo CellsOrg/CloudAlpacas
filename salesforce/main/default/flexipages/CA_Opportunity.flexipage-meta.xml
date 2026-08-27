@@ -1845,17 +1845,41 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentName>c:activityTimeline</componentName>
+                <identifier>c_activityTimeline</identifier>
+            </componentInstance>
+        </itemInstances>
+        <name>CA_Activity_IntelligenceTab</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>active</name>
                     <value>true</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>body</name>
+                    <value>CA_Activity_IntelligenceTab</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>title</name>
+                    <value>Intelligence</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:tab</componentName>
+                <identifier>caActivityIntelligenceTab</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>body</name>
                     <value>Facet-4320adbd-eefd-4adf-af6a-8e1f33b3ab14</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>title</name>
-                    <value>Standard.Tab.activity</value>
+                    <value>Activities</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:tab</componentName>
                 <identifier>activityTab</identifier>
@@ -1921,18 +1945,6 @@
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
-                <componentName>c:activityIntelligence</componentName>
-                <identifier>c_activityIntelligence</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentName>c:activityTimeline</componentName>
-                <identifier>c_activityTimeline</identifier>
-            </componentInstance>
-        </itemInstances>
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
