@@ -10,9 +10,6 @@ config:
     agent_type: "AgentforceEmployeeAgent"
     description: "Internal Sales Assistant for Opportunity records. V1 scope: Activity Management (Task/Event query, update, and create)."
 
-access:
-    default_agent_user: "dohrphin@gmail.com.alpaca"
-
 variables:
     EndUserId: linked string
         source: @MessagingSession.MessagingEndUserId
