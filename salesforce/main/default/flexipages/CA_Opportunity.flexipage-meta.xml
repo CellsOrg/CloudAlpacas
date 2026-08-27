@@ -370,6 +370,108 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Customer_Needs__c</fieldItem>
+                <identifier>CA_DiscoveryInfo_CustomerNeeds</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Customer_KPI__c</fieldItem>
+                <identifier>CA_DiscoveryInfo_CustomerKPI</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Key_Requirements__c</fieldItem>
+                <identifier>CA_DiscoveryInfo_KeyRequirements</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <name>CA_DiscoveryInfo_Col1Fields</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Target_Segment__c</fieldItem>
+                <identifier>CA_DiscoveryInfo_TargetSegment</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Client_Budget__c</fieldItem>
+                <identifier>CA_DiscoveryInfo_ClientBudget</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Client_Budget_Status__c</fieldItem>
+                <identifier>CA_DiscoveryInfo_ClientBudgetStatus</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Target_Start_Season_Display__c</fieldItem>
+                <identifier>CA_DiscoveryInfo_TargetStartSeason</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <name>CA_DiscoveryInfo_Col2Fields</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>body</name>
+                    <value>CA_DiscoveryInfo_Col1Fields</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:column</componentName>
+                <identifier>CA_DiscoveryInfo_Column1</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>body</name>
+                    <value>CA_DiscoveryInfo_Col2Fields</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:column</componentName>
+                <identifier>CA_DiscoveryInfo_Column2</identifier>
+            </componentInstance>
+        </itemInstances>
+        <name>CA_DiscoveryInfo_Columns</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
                     <value>readonly</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.AccountId</fieldItem>
@@ -525,12 +627,28 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentInstanceProperties>
-                    <name>richTextValue</name>
-                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Stage Progress — Qualification&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Qualification 단계에서 확인/수행되어야 하는 업무 항목입니다.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;잠재 스폰서의 관심 수준 확인 (Interest Level)&lt;/li&gt;&lt;li&gt;구단·팬과의 브랜드 적합성 평가 (Brand/Fan Fit)&lt;/li&gt;&lt;li&gt;스폰서의 주요 타깃 고객층 파악 (Target Segment)&lt;/li&gt;&lt;li&gt;실무 담당자 확보 (Primary Contact)&lt;/li&gt;&lt;li&gt;고객 측 스폰서십 예산 파악 (Client Budget / Client Budget Status)&lt;/li&gt;&lt;li&gt;스폰서십 시작 희망 시즌 파악 (Target Start Season)&lt;/li&gt;&lt;li&gt;의사결정권자 접근 가능 여부 파악 (Decision Maker Access)&lt;/li&gt;&lt;li&gt;고객과 실제 접촉 수행 (Call / Email / Meeting)&lt;/li&gt;&lt;/ul&gt;&lt;p style=&quot;font-size:12px;color:#706e6b;&quot;&gt;완료 여부 자동 체크, 진행률(%) 표시, 항목별 CTA 버튼은 추후 LWC 개발이 필요한 영역입니다. 현재는 참고용 체크리스트입니다.&lt;/p&gt;&lt;/div&gt;</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:richText</componentName>
-                <identifier>CA_richText_StageProgress</identifier>
+                <componentName>c:stageProgress</componentName>
+                <identifier>c_stageProgress</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.StageName}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Qualification</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentName>c:stageProgress</componentName>
+                <identifier>c_stageProgress2</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.StageName}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Discovery</rightValue>
+                    </criteria>
+                </visibilityRule>
             </componentInstance>
         </itemInstances>
         <itemInstances>
@@ -567,6 +685,38 @@
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>CA_fieldSection_PotentialFit</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.StageName}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Qualification</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>columns</name>
+                    <value>CA_DiscoveryInfo_Columns</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>horizontalAlignment</name>
+                    <value>false</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>label</name>
+                    <value>Discovery Information</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:fieldSection</componentName>
+                <identifier>CA_fieldSection_DiscoveryInfo</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.StageName}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Discovery</rightValue>
+                    </criteria>
+                </visibilityRule>
             </componentInstance>
         </itemInstances>
         <itemInstances>
@@ -717,16 +867,6 @@
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
-                    <name>richTextValue</name>
-                    <value>&lt;div&gt;&lt;p&gt;&lt;b&gt;Opportunity Score&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Future LWC/Apex Enhancement&lt;/b&gt;&lt;/p&gt;&lt;p&gt;이 Org의 Einstein Opportunity Scoring은 꺼져 있고, 실 Opportunity 데이터도 아직 학습 가능한 양이 아니라서 지금 켜도 의미 있는 점수가 나오지 않습니다. Highlights Panel에 표준 Opportunity Score 필드 자리는 이미 준비되어 있습니다. 아래 항목은 표준 기능만으로는 구현할 수 없어 커스텀 개발이 필요합니다:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Score /100 및 등급(Good/Fair/Risk 등)&lt;/li&gt;&lt;li&gt;Positive / Negative Factors&lt;/li&gt;&lt;li&gt;Score Trend(최근 4주 추이)&lt;/li&gt;&lt;li&gt;Activity 데이터 기반 신호 반영&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:richText</componentName>
-                <identifier>CA_richText_OpportunityScore</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
                     <name>columns</name>
                     <value>CA_DealNote_Columns</value>
                 </componentInstanceProperties>
@@ -746,6 +886,12 @@
             <componentInstance>
                 <componentName>c:activityOverview</componentName>
                 <identifier>c_activityOverview</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentName>c:activityIntelligence</componentName>
+                <identifier>c_activityIntelligence</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>

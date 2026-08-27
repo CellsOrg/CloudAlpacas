@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Customer_KPI__c</fullName>
+    <label>Customer KPI</label>
+    <type>LongTextArea</type>
+    <length>4000</length>
+    <visibleLines>4</visibleLines>
+    <description>Discovery 단계에서 파악한, 고객이 이 파트너십의 성공을 판단하는 기준(KPI). 여러 개일 수 있어 자유 서술 Long Text로 관리하며 단일 picklist로 제한하지 않음.</description>
+</CustomField>

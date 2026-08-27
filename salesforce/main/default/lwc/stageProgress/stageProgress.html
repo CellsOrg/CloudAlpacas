@@ -1,0 +1,47 @@
+<template>
+    <lightning-card title="Stage Progress" icon-name="standard:task2">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template if:true={error}>
+                <p class="slds-text-body_small slds-text-color_error">Stage Progress를 불러오지 못했습니다.</p>
+            </template>
+
+            <template if:true={hasChecklist}>
+                <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
+                    <span class="slds-text-body_regular">{completedCount} / {totalCount} 완료</span>
+                    <span class="slds-text-body_regular slds-text-color_weak">{progressPercentage}%</span>
+                </div>
+                <lightning-progress-bar value={progressPercentage} size="medium"></lightning-progress-bar>
+
+                <ul class="slds-grid slds-wrap slds-gutters_small slds-m-top_large">
+                    <template for:each={checklist} for:item="item">
+                        <li key={item.key} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small">
+                            <div class="slds-grid slds-grid_vertical-align-center">
+                                <template if:true={item.complete}>
+                                    <lightning-icon icon-name="utility:success" variant="success" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                </template>
+                                <template if:false={item.complete}>
+                                    <span class="stage-progress__incomplete-dot slds-m-right_x-small"></span>
+                                </template>
+                                <span class={item.textClass}>{item.label}</span>
+                                <template if:true={item.pending}>
+                                    <lightning-badge label="연동 예정" class="slds-m-left_x-small"></lightning-badge>
+                                </template>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+
+                <template if:true={hasRemaining}>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">{remainingCount}개 업무가 남았습니다.</p>
+                </template>
+                <template if:false={hasRemaining}>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">모든 업무가 완료되었습니다.</p>
+                </template>
+            </template>
+
+            <template if:true={isUnsupportedStage}>
+                <p class="slds-text-body_small slds-text-color_weak">이 단계({stageLabel})의 Stage Progress 체크리스트는 아직 준비되지 않았습니다.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

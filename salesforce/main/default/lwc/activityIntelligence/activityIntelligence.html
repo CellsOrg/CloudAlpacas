@@ -1,0 +1,72 @@
+<template>
+    <lightning-card title="Activity Intelligence" icon-name="standard:einstein">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template if:true={hasError}>
+                <p class="slds-text-body_small slds-text-color_error">Activity Intelligence를 불러오지 못했습니다.</p>
+            </template>
+
+            <template if:false={hasError}>
+                <template if:false={hasItems}>
+                    <p class="slds-text-body_small slds-text-color_weak">아직 생성된 Activity Intelligence가 없습니다.</p>
+                </template>
+
+                <template if:true={hasItems}>
+                    <template for:each={items} for:item="item">
+                        <div key={item.key} class="activity-intelligence__item slds-p-vertical_small">
+                            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-m-bottom_xx-small">
+                                <span class="slds-text-heading_small">[{item.sourceType}] {item.originDateDisplay}</span>
+                                <span class={item.reactionBadgeClass}>{item.customerReaction}</span>
+                            </div>
+
+                            <template if:true={item.originFound}>
+                                <p class="slds-text-body_regular slds-m-bottom_small">
+                                    {item.originSubject}<template if:true={item.hasOriginDetail}> · {item.originDetail}</template>
+                                </p>
+                            </template>
+                            <template if:false={item.originFound}>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">원본 Activity 없음</p>
+                            </template>
+
+                            <p class="slds-text-title slds-text-color_weak slds-m-bottom_xx-small">AI Summary</p>
+                            <p class="slds-text-body_regular slds-m-bottom_small">{item.summary}</p>
+
+                            <template if:true={item.hasKeyDecision}>
+                                <p class="slds-text-title slds-text-color_weak slds-m-bottom_xx-small">Key Decision</p>
+                                <p class="slds-text-body_regular slds-m-bottom_small">{item.keyDecision}</p>
+                            </template>
+
+                            <template if:true={item.hasConcerns}>
+                                <p class="slds-text-title slds-text-color_weak slds-m-bottom_xx-small">Concerns / Objections</p>
+                                <p class="slds-text-body_regular slds-m-bottom_small">{item.concernsObjections}</p>
+                            </template>
+
+                            <template if:true={item.hasFollowUp}>
+                                <p class="slds-text-title slds-text-color_weak slds-m-bottom_xx-small">Follow-up</p>
+                                <p class="slds-text-body_regular slds-m-bottom_small">{item.followUp}</p>
+                            </template>
+
+                            <template if:true={item.hasSignals}>
+                                <p class="slds-text-title slds-text-color_weak slds-m-bottom_x-small">Signals</p>
+                                <template for:each={item.signals} for:item="signal">
+                                    <div key={signal.key} class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_x-small">
+                                        <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                                            <span class="slds-badge slds-m-right_x-small">{signal.category}</span>
+                                            <span class={signal.directionBadgeClass}>{signal.direction}</span>
+                                            <span class="slds-badge slds-badge_lightest slds-m-left_x-small">{signal.confidence}</span>
+                                        </div>
+                                        <template if:true={signal.hasType}>
+                                            <p class="slds-text-body_small slds-m-top_xx-small">{signal.type}</p>
+                                        </template>
+                                        <template if:true={signal.hasEvidence}>
+                                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">"{signal.evidence}"</p>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </template>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>
