@@ -16,7 +16,8 @@ const OPPORTUNITY_FIELDS = [
     'Opportunity.Key_Requirements__c',
     'Opportunity.HasOpportunityLineItem',
     'Opportunity.Amount',
-    'Opportunity.SyncedQuoteId'
+    'Opportunity.SyncedQuoteId',
+    'Opportunity.Open_Tasks_Count__c'
 ];
 
 // Proposal/Quote criterion 4 전용. Synced Quote를 별도 wire로 읽어서 채우며,
@@ -133,6 +134,26 @@ const STAGE_CHECKLISTS = {
             label: '고객에게 Quote 제안',
             // synced Quote의 Status로 판정 (별도 wire, ctx.quoteStatus로 전달)
             isComplete: (r, ctx) => QUOTE_PRESENTED_STATUSES.has(ctx.quoteStatus)
+        }
+    ],
+    Negotiation: [
+        {
+            key: 'quotePresented',
+            label: 'Quote가 고객에게 제안됨',
+            // Proposal/Quote와 동일 semantics — Presented/Accepted만 인정, Denied 제외
+            isComplete: (r, ctx) => QUOTE_PRESENTED_STATUSES.has(ctx.quoteStatus)
+        },
+        {
+            key: 'followUpDefined',
+            label: '후속 액션 정의됨',
+            // 표준 Task 롤업 (CA_Update_Opportunity_Next_Activity Flow가 유지)
+            isComplete: (r) => Number(r.Open_Tasks_Count__c) > 0
+        },
+        {
+            key: 'finalTermsAgreed',
+            label: '최종 조건 합의 (Quote 수락)',
+            // synced Quote.Status = Accepted → Closed Won 직전 상태
+            isComplete: (r, ctx) => ctx.quoteStatus === 'Accepted'
         }
     ]
 };
