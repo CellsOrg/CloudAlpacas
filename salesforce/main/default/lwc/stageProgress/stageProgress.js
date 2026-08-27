@@ -13,8 +13,19 @@ const OPPORTUNITY_FIELDS = [
     'Opportunity.Last_Contact_Date__c',
     'Opportunity.Customer_Needs__c',
     'Opportunity.Customer_KPI__c',
-    'Opportunity.Key_Requirements__c'
+    'Opportunity.Key_Requirements__c',
+    'Opportunity.HasOpportunityLineItem',
+    'Opportunity.Amount',
+    'Opportunity.SyncedQuoteId'
 ];
+
+// Proposal/Quote criterion 4 전용. Synced Quote를 별도 wire로 읽어서 채우며,
+// Quote 접근 실패 시에도 이 값만 undefined로 남고 나머지 Stage 체크리스트엔 영향 없음.
+const SYNCED_QUOTE_FIELDS = ['Quote.Status'];
+
+// "고객에게 제안됨"으로 인정하는 Quote.Status. Presented/Accepted만 의미가 확실.
+// Denied(상대 거절)는 Rejected(내부 반려)와의 구분이 팀 확정 전이라 V1에서는 제외.
+const QUOTE_PRESENTED_STATUSES = new Set(['Presented', 'Accepted']);
 
 const hasValue = (value) => value !== null && value !== undefined && value !== '';
 
@@ -98,6 +109,31 @@ const STAGE_CHECKLISTS = {
             label: 'Target Start Season 파악',
             isComplete: (r) => hasValue(r.Target_Start_Season__c)
         }
+    ],
+    'Proposal/Quote': [
+        {
+            key: 'productConfigured',
+            label: 'Product / Package 구성',
+            // 표준 Opportunity Product(OpportunityLineItem) 존재 여부
+            isComplete: (r) => r.HasOpportunityLineItem === true
+        },
+        {
+            key: 'dealAmount',
+            label: 'Deal 금액 확정',
+            isComplete: (r) => hasValue(r.Amount) && Number(r.Amount) > 0
+        },
+        {
+            key: 'quoteSynced',
+            label: '공식 Quote 생성 및 Opportunity 동기화',
+            // 표준 Primary/Synced Quote
+            isComplete: (r) => hasValue(r.SyncedQuoteId)
+        },
+        {
+            key: 'quotePresented',
+            label: '고객에게 Quote 제안',
+            // synced Quote의 Status로 판정 (별도 wire, ctx.quoteStatus로 전달)
+            isComplete: (r, ctx) => QUOTE_PRESENTED_STATUSES.has(ctx.quoteStatus)
+        }
     ]
 };
 
@@ -106,6 +142,7 @@ export default class StageProgress extends LightningElement {
 
     record;
     error;
+    syncedQuoteStatus;
 
     @wire(getRecord, { recordId: '$recordId', fields: OPPORTUNITY_FIELDS })
     wiredOpportunity({ data, error }) {
@@ -116,6 +153,18 @@ export default class StageProgress extends LightningElement {
             this.error = error;
             this.record = undefined;
         }
+    }
+
+    get syncedQuoteId() {
+        return (this.record && this.record.SyncedQuoteId) || undefined;
+    }
+
+    // Proposal/Quote criterion 4 전용 — Opportunity wire와 완전히 분리.
+    // Quote 권한이 없거나 synced Quote가 없어도 여기서만 조용히 실패하고
+    // this.error / Qualification / Discovery 체크리스트에는 전혀 영향을 주지 않음.
+    @wire(getRecord, { recordId: '$syncedQuoteId', fields: SYNCED_QUOTE_FIELDS })
+    wiredSyncedQuote({ data }) {
+        this.syncedQuoteStatus = data ? data.fields.Status.value : undefined;
     }
 
     toFieldMap(data) {
@@ -147,8 +196,9 @@ export default class StageProgress extends LightningElement {
             return [];
         }
         const record = this.record;
+        const ctx = { quoteStatus: this.syncedQuoteStatus };
         return this.stageConfig.map((item) => {
-            const complete = !item.pending && item.isComplete(record);
+            const complete = !item.pending && item.isComplete(record, ctx);
             return {
                 ...item,
                 complete,
@@ -174,7 +224,8 @@ export default class StageProgress extends LightningElement {
     }
 
     get progressPercentage() {
-        // 8개 항목 균등 가중치라 12.5% 단위 소수가 나올 수 있음 — 소수 첫째 자리까지만 유지
+        // Stage마다 항목 수가 달라(예: Qualification 8 / Discovery 6 / Proposal/Quote 4)
+        // 균등 가중치 나눗셈에서 소수가 나올 수 있음 — 소수 첫째 자리까지만 유지
         return this.totalCount > 0 ? Math.round((this.completedCount / this.totalCount) * 1000) / 10 : 0;
     }
 }
