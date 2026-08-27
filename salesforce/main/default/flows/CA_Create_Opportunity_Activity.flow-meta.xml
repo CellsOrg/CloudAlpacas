@@ -2,6 +2,17 @@
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>62.0</apiVersion>
 
+    <formulas>
+        <name>fmlTaskPriority</name>
+        <dataType>String</dataType>
+        <expression>BLANKVALUE({!priority}, &apos;Normal&apos;)</expression>
+    </formulas>
+    <formulas>
+        <name>fmlTaskStatus</name>
+        <dataType>String</dataType>
+        <expression>BLANKVALUE({!status}, &apos;Not Started&apos;)</expression>
+    </formulas>
+
     <assignments>
         <name>Build_Task</name>
         <label>Build Task</label>
@@ -32,14 +43,14 @@
             <assignToReference>varTask.Status</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>status</elementReference>
+                <elementReference>fmlTaskStatus</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>varTask.Priority</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>priority</elementReference>
+                <elementReference>fmlTaskPriority</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>

@@ -114,13 +114,21 @@ subagent activity_management:
             source: "EmployeeCopilot__QueryRecords"
             inputs:
                 query: string
+                customizationInstructions: string
+            outputs:
+                result: list[object]
+                    complex_data_type_name: "lightning__recordInfoType"
         update_activity:
             description: "Update fields on an existing Task or Event record."
             target: "standardInvocableAction://einsteinCopilotUpdateRecord"
             source: "EmployeeCopilot__UpdateRecordFields"
             require_user_confirmation: True
             inputs:
-                recordDetailInput: string
+                recordDetailInput: object
+                    complex_data_type_name: "lightning__recordInfoType"
+            outputs:
+                recordDetailOutput: object
+                    complex_data_type_name: "lightning__recordInfoType"
         create_activity:
             description: "Create one new Task or Event activity record linked to an Opportunity. Set activityType to 'Task' or 'Event'. whatId is the Opportunity Id. whoId is an optional Contact or Lead Id. For a Task, provide subject, activityDate, and status (priority and description are optional). For an Event, provide subject, startDateTime, and endDateTime (meetingType and description are optional). Only invoke this action after the user has explicitly confirmed the activity details."
             target: "flow://CA_Create_Opportunity_Activity"
