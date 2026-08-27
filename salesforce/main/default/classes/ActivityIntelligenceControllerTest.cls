@@ -7,11 +7,14 @@ private class ActivityIntelligenceControllerTest {
         Opportunity oppB = new Opportunity(Name = 'Test Opp B (other)', StageName = 'Qualification', CloseDate = Date.today().addDays(30));
         insert new List<Opportunity>{ oppA, oppB };
 
-        Task callTask = new Task(WhatId = oppA.Id, Subject = '고객 전화 통화', Status = 'Completed', ActivityDate = Date.today().addDays(-2));
-        Event meetingEvent = new Event(WhatId = oppA.Id, Subject = '오프라인 미팅', StartDateTime = Datetime.now().addDays(-1), EndDateTime = Datetime.now().addDays(-1).addHours(1));
+        Task callTask = new Task(WhatId = oppA.Id, Subject = '고객 전화 통화', Status = 'Completed', ActivityDate = Date.today().addDays(-2), Description = '예산 관련 1차 통화');
+        Event meetingEvent = new Event(WhatId = oppA.Id, Subject = '오프라인 미팅', StartDateTime = Datetime.now().addDays(-1), EndDateTime = Datetime.now().addDays(-1).addHours(1),
+            Meeting_Type__c = 'Offline', Key_Discussion__c = 'Platinum 패키지 논의', Concerns_Objections__c = '예산 미확정', Follow_up__c = '제안서 재전달');
         Task danglingTask = new Task(WhatId = oppA.Id, Subject = '삭제될 임시 Task', Status = 'Completed', ActivityDate = Date.today());
         Task otherOppTask = new Task(WhatId = oppB.Id, Subject = 'Opp B 전화 통화', Status = 'Completed', ActivityDate = Date.today());
-        insert new List<Task>{ callTask, danglingTask, otherOppTask };
+        // Intelligence가 전혀 없는 일반 Task(Timeline에는 나와야 하고, getIntelligence에는 영향 없음)
+        Task generalTask = new Task(WhatId = oppA.Id, Subject = '내부 준비 작업', Status = 'Not Started', ActivityDate = Date.today().addDays(1));
+        insert new List<Task>{ callTask, danglingTask, otherOppTask, generalTask };
         insert meetingEvent;
 
         EmailMessage email = new EmailMessage(Subject = '제안서 전달', Status = '3', RelatedToId = oppA.Id, MessageDate = Datetime.now().addDays(-3));
@@ -49,6 +52,23 @@ private class ActivityIntelligenceControllerTest {
 
         // 원본 Activity가 실제로 삭제된(dangling) 상태를 재현
         delete danglingTask;
+
+        // target persona(Manager Lee 유형) — Standard User + CA_Opportunity_Agent_Access.
+        // permission set 인식이 트랜잭션 경계를 넘어야 runAs에서 반영되므로 @testSetup에서 만든다.
+        // setup object(User/PermissionSetAssignment) DML은 MIXED_DML 회피를 위해 runAs로 격리.
+        System.runAs(new User(Id = UserInfo.getUserId())) {
+            PermissionSet ps = [SELECT Id FROM PermissionSet WHERE Name = 'CA_Opportunity_Agent_Access' LIMIT 1];
+            Profile std = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+            User u = new User(
+                FirstName = 'AM', LastName = 'QA Manager', Alias = 'amqamgr',
+                Email = 'am.qa.manager@example.com.invalid',
+                Username = 'am.qa.manager.' + System.now().getTime() + '@example.com.invalid',
+                ProfileId = std.Id, TimeZoneSidKey = 'Asia/Seoul', LocaleSidKey = 'ko_KR',
+                EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US'
+            );
+            insert u;
+            insert new PermissionSetAssignment(AssigneeId = u.Id, PermissionSetId = ps.Id);
+        }
     }
 
     @isTest
@@ -162,5 +182,207 @@ private class ActivityIntelligenceControllerTest {
 
         System.assertEquals(0, emptyResult.size(), 'Intelligence가 없는 Opportunity는 빈 리스트를 반환해야 한다');
         System.assertEquals(0, nullResult.size(), 'null Id는 예외 없이 빈 리스트를 반환해야 한다');
+    }
+
+    // ===================== getActivityTimeline =====================
+
+    @isTest
+    static void testActivityTimelineIncludesAllActivityTypesWithLeftJoin() {
+        Opportunity oppA = [SELECT Id FROM Opportunity WHERE Name = 'Test Opp A' LIMIT 1];
+
+        Test.startTest();
+        List<ActivityIntelligenceController.TimelineItem> rows = ActivityIntelligenceController.getActivityTimeline(oppA.Id);
+        Test.stopTest();
+
+        // Task 3건(call/dangling은 삭제됨/general) + Event 1건 + EmailMessage 1건
+        // dangling Task는 삭제되었으므로 timeline row 없음 → Task 2 + Event 1 + Email 1 = 4
+        Map<String, ActivityIntelligenceController.TimelineItem> bySubject = new Map<String, ActivityIntelligenceController.TimelineItem>();
+        for (ActivityIntelligenceController.TimelineItem r : rows) {
+            bySubject.put(r.subject, r);
+        }
+        System.assertEquals(4, rows.size(), '삭제된 dangling Task를 제외한 Activity 4건이 timeline에 나와야 한다');
+
+        ActivityIntelligenceController.TimelineItem callRow = bySubject.get('고객 전화 통화');
+        System.assertNotEquals(null, callRow, 'Call Task가 timeline에 있어야 한다');
+        System.assertEquals('Task', callRow.sourceObject);
+        System.assertEquals(true, callRow.hasIntelligence, 'Call Task는 연결된 Intelligence가 있어야 한다');
+        System.assertEquals('전화로 예산 논의', callRow.summary);
+        System.assertEquals(2, callRow.signals.size(), 'Call Intelligence의 Signal 2건이 조회되어야 한다');
+        System.assertEquals('Activity Notes', callRow.contentType);
+
+        ActivityIntelligenceController.TimelineItem generalRow = bySubject.get('내부 준비 작업');
+        System.assertNotEquals(null, generalRow, 'Intelligence 없는 일반 Task도 timeline에 나와야 한다');
+        System.assertEquals(false, generalRow.hasIntelligence, '일반 Task는 hasIntelligence=false');
+        System.assertEquals('Task', generalRow.activityType);
+        System.assertNotEquals(null, generalRow.signals, 'Intelligence가 없어도 signals는 빈 리스트여야 한다');
+        System.assertEquals(0, generalRow.signals.size());
+
+        ActivityIntelligenceController.TimelineItem eventRow = bySubject.get('오프라인 미팅');
+        System.assertEquals('Event', eventRow.sourceObject);
+        System.assertEquals('Offline Meeting', eventRow.activityType);
+        System.assertEquals(true, eventRow.hasIntelligence);
+        System.assertEquals('Meeting Notes', eventRow.contentType);
+
+        ActivityIntelligenceController.TimelineItem emailRow = bySubject.get('제안서 전달');
+        System.assertEquals('EmailMessage', emailRow.sourceObject);
+        System.assertEquals('Email', emailRow.activityType);
+        System.assertEquals(true, emailRow.hasIntelligence);
+        System.assertEquals('Email Content', emailRow.contentType);
+    }
+
+    @isTest
+    static void testActivityTimelineOpportunityIsolationAndSort() {
+        Opportunity oppA = [SELECT Id FROM Opportunity WHERE Name = 'Test Opp A' LIMIT 1];
+
+        Test.startTest();
+        List<ActivityIntelligenceController.TimelineItem> rows = ActivityIntelligenceController.getActivityTimeline(oppA.Id);
+        Test.stopTest();
+
+        for (ActivityIntelligenceController.TimelineItem r : rows) {
+            System.assertNotEquals('Opp B 전화 통화', r.subject, '다른 Opportunity의 Activity가 섞이면 안 된다');
+        }
+        // 최신순(내림차순) 정렬 확인
+        for (Integer i = 1; i < rows.size(); i++) {
+            Datetime prev = rows[i - 1].timestamp;
+            Datetime curr = rows[i].timestamp;
+            if (prev != null && curr != null) {
+                System.assert(prev >= curr, 'timeline은 timestamp 내림차순이어야 한다');
+            }
+        }
+    }
+
+    @isTest
+    static void testActivityTimelineNullAndEmpty() {
+        Opportunity oppEmpty = new Opportunity(Name = 'Timeline Empty Opp', StageName = 'Qualification', CloseDate = Date.today().addDays(30));
+        insert oppEmpty;
+
+        Test.startTest();
+        System.assertEquals(0, ActivityIntelligenceController.getActivityTimeline(null).size());
+        System.assertEquals(0, ActivityIntelligenceController.getActivityTimeline(oppEmpty.Id).size());
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testActivityTimelineBulkGovernorSafe() {
+        Opportunity opp = new Opportunity(Name = 'Bulk Timeline Opp', StageName = 'Qualification', CloseDate = Date.today().addDays(30));
+        insert opp;
+        List<Task> tasks = new List<Task>();
+        for (Integer i = 0; i < 200; i++) {
+            tasks.add(new Task(WhatId = opp.Id, Subject = 'Bulk Task ' + i, Status = 'Completed', ActivityDate = Date.today().addDays(-i)));
+        }
+        insert tasks;
+
+        Test.startTest();
+        Integer qBefore = Limits.getQueries();
+        List<ActivityIntelligenceController.TimelineItem> rows = ActivityIntelligenceController.getActivityTimeline(opp.Id);
+        Integer qUsed = Limits.getQueries() - qBefore;
+        Test.stopTest();
+
+        System.assertEquals(200, rows.size(), '200건 Activity를 모두 반환해야 한다');
+        System.assert(qUsed <= 6, 'N+1 없이 오브젝트당 상수 개의 벌크 쿼리만 사용해야 한다. 실제=' + qUsed);
+    }
+
+    // ===================== getActivityContent =====================
+
+    @isTest
+    static void testGetActivityContentTaskNotes() {
+        Task t = [SELECT Id FROM Task WHERE Subject = '고객 전화 통화' LIMIT 1];
+
+        Test.startTest();
+        ActivityIntelligenceController.ActivityContent c = ActivityIntelligenceController.getActivityContent(t.Id);
+        Test.stopTest();
+
+        System.assertEquals('Task', c.sourceObject);
+        System.assertEquals('Activity Notes', c.contentType);
+        System.assertEquals('예산 관련 1차 통화', c.body);
+        System.assertEquals(true, c.hasContent);
+    }
+
+    @isTest
+    static void testGetActivityContentEventMeetingNotes() {
+        Event ev = [SELECT Id FROM Event WHERE Subject = '오프라인 미팅' LIMIT 1];
+
+        Test.startTest();
+        ActivityIntelligenceController.ActivityContent c = ActivityIntelligenceController.getActivityContent(ev.Id);
+        Test.stopTest();
+
+        System.assertEquals('Event', c.sourceObject);
+        System.assertEquals('Meeting Notes', c.contentType);
+        System.assertEquals('Offline Meeting', c.activityType);
+        System.assertEquals(true, c.hasContent);
+        System.assertNotEquals(null, c.meetingNotes);
+        System.assert(c.meetingNotes.size() >= 3, '비어있지 않은 담당자 노트 필드가 나와야 한다');
+        Map<String, String> notes = new Map<String, String>();
+        for (ActivityIntelligenceController.NoteField nf : c.meetingNotes) {
+            notes.put(nf.label, nf.value);
+        }
+        System.assertEquals('Platinum 패키지 논의', notes.get('Key Discussion'));
+        System.assertEquals('예산 미확정', notes.get('Concerns / Objections'));
+    }
+
+    @isTest
+    static void testGetActivityContentEmail() {
+        EmailMessage em = [SELECT Id FROM EmailMessage WHERE Subject = '제안서 전달' LIMIT 1];
+
+        Test.startTest();
+        ActivityIntelligenceController.ActivityContent c = ActivityIntelligenceController.getActivityContent(em.Id);
+        Test.stopTest();
+
+        System.assertEquals('EmailMessage', c.sourceObject);
+        System.assertEquals('Email Content', c.contentType);
+        System.assertEquals('Email', c.activityType);
+    }
+
+    @isTest
+    static void testGetActivityContentNull() {
+        Test.startTest();
+        ActivityIntelligenceController.ActivityContent c = ActivityIntelligenceController.getActivityContent(null);
+        Test.stopTest();
+        System.assertEquals(false, c.hasContent);
+    }
+
+    // ===================== FLS: target persona (Manager Lee 유형) =====================
+
+    @isTest
+    static void testOpportunityAgentAccessGrantsEventNoteFls() {
+        // Option A 승인 범위: CA_Opportunity_Agent_Access가 Event 담당자 노트 5개 필드를
+        // read-only(editable=false)로 부여하는지 결정적으로 검증한다.
+        // (System.runAs는 permission-set 기반 FLS를 테스트 컨텍스트에서 신뢰성 있게 반영하지 못하므로
+        //  실제 WITH USER_MODE 런타임 동작은 별도 org QA로 확인한다.)
+        Set<String> fields = new Set<String>{
+            'Event.Key_Discussion__c', 'Event.Key_Decision__c', 'Event.Concerns_Objections__c',
+            'Event.Follow_up__c', 'Event.Customer_Reaction__c'
+        };
+        Map<String, FieldPermissions> byField = new Map<String, FieldPermissions>();
+        for (FieldPermissions fp : [
+            SELECT Field, PermissionsRead, PermissionsEdit
+            FROM FieldPermissions
+            WHERE Parent.Name = 'CA_Opportunity_Agent_Access' AND Field IN :fields
+        ]) {
+            byField.put(fp.Field, fp);
+        }
+        for (String f : fields) {
+            System.assertNotEquals(null, byField.get(f), f + ' FLS 항목이 permission set에 존재해야 한다');
+            System.assertEquals(true, byField.get(f).PermissionsRead, f + ' 는 readable 이어야 한다');
+            System.assertEquals(false, byField.get(f).PermissionsEdit, f + ' 는 editable=false 여야 한다');
+        }
+    }
+
+    @isTest
+    static void testGetActivityContentNoExceptionForAgentAccessUser() {
+        // Standard User + CA_Opportunity_Agent_Access 사용자(Manager Lee 유형)로 실행해도
+        // getActivityContent / getActivitytimeline이 예외 없이 동작해야 한다(동적 FLS SELECT).
+        User u = [SELECT Id FROM User WHERE Alias = 'amqamgr' LIMIT 1];
+        Event ev = [SELECT Id FROM Event WHERE Subject = '오프라인 미팅' LIMIT 1];
+        Opportunity oppA = [SELECT Id FROM Opportunity WHERE Name = 'Test Opp A' LIMIT 1];
+
+        Test.startTest();
+        System.runAs(u) {
+            ActivityIntelligenceController.ActivityContent c = ActivityIntelligenceController.getActivityContent(ev.Id);
+            System.assertNotEquals(null, c, '예외 없이 content를 반환해야 한다');
+            List<ActivityIntelligenceController.TimelineItem> rows = ActivityIntelligenceController.getActivityTimeline(oppA.Id);
+            System.assertNotEquals(null, rows, '예외 없이 timeline을 반환해야 한다');
+        }
+        Test.stopTest();
     }
 }
