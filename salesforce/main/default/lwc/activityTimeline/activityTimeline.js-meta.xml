@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Activity Timeline</masterLabel>
+    <description>Opportunity의 모든 Activity(Task/Call/Email/Meeting)를 시간순으로 보여주고, 각 Activity에 연결된 Interaction Intelligence(요약/반응/Signal)와 원본 내용을 detail에서 함께 확인합니다.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Opportunity</object>
+            </objects>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

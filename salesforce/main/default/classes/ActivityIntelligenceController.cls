@@ -225,4 +225,357 @@ public with sharing class ActivityIntelligenceController {
         @AuraEnabled public String confidence;
         @AuraEnabled public String evidence;
     }
+
+    // ============================================================================
+    //  Activity Timeline + Intelligence UI Integration V1  (activityTimeline LWC)
+    //  기존 getIntelligence()는 그대로 두고(호환 유지), 아래 두 메서드를 추가한다.
+    //  getActivityTimeline : Opportunity의 모든 Activity(Task/Event/EmailMessage)를
+    //                        시간순으로 정규화하고 Interaction Intelligence를 LEFT JOIN.
+    //  getActivityContent  : 특정 Activity 클릭 시 원본 상세/전문을 lazy load.
+    //  Full Content는 timeline 초기 로드에 포함하지 않는다(성능).
+    // ============================================================================
+
+    /**
+     * Opportunity에 연결된 Task/Event/EmailMessage 전부를 정규화한 Timeline row로 반환한다.
+     * Interaction_Intelligence__c(+Signal)는 Source_Record_Id__c = Activity Id 기준으로 LEFT JOIN.
+     * Intelligence가 없는 Activity(일반 Task 등)도 그대로 반환한다(hasIntelligence=false).
+     * SOQL은 오브젝트당 1회 벌크(총 ≤ 5). N+1 없음. with sharing + USER_MODE.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<TimelineItem> getActivityTimeline(Id opportunityId) {
+        List<TimelineItem> rows = new List<TimelineItem>();
+        if (opportunityId == null) {
+            return rows;
+        }
+
+        // --- Intelligence + Signals (Source_Record_Id__c -> Intelligence) ---
+        List<Interaction_Intelligence__c> intelligences = [
+            SELECT Id, Source_Type__c, Source_Record_Id__c, Summary__c, Customer_Reaction__c,
+                   Key_Decision__c, Concerns_Objections__c, Follow_Up__c, CreatedDate
+            FROM Interaction_Intelligence__c
+            WHERE Opportunity__c = :opportunityId
+            WITH USER_MODE
+        ];
+        Map<Id, Interaction_Intelligence__c> iiByActivityId = new Map<Id, Interaction_Intelligence__c>();
+        for (Interaction_Intelligence__c ii : intelligences) {
+            if (String.isBlank(ii.Source_Record_Id__c)) {
+                continue;
+            }
+            try {
+                iiByActivityId.put(Id.valueOf(ii.Source_Record_Id__c), ii);
+            } catch (Exception e) {
+                // 형식이 잘못된 Id(Validation Rule로 정상 경로에서는 도달 불가) — 조용히 건너뜀
+            }
+        }
+        Map<Id, List<Interaction_Signal__c>> signalsByParent =
+            intelligences.isEmpty() ? new Map<Id, List<Interaction_Signal__c>>() : groupSignalsByParent(intelligences);
+
+        // --- EmailMessages (현재 org 데이터 없음 — 향후 실 EmailMessage 대비 정규화 경로) ---
+        // EmailMessage를 저장하면 Salesforce가 짝이 되는 shadow Task(TaskSubtype='Email')를 자동 생성한다.
+        // 그 shadow Task Id는 EmailMessage.ActivityId이므로, 아래 Task 조회에서 제외해 중복 row를 막는다.
+        Set<Id> emailShadowTaskIds = new Set<Id>();
+        List<TimelineItem> emailRows = new List<TimelineItem>();
+        if (Schema.SObjectType.EmailMessage.isAccessible() && Schema.SObjectType.EmailMessage.isQueryable()) {
+            try {
+                for (EmailMessage em : [
+                    SELECT Id, Subject, MessageDate, CreatedDate, FromName, FromAddress, ActivityId
+                    FROM EmailMessage
+                    WHERE RelatedToId = :opportunityId
+                    WITH USER_MODE
+                ]) {
+                    if (em.ActivityId != null) {
+                        emailShadowTaskIds.add(em.ActivityId);
+                    }
+                    TimelineItem item = new TimelineItem();
+                    item.activityId = em.Id;
+                    item.sourceObject = 'EmailMessage';
+                    item.activityType = 'Email';
+                    item.timestamp = (em.MessageDate != null) ? em.MessageDate : em.CreatedDate;
+                    item.subject = em.Subject;
+                    item.contactName = String.isNotBlank(em.FromName) ? em.FromName : em.FromAddress;
+                    item.contentType = 'Email Content';
+                    applyIntelligence(item, iiByActivityId.get(em.Id), signalsByParent);
+                    emailRows.add(item);
+                }
+            } catch (Exception e) {
+                // EmailMessage 접근 제약 — Timeline 전체를 실패시키지 않는다
+            }
+        }
+
+        // --- Tasks (EmailMessage shadow Task 제외) ---
+        for (Task t : [
+            SELECT Id, Subject, Status, Priority, ActivityDate, CreatedDate, TaskSubtype,
+                   Meeting_Type__c, Who.Name, Owner.Name
+            FROM Task
+            WHERE WhatId = :opportunityId AND Id NOT IN :emailShadowTaskIds
+            WITH USER_MODE
+        ]) {
+            TimelineItem item = new TimelineItem();
+            item.activityId = t.Id;
+            item.sourceObject = 'Task';
+            item.activityType = taskActivityType(t.TaskSubtype);
+            item.timestamp = (t.ActivityDate != null)
+                ? Datetime.newInstance(t.ActivityDate, Time.newInstance(0, 0, 0, 0))
+                : t.CreatedDate;
+            item.subject = t.Subject;
+            item.contactName = (t.Who != null) ? t.Who.Name : null;
+            item.ownerName = (t.Owner != null) ? t.Owner.Name : null;
+            item.status = t.Status;
+            item.meetingType = t.Meeting_Type__c;
+            item.contentType = 'Activity Notes';
+            applyIntelligence(item, iiByActivityId.get(t.Id), signalsByParent);
+            rows.add(item);
+        }
+
+        // --- Events ---
+        for (Event ev : [
+            SELECT Id, Subject, StartDateTime, EndDateTime, CreatedDate, Location,
+                   Meeting_Type__c, Who.Name, Owner.Name
+            FROM Event
+            WHERE WhatId = :opportunityId
+            WITH USER_MODE
+        ]) {
+            TimelineItem item = new TimelineItem();
+            item.activityId = ev.Id;
+            item.sourceObject = 'Event';
+            item.activityType = eventActivityType(ev.Meeting_Type__c);
+            item.timestamp = (ev.StartDateTime != null) ? ev.StartDateTime : ev.CreatedDate;
+            item.subject = ev.Subject;
+            item.contactName = (ev.Who != null) ? ev.Who.Name : null;
+            item.ownerName = (ev.Owner != null) ? ev.Owner.Name : null;
+            item.status = null;
+            item.meetingType = ev.Meeting_Type__c;
+            item.contentType = 'Meeting Notes';
+            applyIntelligence(item, iiByActivityId.get(ev.Id), signalsByParent);
+            rows.add(item);
+        }
+
+        rows.addAll(emailRows);
+        rows.sort();
+        return rows;
+    }
+
+    /**
+     * 특정 Activity의 상세/전문을 반환한다(detail 패널 open 시 lazy load).
+     * Task -> Task.Description ("Activity Notes")
+     * Event -> Event.Description ("Meeting Notes") + 담당자 원본 구조화 노트(FLS 허용 필드만)
+     * EmailMessage -> From/To/Cc + TextBody/HtmlBody ("Email Content")
+     * 사용자가 읽을 수 없는 필드는 Security.stripInaccessible로 제거되어 null로 반환된다(예외 없음).
+     */
+    @AuraEnabled(cacheable=true)
+    public static ActivityContent getActivityContent(Id activityId) {
+        ActivityContent content = new ActivityContent();
+        if (activityId == null) {
+            return content;
+        }
+        String prefix = String.valueOf(activityId).substring(0, 3);
+
+        if (prefix == Task.SObjectType.getDescribe().getKeyPrefix()) {
+            List<Task> tasks = [
+                SELECT Id, Subject, Description, Status, Priority, ActivityDate, TaskSubtype,
+                       Meeting_Type__c, Who.Name, Owner.Name
+                FROM Task WHERE Id = :activityId WITH USER_MODE LIMIT 1
+            ];
+            if (!tasks.isEmpty()) {
+                Task t = tasks[0];
+                content.activityType = taskActivityType(t.TaskSubtype);
+                content.sourceObject = 'Task';
+                content.subject = t.Subject;
+                content.contactName = (t.Who != null) ? t.Who.Name : null;
+                content.ownerName = (t.Owner != null) ? t.Owner.Name : null;
+                content.status = t.Status;
+                content.priority = t.Priority;
+                content.timestamp = (t.ActivityDate != null)
+                    ? Datetime.newInstance(t.ActivityDate, Time.newInstance(0, 0, 0, 0)) : null;
+                content.meetingType = t.Meeting_Type__c;
+                content.contentType = 'Activity Notes';
+                content.body = t.Description;
+                content.hasContent = String.isNotBlank(t.Description);
+            }
+        } else if (prefix == Event.SObjectType.getDescribe().getKeyPrefix()) {
+            // 담당자 원본 노트 5개 필드는 permission set별 FLS가 갈리므로(예: Qualification Access는 미부여)
+            // running user가 읽을 수 있는 필드만 동적으로 SELECT한다 — WITH USER_MODE에서 예외가 나지 않는다.
+            Map<String, Schema.SObjectField> fMap = Schema.SObjectType.Event.fields.getMap();
+            List<String> noteFields = new List<String>();
+            for (String api : new List<String>{
+                'Key_Discussion__c', 'Key_Decision__c', 'Concerns_Objections__c', 'Follow_up__c', 'Customer_Reaction__c'
+            }) {
+                Schema.SObjectField f = fMap.get(api.toLowerCase());
+                if (f != null && f.getDescribe().isAccessible()) {
+                    noteFields.add(api);
+                }
+            }
+            String soql = 'SELECT Id, Subject, Description, StartDateTime, EndDateTime, Location, Meeting_Type__c, Who.Name, Owner.Name';
+            if (!noteFields.isEmpty()) {
+                soql += ', ' + String.join(noteFields, ', ');
+            }
+            soql += ' FROM Event WHERE Id = :activityId WITH USER_MODE LIMIT 1';
+            List<Event> raw = Database.query(soql);
+            if (!raw.isEmpty()) {
+                Event ev = raw[0];
+                content.activityType = eventActivityType(ev.Meeting_Type__c);
+                content.sourceObject = 'Event';
+                content.subject = ev.Subject;
+                content.contactName = (ev.Who != null) ? ev.Who.Name : null;
+                content.ownerName = (ev.Owner != null) ? ev.Owner.Name : null;
+                content.status = null;
+                content.timestamp = ev.StartDateTime;
+                content.endTimestamp = ev.EndDateTime;
+                content.location = ev.Location;
+                content.meetingType = ev.Meeting_Type__c;
+                content.contentType = 'Meeting Notes';
+                content.body = ev.Description;
+                content.meetingNotes = new List<NoteField>();
+                Map<String, String> noteLabels = new Map<String, String>{
+                    'Key_Discussion__c' => 'Key Discussion',
+                    'Key_Decision__c' => 'Key Decision',
+                    'Concerns_Objections__c' => 'Concerns / Objections',
+                    'Follow_up__c' => 'Follow-up',
+                    'Customer_Reaction__c' => 'Customer Reaction (Rep)'
+                };
+                for (String api : new List<String>{
+                    'Key_Discussion__c', 'Key_Decision__c', 'Concerns_Objections__c', 'Follow_up__c', 'Customer_Reaction__c'
+                }) {
+                    if (noteFields.contains(api)) {
+                        addNote(content.meetingNotes, noteLabels.get(api), (String) ev.get(api));
+                    }
+                }
+                content.hasContent = String.isNotBlank(ev.Description) || !content.meetingNotes.isEmpty();
+            }
+        } else if (prefix == EmailMessage.SObjectType.getDescribe().getKeyPrefix()) {
+            List<EmailMessage> emails = [
+                SELECT Id, Subject, TextBody, HtmlBody, FromName, FromAddress, ToAddress, CcAddress,
+                       MessageDate, Incoming
+                FROM EmailMessage WHERE Id = :activityId WITH USER_MODE LIMIT 1
+            ];
+            if (!emails.isEmpty()) {
+                EmailMessage em = emails[0];
+                content.activityType = 'Email';
+                content.sourceObject = 'EmailMessage';
+                content.subject = em.Subject;
+                content.contactName = String.isNotBlank(em.FromName) ? em.FromName : em.FromAddress;
+                content.timestamp = em.MessageDate;
+                content.contentType = 'Email Content';
+                content.emailFrom = em.FromAddress;
+                content.emailTo = em.ToAddress;
+                content.emailCc = em.CcAddress;
+                content.body = em.TextBody;
+                content.htmlBody = em.HtmlBody;
+                content.hasContent = String.isNotBlank(em.TextBody) || String.isNotBlank(em.HtmlBody);
+            }
+        }
+        return content;
+    }
+
+    // --- helpers ---
+
+    private static String taskActivityType(String taskSubtype) {
+        if (taskSubtype == 'Call') return 'Call';
+        if (taskSubtype == 'Email' || taskSubtype == 'ListEmail') return 'Email';
+        return 'Task';
+    }
+
+    private static String eventActivityType(String meetingType) {
+        if (meetingType == 'Online') return 'Online Meeting';
+        if (meetingType == 'Offline') return 'Offline Meeting';
+        return 'Meeting';
+    }
+
+    private static void applyIntelligence(TimelineItem item, Interaction_Intelligence__c ii,
+            Map<Id, List<Interaction_Signal__c>> signalsByParent) {
+        if (ii == null) {
+            item.hasIntelligence = false;
+            item.signals = new List<SignalItem>();
+            return;
+        }
+        item.hasIntelligence = true;
+        item.intelligenceId = ii.Id;
+        item.summary = ii.Summary__c;
+        item.customerReaction = ii.Customer_Reaction__c;
+        item.keyDecision = ii.Key_Decision__c;
+        item.concernsObjections = ii.Concerns_Objections__c;
+        item.followUp = ii.Follow_Up__c;
+        item.signals = new List<SignalItem>();
+        List<Interaction_Signal__c> sigs = signalsByParent.get(ii.Id);
+        if (sigs != null) {
+            for (Interaction_Signal__c sig : sigs) {
+                SignalItem si = new SignalItem();
+                si.id = sig.Id;
+                si.category = sig.Signal_Category__c;
+                si.type = sig.Signal_Type__c;
+                si.direction = sig.Direction__c;
+                si.confidence = sig.Confidence__c;
+                si.evidence = sig.Evidence__c;
+                item.signals.add(si);
+            }
+        }
+    }
+
+    private static void addNote(List<NoteField> notes, String label, String value) {
+        if (String.isNotBlank(value)) {
+            NoteField nf = new NoteField();
+            nf.label = label;
+            nf.value = value;
+            notes.add(nf);
+        }
+    }
+
+    public class TimelineItem implements Comparable {
+        @AuraEnabled public Id activityId;
+        @AuraEnabled public String activityType;
+        @AuraEnabled public String sourceObject;
+        @AuraEnabled public Datetime timestamp;
+        @AuraEnabled public String subject;
+        @AuraEnabled public String contactName;
+        @AuraEnabled public String ownerName;
+        @AuraEnabled public String status;
+        @AuraEnabled public String meetingType;
+        @AuraEnabled public Boolean hasIntelligence = false;
+        @AuraEnabled public Id intelligenceId;
+        @AuraEnabled public String summary;
+        @AuraEnabled public String customerReaction;
+        @AuraEnabled public String keyDecision;
+        @AuraEnabled public String concernsObjections;
+        @AuraEnabled public String followUp;
+        @AuraEnabled public List<SignalItem> signals;
+        @AuraEnabled public String contentType;
+
+        public Integer compareTo(Object other) {
+            Datetime a = this.timestamp;
+            Datetime b = ((TimelineItem) other).timestamp;
+            if (a == null && b == null) return 0;
+            if (a == null) return 1;
+            if (b == null) return -1;
+            if (a > b) return -1;
+            if (a < b) return 1;
+            return 0;
+        }
+    }
+
+    public class ActivityContent {
+        @AuraEnabled public String activityType;
+        @AuraEnabled public String sourceObject;
+        @AuraEnabled public String subject;
+        @AuraEnabled public String contactName;
+        @AuraEnabled public String ownerName;
+        @AuraEnabled public String status;
+        @AuraEnabled public String priority;
+        @AuraEnabled public Datetime timestamp;
+        @AuraEnabled public Datetime endTimestamp;
+        @AuraEnabled public String location;
+        @AuraEnabled public String meetingType;
+        @AuraEnabled public String contentType;
+        @AuraEnabled public Boolean hasContent = false;
+        @AuraEnabled public String body;
+        @AuraEnabled public String htmlBody;
+        @AuraEnabled public String emailFrom;
+        @AuraEnabled public String emailTo;
+        @AuraEnabled public String emailCc;
+        @AuraEnabled public List<NoteField> meetingNotes;
+    }
+
+    public class NoteField {
+        @AuraEnabled public String label;
+        @AuraEnabled public String value;
+    }
 }

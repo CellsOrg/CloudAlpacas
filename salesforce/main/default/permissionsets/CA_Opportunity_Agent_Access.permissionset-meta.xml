@@ -94,6 +94,41 @@
         <readable>true</readable>
     </fieldPermissions>
 
+    <!-- Event — Offline/Online Meeting content fields, read only.
+         Activity Timeline + Intelligence UI (activityTimeline LWC /
+         ActivityIntelligenceController.getActivityContent) shows the rep-authored
+         meeting note on the source Event in the Activity detail panel. These are
+         the raw notes; the AI-processed versions live on Interaction_Intelligence__c
+         (already granted above). Read-only — this permission set never edits Events.
+         Note: Salesforce pairs Activity custom-field FLS across Task/Event, so
+         granting these Event fields also exposes the matching Task.* fields at
+         runtime (same underlying field; not separately used by this UI). -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Event.Key_Discussion__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Event.Key_Decision__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Event.Concerns_Objections__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Event.Follow_up__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Event.Customer_Reaction__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
     <!-- Interaction_Intelligence__c — Deal Intelligence, read only.
          Source_Type__c / Source_Record_Id__c are required fields, so Salesforce does not
          allow (and does not need) an explicit fieldPermissions entry for them — they are

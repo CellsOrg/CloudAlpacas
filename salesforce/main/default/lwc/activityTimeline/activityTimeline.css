@@ -1,0 +1,27 @@
+.activity-timeline__item + .activity-timeline__item {
+    border-top: 1px solid #e5e5e5;
+}
+
+.activity-timeline__header {
+    cursor: pointer;
+}
+
+.activity-timeline__header:hover {
+    background-color: #f3f3f3;
+}
+
+.activity-timeline__item_expanded {
+    background-color: #fafaf9;
+}
+
+.activity-timeline__summary {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.activity-timeline__content-body {
+    white-space: pre-wrap;
+    word-break: break-word;
+}

@@ -1929,6 +1929,12 @@
         </itemInstances>
         <itemInstances>
             <componentInstance>
+                <componentName>c:activityTimeline</componentName>
+                <identifier>c_activityTimeline</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>CA_DealNote_Columns</value>
