@@ -1,259 +1,280 @@
 <template>
-    <lightning-card title="Activity Timeline" icon-name="standard:activations">
-        <div class="slds-p-horizontal_small slds-p-bottom_small">
+    <!-- No card title: the FlexiPage tab ("Interactions") is the section header. -->
+    <lightning-card>
+        <div class="activity-timeline slds-p-horizontal_small slds-p-vertical_small">
+            <!-- Quick Action Bar — Salesforce standard composers -->
+            <div class="activity-timeline__actionbar" role="group" aria-label="빠른 작업">
+                <template for:each={quickActions} for:item="qa">
+                    <lightning-button
+                        key={qa.name}
+                        class="activity-timeline__action"
+                        label={qa.label}
+                        icon-name={qa.icon}
+                        variant="neutral"
+                        data-name={qa.name}
+                        onclick={handleQuickAction}
+                    ></lightning-button>
+                </template>
+            </div>
+
             <template if:true={hasError}>
                 <p class="slds-text-body_small slds-text-color_error slds-p-vertical_small">
-                    Activity Timeline을 불러오지 못했습니다.
+                    상호작용 내역을 불러오지 못했습니다.
                 </p>
             </template>
 
             <template if:false={hasError}>
                 <template if:false={hasItems}>
                     <p class="slds-text-body_small slds-text-color_weak slds-p-vertical_small">
-                        이 Opportunity에 표시할 활동이 없습니다.
+                        이 Opportunity에 표시할 상호작용 기록이 없습니다.
                     </p>
                 </template>
 
                 <template if:true={hasItems}>
-                    <ul class="slds-timeline">
+                    <ul class="activity-timeline__list">
                         <template for:each={rows} for:item="row">
                             <li key={row.key} class={row.itemClass}>
-                                <!-- collapsed header (clickable) -->
-                                <div
-                                    class="activity-timeline__header slds-grid slds-grid_align-spread slds-grid_vertical-align-start"
-                                    data-id={row.activityId}
-                                    onclick={handleToggle}
-                                    role="button"
-                                    tabindex="0"
-                                >
-                                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
-                                        <lightning-icon
-                                            icon-name={row.iconName}
-                                            size="small"
-                                            class="slds-m-right_x-small"
-                                        ></lightning-icon>
-                                        <div class="slds-has-flexi-truncate">
-                                            <p class="slds-text-body_small slds-text-color_weak">
-                                                <span class="slds-text-title_caps">{row.activityType}</span>
-                                                <template if:true={row.hasContact}> · {row.contactName}</template>
-                                                · {row.timestampDisplay}
-                                            </p>
-                                            <p class="slds-text-body_regular slds-truncate" title={row.subject}>
+                                <span class="activity-timeline__node">
+                                    <lightning-icon icon-name={row.iconName} size="small"></lightning-icon>
+                                </span>
+
+                                <div class="activity-timeline__body">
+                                    <!-- collapsed header (clickable) -->
+                                    <div
+                                        class="activity-timeline__header"
+                                        data-id={row.activityId}
+                                        onclick={handleToggle}
+                                        role="button"
+                                        tabindex="0"
+                                    >
+                                        <div class="activity-timeline__headline">
+                                            <span class="activity-timeline__subject" title={row.subject}>
                                                 {row.subject}
-                                            </p>
+                                            </span>
+                                            <span class="activity-timeline__datetime">{row.timestampDisplay}</span>
                                         </div>
+                                        <lightning-icon
+                                            icon-name={row.toggleIcon}
+                                            size="x-small"
+                                            alternative-text={row.toggleLabel}
+                                            class="activity-timeline__toggle"
+                                        ></lightning-icon>
                                     </div>
-                                    <lightning-icon
-                                        icon-name={row.toggleIcon}
-                                        size="x-small"
-                                        alternative-text={row.toggleLabel}
-                                        class="slds-m-left_x-small slds-shrink-none"
-                                    ></lightning-icon>
-                                </div>
 
-                                <!-- collapsed intelligence preview -->
-                                <template if:true={row.hasIntelligence}>
-                                    <template if:true={row.summary}>
-                                        <p
-                                            class="activity-timeline__summary slds-text-body_small slds-m-top_xx-small"
-                                        >
-                                            {row.summary}
-                                        </p>
-                                    </template>
-                                    <div
-                                        class="slds-grid slds-wrap slds-grid_vertical-align-center slds-m-top_xx-small"
-                                    >
-                                        <template if:true={row.hasReaction}>
-                                            <span class={row.reactionBadgeClass}>{row.customerReaction}</span>
+                                    <!-- collapsed intelligence preview -->
+                                    <template if:true={row.hasIntelligence}>
+                                        <template if:true={row.summary}>
+                                            <p class="activity-timeline__summary">{row.summary}</p>
                                         </template>
-                                        <template for:each={row.collapsedSignals} for:item="sig">
-                                            <span
-                                                key={sig.key}
-                                                class="slds-badge slds-m-left_xx-small"
-                                                title={sig.evidence}
-                                                >{sig.category}</span
-                                            >
-                                        </template>
-                                        <template if:true={row.hasExtraSignals}>
-                                            <span class="slds-badge slds-badge_lightest slds-m-left_xx-small"
-                                                >{row.extraSignalLabel}</span
-                                            >
-                                        </template>
-                                    </div>
-                                </template>
-                                <template if:false={row.hasIntelligence}>
-                                    <p
-                                        class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small"
-                                    >
-                                        AI 분석 없음
-                                    </p>
-                                </template>
-
-                                <!-- expanded detail -->
-                                <template if:true={row.showDetail}>
-                                    <div
-                                        class="activity-timeline__detail slds-box slds-box_xx-small slds-m-top_small slds-theme_shade"
-                                    >
-                                        <!-- ACTIVITY INFORMATION -->
-                                        <p class="slds-text-title_caps slds-text-color_weak slds-m-bottom_xx-small">
-                                            Activity Information
-                                        </p>
-                                        <dl class="slds-list_horizontal slds-wrap slds-text-body_small">
-                                            <dt class="slds-item_label slds-text-color_weak">Type</dt>
-                                            <dd class="slds-item_detail">{row.activityType}</dd>
-                                            <dt class="slds-item_label slds-text-color_weak">Date / Time</dt>
-                                            <dd class="slds-item_detail">
-                                                {row.timestampDisplay}
-                                                <template if:true={row.contentEndDisplay}>
-                                                    – {row.contentEndDisplay}</template
-                                                >
-                                            </dd>
-                                            <dt class="slds-item_label slds-text-color_weak">Subject</dt>
-                                            <dd class="slds-item_detail">{row.subject}</dd>
-                                            <template if:true={row.hasContact}>
-                                                <dt class="slds-item_label slds-text-color_weak">
-                                                    Contact / Participants
-                                                </dt>
-                                                <dd class="slds-item_detail">{row.contactName}</dd>
-                                            </template>
-                                            <template if:true={row.ownerName}>
-                                                <dt class="slds-item_label slds-text-color_weak">Owner</dt>
-                                                <dd class="slds-item_detail">{row.ownerName}</dd>
-                                            </template>
-                                            <template if:true={row.status}>
-                                                <dt class="slds-item_label slds-text-color_weak">Status</dt>
-                                                <dd class="slds-item_detail">{row.status}</dd>
-                                            </template>
-                                            <template if:true={row.meetingType}>
-                                                <dt class="slds-item_label slds-text-color_weak">Meeting Type</dt>
-                                                <dd class="slds-item_detail">{row.meetingType}</dd>
-                                            </template>
-                                        </dl>
-
-                                        <!-- INTELLIGENCE -->
-                                        <p
-                                            class="slds-text-title_caps slds-text-color_weak slds-m-top_small slds-m-bottom_xx-small"
-                                        >
-                                            Intelligence
-                                        </p>
-                                        <template if:true={row.hasIntelligence}>
-                                            <template if:true={row.summary}>
-                                                <p class="slds-text-body_small slds-m-bottom_xx-small">
-                                                    {row.summary}
-                                                </p>
-                                            </template>
+                                        <div class="activity-timeline__badges">
                                             <template if:true={row.hasReaction}>
-                                                <p class="slds-text-body_small slds-m-bottom_xx-small">
-                                                    Customer Reaction:
-                                                    <span class={row.reactionBadgeClass}>{row.customerReaction}</span>
-                                                </p>
+                                                <span class={row.reactionBadgeClass}>{row.customerReaction}</span>
                                             </template>
-                                            <template if:true={row.hasKeyDecision}>
-                                                <p class="slds-text-body_small slds-m-bottom_xx-small">
-                                                    <span class="slds-text-color_weak">Key Decision:</span>
-                                                    {row.keyDecision}
-                                                </p>
+                                            <template for:each={row.collapsedSignals} for:item="sig">
+                                                <span key={sig.key} class="slds-badge" title={sig.evidence}
+                                                    >{sig.category}</span
+                                                >
                                             </template>
-                                            <template if:true={row.hasConcerns}>
-                                                <p class="slds-text-body_small slds-m-bottom_xx-small">
-                                                    <span class="slds-text-color_weak">Concerns / Objections:</span>
-                                                    {row.concernsObjections}
-                                                </p>
+                                            <template if:true={row.hasExtraSignals}>
+                                                <span class="slds-badge slds-badge_lightest"
+                                                    >{row.extraSignalLabel}</span
+                                                >
                                             </template>
-                                            <template if:true={row.hasFollowUp}>
-                                                <p class="slds-text-body_small slds-m-bottom_xx-small">
-                                                    <span class="slds-text-color_weak">Follow-up:</span>
-                                                    {row.followUp}
-                                                </p>
-                                            </template>
-                                            <template if:true={row.hasCollapsedSignals}>
-                                                <p class="slds-text-color_weak slds-text-body_small slds-m-top_x-small">
-                                                    Signals
-                                                </p>
-                                                <template for:each={row.allSignals} for:item="sig">
-                                                    <div
-                                                        key={sig.key}
-                                                        class="slds-box slds-box_xx-small slds-m-top_xx-small"
-                                                    >
-                                                        <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
-                                                            <span class="slds-badge slds-m-right_xx-small"
-                                                                >{sig.category}</span
+                                        </div>
+                                    </template>
+                                    <template if:false={row.hasIntelligence}>
+                                        <p class="activity-timeline__no-intel">AI 분석 없음</p>
+                                    </template>
+
+                                    <!-- expanded detail -->
+                                    <template if:true={row.showDetail}>
+                                        <div class="activity-timeline__detail">
+                                            <!-- Activity Information -->
+                                            <section class="activity-timeline__section">
+                                                <h3 class="activity-timeline__section-heading">Activity Information</h3>
+                                                <div class="activity-timeline__info">
+                                                    <div class="activity-timeline__info-row">
+                                                        <span class="activity-timeline__info-label">Type</span>
+                                                        <span class="activity-timeline__info-value">{row.typeLabel}</span>
+                                                    </div>
+                                                    <div class="activity-timeline__info-row">
+                                                        <span class="activity-timeline__info-label">Date</span>
+                                                        <span class="activity-timeline__info-value">
+                                                            {row.timestampDisplay}
+                                                            <template if:true={row.contentEndDisplay}>
+                                                                – {row.contentEndDisplay}</template
                                                             >
-                                                            <span class={sig.directionBadgeClass}>{sig.direction}</span>
-                                                            <span
-                                                                class="slds-badge slds-badge_lightest slds-m-left_xx-small"
-                                                                >{sig.confidence}</span
+                                                        </span>
+                                                    </div>
+                                                    <div class="activity-timeline__info-row">
+                                                        <span class="activity-timeline__info-label">Subject</span>
+                                                        <span class="activity-timeline__info-value">{row.subject}</span>
+                                                    </div>
+                                                    <template if:true={row.hasContact}>
+                                                        <div class="activity-timeline__info-row">
+                                                            <span class="activity-timeline__info-label">Contact</span>
+                                                            <span class="activity-timeline__info-value">{row.contactName}</span>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={row.ownerName}>
+                                                        <div class="activity-timeline__info-row">
+                                                            <span class="activity-timeline__info-label">Owner</span>
+                                                            <span class="activity-timeline__info-value">{row.ownerName}</span>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={row.status}>
+                                                        <div class="activity-timeline__info-row">
+                                                            <span class="activity-timeline__info-label">Status</span>
+                                                            <span class="activity-timeline__info-value">{row.status}</span>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={row.meetingType}>
+                                                        <div class="activity-timeline__info-row">
+                                                            <span class="activity-timeline__info-label">Meeting Type</span>
+                                                            <span class="activity-timeline__info-value">{row.meetingType}</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </section>
+
+                                            <!-- Intelligence -->
+                                            <section class="activity-timeline__section">
+                                                <h3 class="activity-timeline__section-heading">Intelligence</h3>
+                                                <template if:true={row.hasIntelligence}>
+                                                    <template if:true={row.summary}>
+                                                        <div class="activity-timeline__field">
+                                                            <p class="activity-timeline__field-label">Summary</p>
+                                                            <p class="activity-timeline__field-value">{row.summary}</p>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={row.hasReaction}>
+                                                        <div
+                                                            class="activity-timeline__field activity-timeline__field_inline"
+                                                        >
+                                                            <span class="activity-timeline__field-label"
+                                                                >Customer Reaction</span
+                                                            >
+                                                            <span class={row.reactionBadgeClass}
+                                                                >{row.customerReaction}</span
                                                             >
                                                         </div>
-                                                        <template if:true={sig.hasType}>
-                                                            <p class="slds-text-body_small slds-m-top_xx-small">
-                                                                {sig.type}
-                                                            </p>
-                                                        </template>
-                                                        <template if:true={sig.hasEvidence}>
-                                                            <p
-                                                                class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small"
-                                                            >
-                                                                "{sig.evidence}"
-                                                            </p>
-                                                        </template>
-                                                    </div>
-                                                </template>
-                                            </template>
-                                        </template>
-                                        <template if:false={row.hasIntelligence}>
-                                            <p class="slds-text-body_small slds-text-color_weak">
-                                                이 활동에 대한 AI 분석이 아직 없습니다.
-                                            </p>
-                                        </template>
-
-                                        <!-- ACTIVITY CONTENT -->
-                                        <p
-                                            class="slds-text-title_caps slds-text-color_weak slds-m-top_small slds-m-bottom_xx-small"
-                                        >
-                                            <template if:true={row.content}>{row.content.contentType}</template>
-                                            <template if:false={row.content}>{row.contentType}</template>
-                                        </p>
-                                        <template if:true={row.loadingContent}>
-                                            <lightning-spinner
-                                                size="x-small"
-                                                alternative-text="불러오는 중"
-                                            ></lightning-spinner>
-                                        </template>
-                                        <template if:true={row.content}>
-                                            <template if:true={row.contentHasEmailMeta}>
-                                                <dl class="slds-list_horizontal slds-wrap slds-text-body_small slds-m-bottom_xx-small">
-                                                    <dt class="slds-item_label slds-text-color_weak">From</dt>
-                                                    <dd class="slds-item_detail">{row.content.emailFrom}</dd>
-                                                    <dt class="slds-item_label slds-text-color_weak">To</dt>
-                                                    <dd class="slds-item_detail">{row.content.emailTo}</dd>
-                                                    <template if:true={row.content.emailCc}>
-                                                        <dt class="slds-item_label slds-text-color_weak">Cc</dt>
-                                                        <dd class="slds-item_detail">{row.content.emailCc}</dd>
                                                     </template>
-                                                </dl>
+                                                    <template if:true={row.hasKeyDecision}>
+                                                        <div class="activity-timeline__field">
+                                                            <p class="activity-timeline__field-label">Key Decision</p>
+                                                            <p class="activity-timeline__field-value">{row.keyDecision}</p>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={row.hasConcerns}>
+                                                        <div class="activity-timeline__field">
+                                                            <p class="activity-timeline__field-label">
+                                                                Concerns / Objections
+                                                            </p>
+                                                            <p class="activity-timeline__field-value">
+                                                                {row.concernsObjections}
+                                                            </p>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={row.hasFollowUp}>
+                                                        <div class="activity-timeline__field">
+                                                            <p class="activity-timeline__field-label">Follow-up</p>
+                                                            <p class="activity-timeline__field-value">{row.followUp}</p>
+                                                        </div>
+                                                    </template>
+                                                </template>
+                                                <template if:false={row.hasIntelligence}>
+                                                    <p
+                                                        class="activity-timeline__field-value activity-timeline__muted"
+                                                    >
+                                                        이 활동에 대한 AI 분석이 아직 없습니다.
+                                                    </p>
+                                                </template>
+                                            </section>
+
+                                            <!-- Signals -->
+                                            <template if:true={row.hasCollapsedSignals}>
+                                                <section class="activity-timeline__section">
+                                                    <h3 class="activity-timeline__section-heading">Signals</h3>
+                                                    <template for:each={row.allSignals} for:item="sig">
+                                                        <div key={sig.key} class="activity-timeline__signal">
+                                                            <div class="activity-timeline__signal-badges">
+                                                                <span class="slds-badge">{sig.category}</span>
+                                                                <span class={sig.directionBadgeClass}
+                                                                    >{sig.direction}</span
+                                                                >
+                                                                <span class="slds-badge slds-badge_lightest"
+                                                                    >{sig.confidence}</span
+                                                                >
+                                                            </div>
+                                                            <template if:true={sig.hasType}>
+                                                                <p class="activity-timeline__signal-type">{sig.type}</p>
+                                                            </template>
+                                                            <template if:true={sig.hasEvidence}>
+                                                                <p class="activity-timeline__signal-evidence">
+                                                                    “{sig.evidence}”
+                                                                </p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </section>
                                             </template>
-                                            <template if:true={row.content.body}>
-                                                <p
-                                                    class="activity-timeline__content-body slds-text-body_small"
-                                                >
-                                                    {row.content.body}
-                                                </p>
-                                            </template>
-                                            <template for:each={row.contentMeetingNotes} for:item="note">
-                                                <p key={note.key} class="slds-text-body_small slds-m-top_xx-small">
-                                                    <span class="slds-text-color_weak">{note.label}:</span>
-                                                    {note.value}
-                                                </p>
-                                            </template>
-                                            <template if:true={row.noContent}>
-                                                <p class="slds-text-body_small slds-text-color_weak">
-                                                    저장된 원본 내용이 없습니다.
-                                                </p>
-                                            </template>
-                                        </template>
-                                    </div>
-                                </template>
+
+                                            <!-- Content: Meeting Notes / Activity Notes / Email Content -->
+                                            <section class="activity-timeline__section">
+                                                <h3 class="activity-timeline__section-heading">
+                                                    <template if:true={row.content}>{row.content.contentType}</template>
+                                                    <template if:false={row.content}>{row.contentType}</template>
+                                                </h3>
+                                                <template if:true={row.loadingContent}>
+                                                    <lightning-spinner
+                                                        size="x-small"
+                                                        alternative-text="불러오는 중"
+                                                    ></lightning-spinner>
+                                                </template>
+                                                <template if:true={row.content}>
+                                                    <template if:true={row.contentHasEmailMeta}>
+                                                        <div class="activity-timeline__field">
+                                                            <p class="activity-timeline__field-label">From</p>
+                                                            <p class="activity-timeline__field-value">
+                                                                {row.content.emailFrom}
+                                                            </p>
+                                                        </div>
+                                                        <div class="activity-timeline__field">
+                                                            <p class="activity-timeline__field-label">To</p>
+                                                            <p class="activity-timeline__field-value">
+                                                                {row.content.emailTo}
+                                                            </p>
+                                                        </div>
+                                                        <template if:true={row.content.emailCc}>
+                                                            <div class="activity-timeline__field">
+                                                                <p class="activity-timeline__field-label">Cc</p>
+                                                                <p class="activity-timeline__field-value">
+                                                                    {row.content.emailCc}
+                                                                </p>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                    <template if:true={row.content.body}>
+                                                        <p class="activity-timeline__content-body">{row.content.body}</p>
+                                                    </template>
+                                                    <template for:each={row.contentMeetingNotes} for:item="note">
+                                                        <div key={note.key} class="activity-timeline__field">
+                                                            <p class="activity-timeline__field-label">{note.label}</p>
+                                                            <p class="activity-timeline__field-value">{note.value}</p>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={row.noContent}>
+                                                        <p
+                                                            class="activity-timeline__field-value activity-timeline__muted"
+                                                        >
+                                                            저장된 원본 내용이 없습니다.
+                                                        </p>
+                                                    </template>
+                                                </template>
+                                            </section>
+                                        </div>
+                                    </template>
+                                </div>
                             </li>
                         </template>
                     </ul>

@@ -1,4 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { encodeDefaultFieldValues } from 'lightning/pageReferenceUtils';
 import getActivityTimeline from '@salesforce/apex/ActivityIntelligenceController.getActivityTimeline';
 import getActivityContent from '@salesforce/apex/ActivityIntelligenceController.getActivityContent';
 
@@ -28,8 +30,23 @@ const TYPE_ICON = {
 
 const MAX_COLLAPSED_SIGNALS = 4;
 
-export default class ActivityTimeline extends LightningElement {
+// Presentation only: the UI no longer surfaces Online vs Offline as a distinct
+// concept — every Event reads simply as "Meeting". The underlying
+// Event.Meeting_Type__c data and the Intelligence pipeline are untouched.
+const MEETING_TYPES = new Set(['Meeting', 'Online Meeting', 'Offline Meeting']);
+
+// Quick Action Bar — Salesforce standard record-create composers only
+// (standard__objectPage / actionName:new). No custom Apex / Flow / quick action.
+const QUICK_ACTIONS = [
+    { name: 'task', label: 'Task 추가', icon: 'utility:task' },
+    { name: 'call', label: '통화 기록', icon: 'utility:call' },
+    { name: 'meeting', label: '미팅 추가', icon: 'utility:event' }
+];
+
+export default class ActivityTimeline extends NavigationMixin(LightningElement) {
     @api recordId;
+
+    quickActions = QUICK_ACTIONS;
 
     items = [];
     error;
@@ -55,6 +72,7 @@ export default class ActivityTimeline extends LightningElement {
             key: row.activityId,
             activityId: row.activityId,
             activityType: row.activityType,
+            typeLabel: MEETING_TYPES.has(row.activityType) ? 'Meeting' : row.activityType,
             sourceObject: row.sourceObject,
             iconName: TYPE_ICON[row.activityType] || 'standard:task',
             timestampDisplay: this.formatDateTime(row.timestamp, row.sourceObject === 'Task'),
@@ -106,8 +124,8 @@ export default class ActivityTimeline extends LightningElement {
                 ...item,
                 isExpanded,
                 itemClass: isExpanded
-                    ? 'activity-timeline__item activity-timeline__item_expanded slds-p-around_small'
-                    : 'activity-timeline__item slds-p-around_small',
+                    ? 'activity-timeline__item activity-timeline__item_expanded'
+                    : 'activity-timeline__item',
                 toggleIcon: isExpanded ? 'utility:chevrondown' : 'utility:chevronright',
                 toggleLabel: isExpanded ? '접기' : '상세보기',
                 showDetail: isExpanded,
@@ -176,7 +194,42 @@ export default class ActivityTimeline extends LightningElement {
             month: '2-digit',
             day: '2-digit',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    // --- Quick Action Bar -------------------------------------------------
+    // Opens Salesforce standard record-create composers via NavigationMixin
+    // (standard__objectPage / actionName:new + defaultFieldValues). No Apex /
+    // Flow / custom quick action. Created records surface in the wired timeline
+    // on the next page refresh.
+    //   Task 추가 → New Task,  WhatId = current Opportunity
+    //   통화 기록 → New Task,  WhatId + TaskSubtype='Call' + Status='Completed'
+    //   미팅 추가 → New Event, WhatId = current Opportunity (Meeting Type not forced)
+    handleQuickAction(event) {
+        const name = event.currentTarget.dataset.name;
+        if (name === 'task') {
+            this.navigateToCreate('Task', { WhatId: this.recordId });
+        } else if (name === 'call') {
+            this.navigateToCreate('Task', {
+                WhatId: this.recordId,
+                TaskSubtype: 'Call',
+                Status: 'Completed'
+            });
+        } else if (name === 'meeting') {
+            this.navigateToCreate('Event', { WhatId: this.recordId });
+        }
+    }
+
+    navigateToCreate(objectApiName, defaults) {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__objectPage',
+            attributes: { objectApiName, actionName: 'new' },
+            state: {
+                nooverride: '1',
+                defaultFieldValues: encodeDefaultFieldValues(defaults)
+            }
         });
     }
 }
