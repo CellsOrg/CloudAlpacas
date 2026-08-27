@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SDO_Sales_Reason_Lost__c</fullName>
+    <description>Closed Lost 시 기록하는 공식 실패 사유. Cloud Alpacas 스폰서십 영업 lifecycle에 맞춘 값. Interaction Intelligence의 objection/signal은 대화 근거(evidence)이고, 이 필드는 최종 business outcome 분류다.</description>
+    <externalId>false</externalId>
+    <label>Reason Lost</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Budget Unavailable</fullName>
+                <default>false</default>
+                <label>Budget Unavailable</label>
+            </value>
+            <value>
+                <fullName>Competitor Selected</fullName>
+                <default>false</default>
+                <label>Competitor Selected</label>
+            </value>
+            <value>
+                <fullName>Alternative Channel Selected</fullName>
+                <default>false</default>
+                <label>Alternative Channel Selected</label>
+            </value>
+            <value>
+                <fullName>Brand Strategy Changed</fullName>
+                <default>false</default>
+                <label>Brand Strategy Changed</label>
+            </value>
+            <value>
+                <fullName>Commercial Terms Mismatch</fullName>
+                <default>false</default>
+                <label>Commercial Terms Mismatch</label>
+            </value>
+            <value>
+                <fullName>Decision Deferred</fullName>
+                <default>false</default>
+                <label>Decision Deferred</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
