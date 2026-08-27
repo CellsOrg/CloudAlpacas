@@ -1337,3 +1337,276 @@ Excel Object/Field Design에서 기업 DB가 Object 목록과 같은 표에 섞�
 - DART Open API의 실제 Salesforce/Agentforce 연동 기술 방식(커넥터, Apex 콜아웃,
   External Object 등) — Business 방향(Primary=DART)만 확정, 구현은 미정
 - CSV를 개발/테스트용으로 실제 사용할지 여부와 형식(필요할 때만 검토)
+
+---
+
+## Decision 021 — [P2] Draft Scope Decision: AI Sponsorship Proposal Strategist Phase 0 설계 착수 및 단계적 편입 제안
+
+**상태**: **✅ 2026-08-27 대체됨(Superseded)** — 아래 "2026-08-27 갱신" 참고. 원문(Draft, 8/26 작성)은 그 아래 그대로 보존.
+**기록일**: 2026-08-26
+
+---
+
+### ✅ 2026-08-27 갱신 — 이 Decision의 Proposal Strategist 설계를 실제 구현으로 대체
+
+**배경**: 같은 날(2026-08-27) Opportunity 영역 담당자(메인 Opportunity Agent 담당)로부터 팀 전체 아키텍처 공유를 받았다 — 메인 `Opportunity Agent`(단일 진입점, 라우팅) 하위에 전문 Subagent(Topic) 5개(Activity Management / Deal Intelligence / Discovery Management / **Proposal / Quote** / Negotiation)를 두고, 각자 독립적으로 개발·테스트한 뒤 통합 담당자가 마지막에 메인 Agent에 연결하는 구조다. 이 공유에는 "Salesforce Standard Action 우선 사용", "Delete Action은 V1 제외", "Agent 전용 PermSet(`CA_Opportunity_Agent_Access`)로 권한 통합 관리" 등 구체적 개발 원칙이 포함되어 있다. 승우가 이 중 **Proposal / Quote** Subagent를 담당해 같은 날 실제로 설계·구현·배포·Live Preview까지 완료했다.
+
+**결정**: 아래 원문 Draft(Strategist 설계, 7개 Action, Candidate Set 제약, MVP 0~3 단계안)는 **실제 구현으로 대체한다.** 팀 승인을 기다리는 별도의 좁은 Agentforce 예외를 새로 만드는 대신, 팀이 이미 공유한 Opportunity Agent 구조 안에서 진행한다.
+
+**실제 구현물** (Draft의 7개 Action 계약을 대체):
+
+| 원문 Draft (미구현) | 실제 구현 (2026-08-27 완료) |
+|---|---|
+| `Get_Proposal_Context` | `OpportunityProposalContext`(Apex) |
+| `Build_Feasible_Candidates` + `Rank_And_Explain_Candidates` | `SponsorshipPackageLookup`(Apex) — Candidate Set을 별도 계산하지 않고, 조회된 실제 Product2/PricebookEntry 목록을 LLM이 Opportunity/Lead 맥락에 근거해 직접 추천 |
+| `Validate_Selected_Candidate` + `Create_Draft_Quote` | `SponsorshipProposalSaver`(Apex) — Quote+QuoteLineItem 생성, 확인 게이트(`proposal_confirmed`)와 중복 방지(`quote_id`)로 보호 |
+| `Check_Proposal_Readiness`, `Generate_Proposal_Narrative` | 별도 Action으로 만들지 않음 — Agent instructions 안에서 LLM이 처리 |
+
+**Draft가 요구했던 "AI는 Candidate Key만 선택, Product/가격을 직접 추론하지 않는다"는 엄격한 경계는 채택하지 않았다** — 대신 LLM이 실제 조회 결과(Tool Output)에 근거해 자연어로 직접 추천하는 단순한 구조를 택했다. Live Preview(실제 Org 데이터)로 검증한 결과 가격·상품명을 지어내지 않고 정확히 반영하는 것을 확인했지만, Draft가 우려했던 "AI가 임의로 상품/가격을 만들어낼 위험"에 대한 구조적 방지(Candidate Set 강제)는 없다 — 향후 프롬프트 인젝션이나 모델 실수로 잘못된 상품/가격이 언급될 가능성은 이론적으로 남아있다.
+
+**Draft의 "선행 차단 조건" 중 이번 작업으로 해소된 것**:
+- ✅ (조건 1) `sourceApiVersion` 58.0 → 67.0으로 해결
+- ✅ (조건 6 일부) Agent 전용 PermSet(`CA_Opportunity_Agent_Access`)에 최소 권한 구성 완료(`FRM_Manager_Access`가 아니라 이 PermSet을 사용하는 것으로 방향이 바뀜 — Draft 작성 시점엔 이 PermSet이 존재하지 않았음)
+- ⏸ (조건 6 완전 해소는 아님) 실제 비Admin 사용자로 검증은 아직 안 됨
+
+**여전히 유효한 것**: 이 Decision의 "이 Decision이 바꾸지 않는 것"(Decision 017/018-C/018-H·I/019/020 유지) 절은 오늘 구현에서도 그대로 지켰다 — Standard Quote 유지, Segment Match/Recommendation Reason과 Proposal 추천 로직 구분, Lead 흐름 변경 없음 모두 확인됨.
+
+**✅ 해결됨(같은 날 후속)**: 팀 전체가 Opportunity Agent(메인 + Subagent 5개) 구조를 승인했다. 이 승인은 `Decision 022`로 별도 기록했고, `CLAUDE.md` §5도 그에 맞춰 갱신했다(Decision 017에 이은 두 번째 Agentforce 예외).
+
+**상세 구현 내용**: `P2_RESULT_REPORT/Sponsorship_Proposal_Assistant-AgentSpec.md`, `P2_RESULT_REPORT/PROPOSAL_QUOTE_AGENT_TEAM_SHARE.md` 참고. 원문 Draft 문서(`SPONSORSHIP_PROPOSAL_STRATEGIST_AGENT_SPEC.md`, `..._DATA_CONTRACT.md`)는 삭제하지 않고 "SUPERSEDED" 표시만 추가해 보존한다.
+
+---
+
+### 원문(2026-08-26 Draft, 참고용으로 보존 — 위 갱신 내용이 우선)
+
+### 배경
+
+Decision 017은 `CLAUDE.md` §5의 Agentforce Future Scope 원칙에 대해 **B2B AI
+Matching(Segment Match·Recommendation Reason)에 한해서만** Phase 2 예외를 승인했다.
+따라서 Opportunity의 Proposal/Quote 단계에서 Agentforce를 사용하는 것은 Decision 017에
+포함된 범위가 아니며, 별도 결정 없이 구현하면 “Agentforce의 다른 활용은 여전히 Future
+Scope”라는 기존 제한과 충돌한다.
+
+한편 Decision 019가 확정한 B2B Sales 흐름에는 `Opportunity → Sponsorship Product →
+Standard Quote → Negotiation`이 포함된다. Proposal/Quote 단계의 핵심 질문은 다음과 같다.
+
+> Discovery와 Interaction에서 확인한 고객 요구사항을 어떤 상품·가격·조건의 구체적인
+> 제안으로 구성할 것인가?
+
+가격 계산, Product/Pricebook 유효성, Quote·QuoteLineItem 생성은 Salesforce가 결정론적으로
+처리할 수 있다. 반면 고객 목표·KPI·예산·우려사항과 여러 유효 후보를 종합해 **무엇을 왜
+제안할지 설명하는 판단**에는 Agentforce를 적용할 근거가 있다. 다만 AI에게 상품·가격·Quote
+권한을 포괄적으로 넘기지 않도록 역할 경계를 먼저 고정해야 한다.
+
+### 결정
+
+1. **`AI Sponsorship Proposal Strategist`의 Phase 0 로컬 설계 문서 작성을 시작한다.**
+   Agent Spec, Data Contract, 평가 기준을 먼저 작성하며, 이 Draft만으로 AgentScript,
+   Apex, Flow, Prompt Template 또는 Org 설정을 만들지 않는다.
+2. 팀 승인 시 Proposal/Quote Stage의 Proposal Strategist를 Decision 017과 구분되는
+   **두 번째 좁은 Agentforce 예외**로 Phase 2에 편입하는 방향을 제안한다. 승인 전에는
+   `CLAUDE.md` §5의 현재 Future Scope 문구가 계속 우선한다.
+3. Proposal Strategist는 영업사원을 지원하는 **내부 Employee Agent**로 제한한다.
+   초기 아키텍처는 단일 `start_agent proposal_strategy` execution block과 mixed posture를
+   사용하며 router/subagent/mutable state를 두지 않는다.
+4. 역할 경계는 다음과 같이 제안한다.
+
+| 구분 | 담당 범위 |
+|---|---|
+| AI / Prompt Template | 고객 요구·Interaction 의미 해석, 유효 Candidate 순위화, 추천 이유·우려·대안, Proposal Narrative 초안 |
+| Salesforce Apex / Flow / Rules | Opportunity 식별, 필수 데이터 확인, 활성 Product/PBE 조회, Currency·수량·가격·예산·기간·재고·독점·조합 검증, Quote DML, 중복 실행 방지 |
+| 영업사원 | 추천 조건 조정, 후보 선택, 최종 상품·가격 확인, Quote 생성 확인, 고객 전달물 최종 검토·승인 |
+
+5. AI는 전체 Product Catalog에서 임의 상품을 만들거나 가격을 추론하지 않는다.
+   Salesforce가 Hard constraint를 통과시켜 만든 Candidate Set만 입력으로 받고, AI 출력은
+   Candidate Key만 선택·순위화한다. 후보에 없는 Product ID·가격·할인율은 무효다.
+6. 첫 실행 범위는 **read-only Sandbox Advisor**로 제한한다. Recommendation 품질과 권한을
+   검증하기 전에는 Record를 만들거나 수정하지 않는다.
+7. Draft Quote 생성은 후속 단계에서만 검토하며 다음 조건을 모두 만족해야 한다.
+   - live validator 성공
+   - 대상 Opportunity와 Candidate/Price Snapshot 확정
+   - 정확한 Product, 수량, 단가, 총액, 기간을 실행 직전에 표시
+   - 명시적 User Confirmation과 사용자에 결합된 단기 confirmation token
+   - 단일 사용 idempotency key와 중복 생성 방지
+8. Decision 018-C의 **Standard Quote(Quote + QuoteLineItem)** 선택을 유지한다. 이
+   Agent를 이유로 Custom Quote Object나 AI 전용 가격 Object를 만들지 않는다.
+9. Recommendation 이력의 영구 저장 위치는 이번 Draft에서 확정하지 않는다.
+   `Sponsorship_Proposal_Run__c` 같은 신규 Custom Object/Field는 필요성이 검증되고 후속
+   Technical Decision이 승인되기 전까지 만들지 않는다.
+10. 현재 Action 계약은 다음 7개이며 전부 `NEEDS STUB`이다.
+    - `Get_Proposal_Context`
+    - `Check_Proposal_Readiness`
+    - `Build_Feasible_Candidates`
+    - `Rank_And_Explain_Candidates`
+    - `Validate_Selected_Candidate`
+    - `Create_Draft_Quote`
+    - `Generate_Proposal_Narrative`
+
+    기존 구현을 먼저 검색할지, 신규 Stub/구현을 생성할지는 별도 사용자 선택 후 진행한다.
+11. 이 Draft는 Production deploy, Agent publish/activate, Production live action, Slack
+    Workspace 공개를 승인하지 않는다. Production release는 Sandbox UAT와 보안 검토 후
+    별도 Release Decision이 필요하다.
+
+### MVP 단계
+
+#### Phase 0 — Decision and Data Readiness
+
+- Agent Spec과 Data Contract 승인
+- Production↔Git source drift 해소 및 실제 Field API Name 확인
+- Discovery/Interaction 구조화 계약 확정
+- Product 채널·KPI·Target·기간·Bundle·재고·독점 taxonomy 확정
+- 21개 Product와 3개 Package 가격 팀 승인
+- Permission, Sandbox, API version, 평가 Golden Set 확정
+
+#### MVP 1 — Read-only Advisor in Sandbox
+
+- Opportunity 제안 준비도와 누락 데이터 확인
+- Hard constraint를 통과한 최대 3개 Candidate 추천·비교
+- “2억원 이하”, “SNS 중심”, “Gold와 비교” 조건 재계산
+- 근거, Score breakdown, Confidence, 우려, 가정 표시
+- Salesforce Record DML 없음
+
+#### MVP 2 — Controlled Draft Quote in Sandbox
+
+- 선택 Candidate live 재검증
+- 변경 예정 내용을 정확히 표시하고 사용자 확인
+- Standard Draft Quote/QuoteLineItem을 idempotent하게 생성
+- Quote Sync, Approval, PDF, 이메일/Slack 발송 없음
+
+#### MVP 3 — Proposal Narrative and UAT
+
+- 검증된 Draft Quote만 Grounding한 고객용 Narrative 초안
+- 한국어/영어, 권한, 누락 데이터, 비활성 상품, Currency, 예산, Prompt Injection,
+  confirmation cancel, 중복 쓰기 테스트
+- Business Reviewer 승인 후 Production Release Decision 검토
+
+### Source/API 선행 차단 조건
+
+현재 확인된 구현 차단 조건은 다음과 같다.
+
+1. `sfdx-project.json`의 `sourceApiVersion`은 `58.0`이며 Agentforce metadata에 필요한
+   API `66.0+` 호환 전략이 없다.
+2. 저장소에는 Proposal Strategist용 AgentScript, Apex, Flow, Prompt Template이 없다.
+3. Production에서 직접 만든 Product/Quote/Campaign 관련 metadata 상당수가 Git source에
+   없어 Field·Permission 계약을 재현할 수 없다.
+4. Discovery 목표·KPI·예산·Decision Process와 Interaction Concern·Objection·Signal의
+   실제 저장 위치/API Name이 확정되지 않았다.
+5. Product의 KPI·Channel·Target·계약 단위·Bundle·가용 재고·독점 충돌 정보가 구조화되지
+   않았다.
+6. `FRM_Manager_Access`만으로 Opportunity, Pricebook, Quote와 Action 실행에 필요한 최소
+   권한이 보장되지 않는다.
+7. Sandbox의 Agentforce/Prompt Builder 라이선스, 실행 사용자, Slack user mapping을
+   확인하지 않았다.
+8. 현재 로컬 `sf config`의 `target-org` 기본값이 비어 있으므로 Org 작업 전 Sandbox alias를
+   명시적으로 선택해야 한다.
+
+### 이 Decision이 바꾸지 않는 것
+
+- **Decision 017의 B2B AI Matching 예외는 그대로 유지한다.** Proposal Strategist를 그
+  예외에 포함됐다고 재해석하지 않는다.
+- **Decision 018-C의 Standard Quote 선택은 유지한다.** Custom Quote Object를 도입하지
+  않는다.
+- Decision 018-H/I의 Segment Match·Recommendation Reason은 기업 발굴 단계 결과이며,
+  Proposal 단계의 상품 구성 추천과 별개다.
+- **Decision 019의 Fan Fit Score와 Lead Score 구분을 유지한다.** Proposal Fit Score도
+  둘 중 하나를 대신하거나 수정하지 않는다.
+- **Decision 020의 DART Open API → Top 10 Recommendation → 담당자 선택 → Lead 흐름을
+  변경하지 않는다.** Proposal Strategist는 Opportunity 생성 이후에만 동작한다.
+- Fan Summary, 광범위한 Next Best Action 등 다른 Agentforce 활용은 계속 Future Scope다.
+- Decision 001~020의 역사적 본문은 수정하지 않는다.
+
+### Non-goals
+
+- AI의 Product·PBE·가격·할인율·Quote Total 임의 생성/계산
+- 검증과 확인 없는 Quote/QuoteLineItem 생성·수정
+- 할인/Quote 승인, Opportunity Stage 변경, Closed Won 처리
+- 고객 이메일·Slack·Proposal 문서 자동 발송
+- Win Probability·고객 반응 예측, 자율 Negotiation
+- Proposal PDF/계약서 자동 생성·전자서명·발송
+- Revenue Cloud/CPQ 도입 또는 Standard Quote 교체
+- Proposal/Quote/Campaign용 신규 Custom Object의 자동 승인
+- Production Agent publish/activate 또는 Slack 공개
+
+### 이유
+
+- Agentforce 가치가 가장 높은 부분은 계산이나 DML이 아니라 여러 CRM 근거와 유효한
+  상품 후보를 종합해 **무엇을 왜 제안할지 판단하고 설명하는 것**이다.
+- AI와 결정론적 Salesforce 기능의 경계를 먼저 고정하면 생성형 AI의 유연성을 쓰면서도
+  가격·권한·Quote 무결성을 보호할 수 있다.
+- Standard Quote를 System of Record로 유지하는 것은 Decision 003의 `Standard First,
+  Custom When Needed`와 Decision 018-C를 따른다.
+- read-only MVP부터 검증하면 추천 품질이 입증되기 전에 새 Object, 가격 자동화,
+  Production Agent를 과도하게 만드는 위험을 줄일 수 있다.
+
+### 영향
+
+- Phase 0 산출물로 다음 두 문서를 추가한다.
+  - `P2_RESULT_REPORT/SPONSORSHIP_PROPOSAL_STRATEGIST_AGENT_SPEC.md`
+  - `P2_RESULT_REPORT/SPONSORSHIP_PROPOSAL_STRATEGIST_DATA_CONTRACT.md`
+- 이 Decision이 팀에서 확정되면 `CLAUDE.md` §5, `00_STORY.md`, `01_PROJECT.md`,
+  `03_SYSTEM.md`, `04_DEMO.md`에 Proposal/Quote Stage의 좁은 Agentforce 예외와 역할
+  경계를 반영한다.
+- Agentforce metadata와 의존 Action은 source control에 남기며, Production UI에서만
+  만들고 Git에 남기지 않는 방식을 사용하지 않는다.
+- Production release는 별도 Decision 전까지 차단된다.
+
+### TBD (아직 확정하지 않은 것)
+
+- Decision 021의 팀 승인 여부와 구현 Owner/Business Reviewer/UAT 승인자
+- 기존 Action 구현 검색 또는 신규 Stub/구현 생성 경로
+- Discovery·Interaction 입력 Object/Field의 정확한 API Name
+- Product taxonomy, Candidate 조합·점수 규칙, Custom Metadata 구조
+- Recommendation 영구 저장 여부와 위치
+- confirmation UI·token·idempotency 저장 방식
+- Agentforce metadata API upgrade/manifest 전략
+- Sandbox alias, 라이선스, Permission Set, Slack user mapping
+- 한국어/영어 기본 설정과 target model
+- Production 배포·활성화의 별도 승인 기준
+
+---
+
+## Decision 022 — [P2] Opportunity Agent(메인 + Subagent 5개) 구조를 Agentforce 두 번째 예외로 팀 승인
+
+**상태**: ✅ 확정(팀 승인 완료)
+**기록일**: 2026-08-27
+
+### 배경
+
+`CLAUDE.md` §5는 Agentforce를 원칙적으로 Future Scope로 두고, Decision 017(B2B AI Matching — Segment Match·Recommendation Reason 자동 생성)에 한해서만 좁은 예외를 허용했다. Decision 021(Draft, 8/26)은 Opportunity Proposal/Quote 단계에도 Agentforce를 쓰려면 별도의 두 번째 예외 승인이 필요하다고 지적하며, 팀 승인 전까지는 로컬 설계만 진행하기로 했다.
+
+2026-08-27, Opportunity 영역 담당자로부터 아래 아키텍처가 팀 전체에 공유됐다.
+
+> 메인 **Opportunity Agent**(단일 진입점, 라우팅) 하위에 전문 Subagent(Topic) 5개 — **Activity Management / Deal Intelligence / Discovery Management / Proposal / Quote / Negotiation**. 각자 독립적으로 개발·테스트하고, 메인 Agent 연결(Planner 통합)은 통합 담당자가 마지막에 진행한다.
+
+같은 날 이 구조 중 **Proposal / Quote** Subagent(`Sponsorship_Proposal_Assistant`)를 승우가 실제로 설계·구현·배포·Live Preview까지 완료했다(Decision 021 "2026-08-27 갱신" 절 참고). 그리고 **팀 전체가 이 Opportunity Agent 구조를 승인**했다.
+
+### 결정
+
+1. **Opportunity 영역의 Agentforce 활용(메인 Opportunity Agent + Subagent 5개: Activity Management/Deal Intelligence/Discovery Management/Proposal·Quote/Negotiation)을 `CLAUDE.md` §5의 Agentforce Future Scope 원칙에 대한 **두 번째 예외**로 승인한다.** 첫 번째 예외는 Decision 017(B2B AI Matching)이고, 이번이 두 번째다.
+2. 이 예외의 범위는 **Opportunity 도메인의 5개 Subagent로 한정**한다. Fan Summary, 그 외 Next Best Action 설명 등 다른 Agentforce 활용은 여전히 Future Scope다.
+3. 개발 원칙(팀 공유 원문 그대로 확정):
+   - 최종 사용자 진입점은 메인 Opportunity Agent 하나로 통합한다 — 각 Subagent가 별도의 최종 사용자용 Agent가 되는 것이 목적이 아니다.
+   - 담당 영역별 책임을 명확히 분리한다(예: Proposal/Quote = 제안 구성·상품·가격·Quote 조회/생성/수정, Negotiation = 협상 조건·이슈·승인·후속조치).
+   - Record 조회/생성/수정은 가능하면 Salesforce Standard Action을 우선 사용하고, 표준으로 안 되는 경우에만 Flow/Apex를 추가한다.
+   - Action은 특정 Subagent의 Instruction에 강하게 결합하지 않고, 입출력이 명확한 독립 단위로 만들어 다른 Subagent에서도 재사용 가능하게 한다.
+   - **Delete Action은 Agent V1 범위에서 제외한다.** Read/Recommend는 폭넓게 허용하고, Create/Update는 필요 시 사용자 확인을 거친다. Delete가 꼭 필요하면 바로 추가하지 않고 팀과 먼저 논의한다.
+   - Agent/Subagent 권한은 전용 Permission Set `CA_Opportunity_Agent_Access`로 통합 관리한다. 기존 `CA_Opportunity_Qualification_Access`(화면·기존 기능용)는 이 목적으로 수정하지 않는다. 추가 권한이 필요하면 실제 Action이 쓰는 Object/Field가 확인된 경우에만, 다른 Subagent 몫을 미리 추가하지 않고, Delete 권한 없이 최소로 추가한다.
+   - 메인 Opportunity Agent/Planner 연결(Git conflict 방지)은 통합 담당자가 마지막 단계에서 진행한다. 각자 담당 Subagent와 Action을 먼저 독립적으로 개발·테스트한다.
+   - 공통 Agent 구조나 공유 Permission Set을 수정해야 할 것 같으면, 바로 수정하지 않고 먼저 팀에 공유한다.
+4. Decision 017의 범위·조건은 그대로 유지한다 — 이번 Decision은 Decision 017을 대체하지 않고, 별도의 두 번째 예외를 추가하는 것이다.
+
+### 이 Decision이 바꾸지 않는 것
+
+- Decision 003(Standard First), 006(필요한 만큼만), 017(B2B AI Matching 예외), 018 시리즈(Lead/Quote/Campaign 등 Object 결정), 019(Sponsorship Sales/Pipeline 중심), 020(DART Open API 흐름) — 전부 그대로 유지.
+- Fan Summary 등 Opportunity 도메인 밖의 Agentforce 활용은 여전히 Future Scope.
+
+### 영향
+
+- `CLAUDE.md` §5의 Future Scope 문단을 이 Decision을 반영해 갱신한다(Decision 017 확정 때와 같은 방식).
+- Decision 021은 이 Decision으로 완전히 대체되는 것이 아니라, Proposal/Quote Subagent 하나의 구현 경위를 기록한 하위 문서로 남는다.
+
+### TBD
+
+- Activity Management/Deal Intelligence/Discovery Management/Negotiation 4개 Subagent의 구체 설계·구현(각 담당자 진행 중)
+- 메인 Opportunity Agent Planner 통합 시점과 방식
+- Production Publish/Activate 승인 기준(모든 Subagent 공통)

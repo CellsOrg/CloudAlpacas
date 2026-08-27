@@ -128,7 +128,12 @@ B2B 영역의 상세 Story, Persona, Object, Field, 역할 분담은 확정되�
 
 Marketing Cloud, Data Cloud, 실제 결제 및 외부 API/AWS 기반 실시간 데이터 연동 등은 Phase 2 범위에도 포함하지 않으며 Future Scope로 관리합니다.
 
-Agentforce는 원칙적으로 Future Scope입니다. 단, 2026-08-18 Phase 2 Technical Decision 회의에서 **B2B AI Matching(Segment Match·Recommendation Reason 자동 생성 포함)에 한해** 예외적으로 Phase 2 범위에 포함하기로 결정했습니다(`05_DECISIONS.md` Decision 017). 이 예외는 AI Matching 기능에만 적용되며, 그 외 Agentforce 활용(예: Fan Summary, Next Best Action 설명 등)은 여전히 Future Scope입니다.
+Agentforce는 원칙적으로 Future Scope입니다. 단, 아래 두 가지 예외가 승인되었습니다.
+
+1. 2026-08-18 Phase 2 Technical Decision 회의에서 **B2B AI Matching(Segment Match·Recommendation Reason 자동 생성 포함)**을 예외적으로 Phase 2 범위에 포함하기로 결정했습니다(`05_DECISIONS.md` Decision 017).
+2. 2026-08-27 팀 전체 승인으로 **Opportunity 영역의 Agentforce Agent 구조(메인 Opportunity Agent + Subagent 5개 — Activity Management/Deal Intelligence/Discovery Management/Proposal·Quote/Negotiation)**를 두 번째 예외로 Phase 2 범위에 포함하기로 결정했습니다(`05_DECISIONS.md` Decision 022).
+
+이 두 예외는 각각 명시된 범위(AI Matching, Opportunity 영역 5개 Subagent)에만 적용되며, 그 외 Agentforce 활용(예: Fan Summary, Next Best Action 설명 등)은 여전히 Future Scope입니다.
 
 새로운 아이디어가 나오더라도 현재 Phase(1 또는 2) 범위를 벗어나면 바로 구현하지 않고 Future Scope로 기록합니다.
 

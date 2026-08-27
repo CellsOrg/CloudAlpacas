@@ -22,6 +22,7 @@ build/
 
 # Salesforce CLI local state
 .sf/
+.sfdx/
 
 # VS Code personal settings
 .vscode/

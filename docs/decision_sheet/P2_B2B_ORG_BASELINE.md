@@ -242,3 +242,93 @@ Cloud Alpacas B2B 관점에서 **아무것도 없는** 것으로 확인된 항�
 ---
 
 *읽기 전용 조회 결과 기록. Org 변경 없음, 다른 MD 파일 수정 없음. 2026-08-17 작성.*
+
+---
+
+## 15. 2026-08-27 재검증 — Fact Record 갱신
+
+> 아래는 2026-08-27, `Rafael Espada`(승우) 세션에서 실제 Org(alias `CloudAlpacas`, orgId `00Dbm00000tkYqDEAU`)를 재조회한 결과다. §1~14(2026-08-17 기록)는 원문 그대로 보존하고, 여기서는 **변화가 있었던 부분만** 갱신한다. 조회 방법: `sf sobject describe`, SOQL(Tooling API 및 Setup Audit Trail 포함, 전부 SELECT). **이번 세션에서 실제 create/update/deploy(필드 4개 생성 후 3개 삭제, PermSet 1개 생성/재배포)가 발생했다** — §17에 별도 기록. 이 점에서 순수 읽기 전용이었던 8/17 조회와 다르다.
+
+### 15.1 Product2 — 확정 수준으로 진행됨
+
+8/17 "Sponsorship Package RecordType 없음"에서 크게 진전됨.
+
+- **[Org 조회]** `Sponsorship Package` RecordType(devName `Sponsorship_Package`) 신설, **Active**.
+- **[Org 조회]** 실제 상품 **13개** 생성 완료, 전부 Active(예: 전광판 광고+Brand Day 패키지, 백네트 후면 LED 전광판, 외야 펜스 광고, 덕아웃/포수석 광고보드, 유니폼 소매 패치, 헬멧 로고, 구장 내 특별구역 명명권, 공식 SNS 브랜디드 콘텐츠, 공식 앱/배너, Brand Day 단독 패키지, 경품 증정 프로모션, 콜라보 굿즈 공동기획 등).
+- **[Org 조회]** 13개 전부 **Standard Price Book에 PricebookEntry 등록 완료**, 실제 가격 반영(예: 구장 명명권 24억, LED 전광판 11억 등).
+- **B2B 관점 상태**: **Confirmed/Implemented** (8/17 "Needs Configuration"에서 승격)
+
+### 15.2 Opportunity — 8/17 "Not Found"에서 상당히 진전됨
+
+> ⚠️ 8/17 문서는 물론, 이번 세션 초반 제가 Tooling API `FieldDefinition` 쿼리로 "Opportunity Custom Field 0개"라고 잘못 확인한 적이 있다(§18 참고). `sf sobject describe`로 재확인한 정확한 결과는 다음과 같다.
+
+- **[Org 조회]** Cloud Alpacas B2B 커스텀 필드 **5개 확인됨**:
+  - `Expected_Benefit_Short_Term__c`(TextArea 1000, `03_SYSTEM.md §7.2 F` / Decision 018-F)
+  - `Expected_Benefit_Mid_Term__c`(TextArea 1000)
+  - `Expected_Benefit_Long_Term__c`(TextArea 1000)
+  - `Target_Segment__c`(Text 255 — Opportunity 쪽은 Picklist가 아니라 Text로 존재. 실제 데이터 있는 Opportunity 7건 확인됨, §7.2 G 방향과 일치하나 Picklist 전환 여부는 미정)
+  - `Partner_Tier__c`(Picklist)
+- 그 외 `SDO_*`/`DB_*`/`ED_*`/`Products__c` 등 약 35개는 8/17과 동일하게 SDO Sales Cloud 데모 패키지 필드로 추정.
+- **[Org 조회, 은영(Eunyeong Doh) 작업으로 추정]** `CA Opportunity Qualification Access`라는 **별도 PermSet**에 Opportunity 관련 필드(Contract Term, Estimated Budget, Deal Note, Client Budget, Contract Start/End Date, Partner Tier, Target Start Season, 관심 방향, 추진 시기, 의사결정자 접촉 가능 여부, Sponsorship 관심도 등)의 Field-Level Security 변경 이력이 Setup Audit Trail에 다수 존재함 — 그러나 **현재 Opportunity에는 이 필드들이 실제로 존재하지 않는다**(`sf sobject describe` 기준). 생성 후 삭제됐거나, 다른 Object 소속일 가능성 — 미확인, 은영님 확인 필요.
+- **B2B 관점 상태**: **Needs Configuration → 부분 Implemented**(핵심 B2B 필드 5개는 갖춰짐, Kanban Stage/권한 등은 여전히 확인 필요)
+
+### 15.3 Quote — 변화 없음(여전히 미착수)
+
+- **[Org 조회]** Custom Field 0개, RecordType 없음(Master만), 실제 Quote 레코드 **0건** — 8/17과 동일.
+- **[Org 조회]** `FRM_Manager_Access`/`Fan_App_API_Access` 두 PermSet 모두 Quote/QuoteLineItem 권한 0건 — 동일.
+- 이번 세션에서 `PRM_Manager_Access`(§15.5)에 Quote 객체 권한(Read/Create/Edit/Delete)을 새로 부여함 — **QuoteLineItem 객체 권한은 배포를 2회 시도했으나 적용되지 않음**(에러 없이 성공 응답은 오지만 실제 반영 안 됨 — 원인 미상, Setup UI에서 Quote 기능 활성화 상태 확인 필요).
+- **B2B 관점 상태**: **Not Found — 여전히 완전 미착수**(권한만 이번에 마련됨, 실제 사용/자동화는 없음)
+
+### 15.4 Lead — 8/17엔 발견 못 했던 정교한 B2B 스코어링 모델 존재 확인 ⭐️ 중요
+
+> 8/17 문서는 "Lead Custom Field 0개"라고 기록했으나, 이번 재조회 결과 **완전히 다르다.** 8/17 이후 대규모 작업이 있었던 것으로 보인다(작업자 미상 — 혜준님 PermSet 작업 이력과 시점이 겹침, §15.5 참고).
+
+- **[Org 조회]** Lead Custom Field **63개** 확인(`sf sobject describe` 기준). 이 중 B2B Sponsorship 관련으로 명확히 식별되는 것:
+  - `Lead_Score__c`(Number) — **Decision 018-E가 이미 구현됨**
+  - `Target_Segment__c`(**Picklist**) — 값: `10-30 Female`, `10-30 Male`, `40-60 Female`, `40-60 Male`, `Family`, `etc`. **Decision 018-G의 "Picklist 값 TBD" 문제가 Lead 쪽에서는 이미 실질적으로 해소돼 있음.**
+  - `Segment_Match__c`(Percent) — **Decision 018-H(Agentforce Fit Score)가 이미 필드로 존재**
+  - `Recommendation_Reason__c`(TextArea) — **Decision 018-I가 이미 필드로 존재**
+  - 그 외 미문서화된 추가 스코어링 필드 다수: `Score_Industry__c`, `Score_Interest__c`, `Score_LeadSource__c`, `Score_Sponsorship__c`, `Final_Lead_Score__c`, `Risk_Penalty__c`, `Score_Region__c`, `Sponsorship_History__c`, `Competitor_Sponsor__c`, `Controversial_Industry__c`, `Regional_Connection__c`, `Company_Phone__c`, `Department__c` — **`03_SYSTEM.md`/`05_DECISIONS.md` 어디에도 없는 필드들**. 상당히 정교한 Lead Scoring 모델이 문서화 없이 구축된 것으로 보임.
+- **B2B 관점 상태**: 8/17 "Needs Configuration" → **대부분 Implemented, 단 완전히 문서화되지 않음(Undocumented)**
+
+### 15.5 Permission Set — `PRM_Manager_Access` 존재 확인(8/17엔 없었음, 8/18 생성)
+
+- **[Org 조회]** `PRM_Manager_Access`(Label: PRM Manager Access) — **생성자 혜준(Hyejune Jo), 생성일 2026-08-18**. 8/17 baseline엔 `FRM_Manager_Access`/`Fan_App_API_Access` 둘뿐이었으므로 그 다음 날 신설된 것 — 8/17 문서 기준으로는 "존재하지 않음"이 맞았고, 이후 변화.
+- **[Org 조회, Setup Audit Trail 기반]** 원래(8/18, 혜준 + 8/19 이후 아론(Aaron Choi) 추가 작업) 구성:
+  - Leads 탭: Visible
+  - Lead: Read/Create/Edit, View All Records
+  - Lead Field: `Lead_Score__c`/`Target_Segment__c`/`Segment_Match__c`/`Recommendation_Reason__c` 전부 Read/Write
+  - Account: Read/Create/Edit/Delete, View All Records
+  - Contact: Read/Create/Edit/Delete, View All Records (최초 Read만 → 이후 아론이 전체 CRUD로 확장)
+- **[Org 조회]** 배정된 User **0명** — 아직 실사용자에게 할당되지 않은 상태.
+- **[Org 조회]** `Cloud Alpacas PRM`이라는 **Custom Lightning App**과 `Cloud Alpacas PRM UtilityBar` **Lightning Page**가 같은 날(8/18, 혜준) 생성됨 — PRM Manager용 워크스페이스 자체가 이미 상당 부분 구축돼 있음. **이번 세션에서 내용을 열어보지는 않음(범위 밖) — 별도 확인 필요.**
+- **또 다른 발견**: `CA Opportunity Qualification Access`라는 **완전히 별개의 PermSet**(은영 Eunyeong Doh 작업)이 존재 — Opportunity/Event/Task/Interaction Intelligence/Interaction Signal 등 여러 Object에 걸친 Field-Level Security 변경 이력이 Setup Audit Trail에 다수 있음. 이번 세션에서 상세 내용은 조사하지 않음(범위 밖) — 이 프로젝트에 **문서화되지 않은 별도 B2B/AI 관련 작업 흐름이 존재하는 것으로 추정됨.**
+
+### 15.6 Already Available (8/27 기준 갱신)
+
+§11에 추가로:
+- Product2 Sponsorship Package RecordType + 실제 상품 13개 + PricebookEntry — 완전히 사용 가능한 상태
+- Lead의 B2B 스코어링 필드 세트(Lead_Score__c 등 9개+) — 문서화만 되면 바로 활용 가능
+- `PRM_Manager_Access` PermSet 뼈대(Lead/Account/Contact/Opportunity/Quote) — 이번 세션 복구+확장 후 정상
+
+---
+
+## 16. 문서-Org 간극에 대한 총평 (2026-08-27)
+
+`03_SYSTEM.md §7.2`가 "TBD"로 남긴 항목(E: Lead Score, G: Target Segment Picklist 값, H: Segment Match, I: Recommendation Reason) 중 상당수가 **Org에는 이미 실제 필드로 구현되어 있다.** 즉 **Org 구현이 문서보다 앞서 있는 상태**다(8/17 baseline이 "문서가 Org보다 앞서 있다"고 기록했던 것과 정반대 방향으로 상황이 바뀜).
+
+또한 은영·혜준 두 팀원이 이번 baseline 작성자가 인지하지 못한 **병행 B2B 작업**(각자의 PermSet, Lightning App, Scoring 필드)을 이미 진행 중인 것으로 확인된다. **팀 동기화 회의에서 이 셋(승우가 만든 Product2/Quote/Opportunity 작업, 혜준의 PRM App/PermSet, 은영의 Opportunity Qualification 작업)을 한 번에 맞춰보는 것을 권장한다.**
+
+---
+
+## 17. 사고 기록 — `PRM_Manager_Access` 권한 일시 유실 및 복구 (2026-08-27)
+
+같은 세션에서 `PRM_Manager_Access`가 이미 존재하는 줄 모르고 "신규 생성"으로 배포하면서, 원래 있던 Lead/Account/Contact 객체 권한·Lead 필드 권한 4개·Leads 탭 설정이 일시적으로 삭제됐다. Setup Audit Trail(`SetupAuditTrail`, Action: `PermSetEntityPermChanged`/`PermSetFlsChanged`/`PermSetTabSettingsChangedNew`)을 근거로 원상복구하고, 원래 요청받은 Opportunity/Quote 권한을 추가로 병합해 재배포했다(§15.5가 그 최종 상태). 배정된 User가 0명이라 실사용자 피해는 없었다. Custom Field 쪽에서도 동일한 이유로 Opportunity에 중복 필드 3개(`Short_Term_Benefit__c` 등)를 만들었다가 즉시 삭제한 사례가 있었다(데이터·권한 0건이라 무해하게 정리됨).
+
+**교훈**: Org에 새 메타데이터를 만들기 전, 이름이 비슷하거나 같은 컴포넌트가 이미 있는지 **반드시 먼저 조회**할 것 — "문서에 없다"가 "Org에 없다"를 보장하지 않는다(이 baseline 문서 자체도 8/17 스냅샷일 뿐, 계속 갱신되지 않으면 같은 함정에 빠진다).
+
+---
+
+## 18. 조사 방법론 주의사항 (2026-08-27)
+
+이번 세션에서 Tooling API `FieldDefinition`(`SELECT QualifiedApiName FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName='Opportunity' AND QualifiedApiName LIKE '%\_\_c'`) 쿼리가 **실제 존재하는 커스텀 필드를 반환하지 못하는 현상**이 확인됐다(방금 배포 성공한 필드조차 조회 안 됨). 원인은 특정하지 못했으나(인덱싱 지연으로 추정), **커스텀 필드 존재 여부 확인은 반드시 `sf sobject describe --sobject <Object> --json` 방식으로 할 것** — 이 baseline 문서의 8/17 원본도 이 방식(`sf sobject describe`)을 썼기 때문에 신뢰할 수 있었다. Tooling API `FieldDefinition`/`CustomField` 쿼리는 이번 세션 기준으로 **커스텀 필드 조사 용도로 신뢰하지 말 것.**
