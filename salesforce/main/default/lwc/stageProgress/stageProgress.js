@@ -10,7 +10,10 @@ const OPPORTUNITY_FIELDS = [
     'Opportunity.Client_Budget_Status__c',
     'Opportunity.Target_Start_Season__c',
     'Opportunity.Decision_Maker_Accessible__c',
-    'Opportunity.Last_Contact_Date__c'
+    'Opportunity.Last_Contact_Date__c',
+    'Opportunity.Customer_Needs__c',
+    'Opportunity.Customer_KPI__c',
+    'Opportunity.Key_Requirements__c'
 ];
 
 const hasValue = (value) => value !== null && value !== undefined && value !== '';
@@ -62,6 +65,38 @@ const STAGE_CHECKLISTS = {
             // Last_Contact_Date__c는 Customer Contact(완료된 Call/Email/Meeting)에
             // 대해서만 Flow가 채움 — 일반 Task 완료는 반영되지 않음
             isComplete: (r) => hasValue(r.Last_Contact_Date__c)
+        }
+    ],
+    Discovery: [
+        {
+            key: 'customerNeeds',
+            label: 'Customer Needs 파악',
+            isComplete: (r) => hasValue(r.Customer_Needs__c)
+        },
+        {
+            key: 'targetSegment',
+            label: 'Target Segment 파악',
+            isComplete: (r) => hasValue(r.Target_Segment__c)
+        },
+        {
+            key: 'customerKPI',
+            label: 'Customer KPI 파악',
+            isComplete: (r) => hasValue(r.Customer_KPI__c)
+        },
+        {
+            key: 'budgetStatus',
+            label: 'Budget 상태 파악',
+            isComplete: (r) => hasValue(r.Client_Budget_Status__c) && r.Client_Budget_Status__c !== 'Unknown'
+        },
+        {
+            key: 'keyRequirements',
+            label: 'Key Requirements 파악',
+            isComplete: (r) => hasValue(r.Key_Requirements__c)
+        },
+        {
+            key: 'targetStartSeason',
+            label: 'Target Start Season 파악',
+            isComplete: (r) => hasValue(r.Target_Start_Season__c)
         }
     ]
 };

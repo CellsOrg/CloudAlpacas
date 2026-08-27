@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Customer_Needs__c</fullName>
+    <label>Customer Needs</label>
+    <type>LongTextArea</type>
+    <length>4000</length>
+    <visibleLines>4</visibleLines>
+    <description>Discovery 단계에서 파악한 고객의 실제 요구사항. 어떤 방향의 파트너십/스폰서십을 원하는지, 우리가 무엇을 제공해야 하는지를 자유 서술로 기록. Proposal/Quote 구성의 기초가 됨.</description>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Key_Requirements__c</fullName>
+    <label>Key Requirements</label>
+    <type>LongTextArea</type>
+    <length>4000</length>
+    <visibleLines>4</visibleLines>
+    <description>Discovery 단계에서 파악한, Proposal/Quote에 반드시 반영해야 하는 고객 요구사항 또는 제약 조건.</description>
+</CustomField>
