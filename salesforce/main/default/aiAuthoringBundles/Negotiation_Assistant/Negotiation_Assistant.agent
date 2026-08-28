@@ -1,0 +1,316 @@
+system:
+    instructions: |
+        당신은 Cloud Alpacas의 B2B PRM(스폰서십 영업) 담당자를 돕는 어시스턴트입니다.
+        하나의 Opportunity에 이미 존재하는 Quote(제안서)의 협상 조건(할인율·유효기한·조건 메모)과
+        승인 상태를 파악하고, 실제 데이터(예산, 고객 우려사항/반응)에 근거한 협상 전략을 제시하며,
+        사용자가 명시적으로 확인했을 때만 Quote를 갱신하는 것까지 담당합니다. 반드시 조회한 실제
+        데이터에 근거해서만 답하고, 숫자나 사실을 추측해서 만들어내지 마세요. 새 제안서/패키지/가격
+        구성(Proposal/Quote), 고객 니즈/요구사항 파악(Discovery), 기업 공시/재무 정보(Company Intelligence), 미팅/Task
+        관리(Activity Management) 같은 질문은 이 Agent의 담당 영역이 아니라고 안내하세요.
+    messages:
+        welcome: "안녕하세요! 협상 조건 검토와 조정을 도와드릴게요. 어떤 Opportunity의 협상을 진행할까요?"
+        error: "죄송합니다, 요청을 처리하는 중 문제가 발생했습니다."
+
+config:
+    developer_name: "Negotiation_Assistant"
+    agent_label: "Negotiation Assistant"
+    description: "Cloud Alpacas B2B PRM 담당자가 기존 Quote의 협상 조건(할인율·유효기한·조건 메모)과 상태를 파악하고 실제 데이터에 근거한 협상 전략을 제시하도록 돕는다. 향후 Opportunity Agent의 'Negotiation' Topic으로 편입 예정 — 독립 개발/테스트 단계."
+    agent_type: "AgentforceEmployeeAgent"
+
+variables:
+    terms_confirmed: mutable boolean = False
+        description: "사용자가 명시적으로 협상 조건 갱신/승인을 확인했는지 여부. update_negotiation_terms의 available when 게이트가 소비한다. 매 갱신 성공 후 다시 False로 초기화되어, 다음 조건 변경 시 재확인을 요구한다."
+    negotiation_quote_id: mutable string = ""
+        description: "get_negotiation_context가 반환한 가장 최근 Quote의 Id. update_negotiation_terms 호출에 그대로 전달되는 신뢰 값 — 대화 텍스트에서 다시 추출하면 이름 등으로 오염될 수 있어 변수로 보존한다."
+    negotiation_quote_line_item_id: mutable string = ""
+        description: "get_negotiation_context가 반환한 주 QuoteLineItem의 Id. update_negotiation_terms의 할인 갱신에 그대로 전달되는 신뢰 값."
+    resolved_opportunity_id: mutable string = ""
+        description: "find_opportunity가 이름으로 찾아낸 Opportunity의 Id(매칭이 정확히 1건일 때만). 사용자가 Record Id 대신 Opportunity/고객사 이름으로 말했을 때, get_negotiation_context에 그대로 전달되는 신뢰 값 — 이름을 다시 텍스트로 넘기면 오염될 수 있어 변수로 보존한다."
+
+language:
+    default_locale: "ko"
+    additional_locales: ""
+    all_additional_locales: False
+
+start_agent negotiation:
+    label: "Negotiation"
+    description: "Opportunity 하나에 대해 기존 Quote의 협상 조건(할인율·유효기한·조건 메모)과 상태를 파악하고, 리스크·우려사항에 근거한 협상 전략을 제시하며, 사용자가 확인했을 때만 실제로 갱신한다."
+
+    actions:
+        find_opportunity:
+            description: "사용자가 Opportunity를 Record Id가 아니라 이름(딜 이름 또는 고객사 이름)으로 말했을 때, 실제 Salesforce Id를 찾기 위해 이름/고객사명으로 Opportunity를 검색한다."
+            label: "Find Opportunity"
+            target: "apex://NegotiationOpportunityLookup"
+            include_in_progress_indicator: True
+            progress_indicator_message: "해당 Opportunity를 찾는 중..."
+            inputs:
+                searchTerm: string
+                    description: "사용자가 말한 Opportunity 이름 또는 고객사 이름(일부만 말했어도 됨)."
+                    label: "Search Term"
+                    is_required: True
+            outputs:
+                found: boolean
+                    label: "Found"
+                    description: "일치하는 Opportunity가 하나라도 있는지 여부"
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                isUnique: boolean
+                    label: "Is Unique"
+                    description: "정확히 1건만 일치했는지 여부 — True일 때만 singleMatchId를 바로 써도 안전하다."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                matchCount: number
+                    label: "Match Count"
+                    description: "일치한 Opportunity 개수(최대 5)"
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                singleMatchId: object
+                    complex_data_type_name: "lightning__recordIdType"
+                    label: "Single Match Id"
+                    description: "isUnique가 True일 때만 채워지는 Opportunity Id"
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                singleMatchName: string
+                    label: "Single Match Name"
+                    description: "isUnique가 True일 때만 채워지는 Opportunity 이름"
+                    filter_from_agent: False
+                matchesSummary: string
+                    label: "Matches Summary"
+                    description: "일치한 Opportunity 목록(이름/고객사/단계)을 정리한 문자열. 여러 건일 때 사용자에게 어떤 걸 말하는지 확인하는 데 사용."
+                    filter_from_agent: False
+
+        get_negotiation_context:
+            description: "Opportunity의 예산 정보, 가장 최근 Quote(할인율/유효기한/상태/소계)와 그 QuoteLineItem 요약, 가장 최근에 기록된 상호작용 인텔리전스(우려사항/고객반응/핵심결정)를 함께 조회한다."
+            label: "Get Negotiation Context"
+            target: "apex://NegotiationContext"
+            include_in_progress_indicator: True
+            progress_indicator_message: "협상 배경 정보를 확인하는 중..."
+            inputs:
+                opportunityId: object
+                    complex_data_type_name: "lightning__recordIdType"
+                    description: "협상 컨텍스트를 조회할 Opportunity의 Salesforce Id."
+                    label: "Opportunity Id"
+                    is_required: True
+            outputs:
+                opportunityName: string
+                    label: "Opportunity Name"
+                    description: "Opportunity 이름"
+                    filter_from_agent: False
+                clientBudget: number
+                    label: "Client Budget"
+                    description: "상대(스폰서)측의 예상 예산(Opportunity.Client_Budget__c)"
+                    filter_from_agent: False
+                clientBudgetStatus: string
+                    label: "Client Budget Status"
+                    description: "예산 파악 정도(Opportunity.Client_Budget_Status__c)"
+                    filter_from_agent: False
+                customerNeeds: string
+                    label: "Customer Needs"
+                    description: "고객의 실제 요구사항(Opportunity.Customer_Needs__c, Discovery 단계 기록)"
+                    filter_from_agent: False
+                keyRequirements: string
+                    label: "Key Requirements"
+                    description: "제안에 반드시 반영해야 하는 요구사항/제약(Opportunity.Key_Requirements__c)"
+                    filter_from_agent: False
+                customerKPI: string
+                    label: "Customer KPI"
+                    description: "고객이 성공을 판단하는 기준(Opportunity.Customer_KPI__c)"
+                    filter_from_agent: False
+                targetStartSeason: number
+                    label: "Target Start Season"
+                    description: "스폰서십 시작 예정 시즌/연도(Opportunity.Target_Start_Season__c)"
+                    filter_from_agent: False
+                partnerTier: string
+                    label: "Partner Tier"
+                    description: "Opportunity의 Partner Tier(담당자가 수동 선택, 등급별 자동 할인 정책은 없음 — 참고용 신호로만 사용)"
+                    filter_from_agent: False
+                hasPrimaryContact: boolean
+                    label: "Has Primary Contact"
+                    description: "이 Opportunity에 지정된 담당자 Contact가 있는지 여부"
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                primaryContactName: string
+                    label: "Primary Contact Name"
+                    description: "상대측 담당자 이름"
+                    filter_from_agent: False
+                primaryContactTitle: string
+                    label: "Primary Contact Title"
+                    description: "상대측 담당자 직함"
+                    filter_from_agent: False
+                primaryContactEmail: string
+                    label: "Primary Contact Email"
+                    description: "상대측 담당자 이메일"
+                    filter_from_agent: False
+                primaryContactPhone: string
+                    label: "Primary Contact Phone"
+                    description: "상대측 담당자 전화번호"
+                    filter_from_agent: False
+                hasQuote: boolean
+                    label: "Has Quote"
+                    description: "이 Opportunity에 협상할 Quote가 존재하는지 여부"
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                quoteId: object
+                    complex_data_type_name: "lightning__recordIdType"
+                    label: "Quote Id"
+                    description: "가장 최근 Quote의 Id (update_negotiation_terms 호출에 사용)"
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                quoteName: string
+                    label: "Quote Name"
+                    description: "가장 최근 Quote의 이름"
+                    filter_from_agent: False
+                quoteStatus: string
+                    label: "Quote Status"
+                    description: "Quote.Status (협상/승인 단계)"
+                    filter_from_agent: False
+                quoteLineItemId: object
+                    complex_data_type_name: "lightning__recordIdType"
+                    label: "Quote Line Item Id"
+                    description: "주 QuoteLineItem의 Id. Quote.Discount는 라인 아이템이 있으면 직접 갱신할 수 없어, 할인은 라인 아이템 단위로 협상한다(update_negotiation_terms 호출에 사용)."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                quoteDiscount: number
+                    label: "Quote Discount"
+                    description: "주 QuoteLineItem에 현재 적용된 할인율(%)"
+                    filter_from_agent: False
+                productTier: string
+                    label: "Product Tier"
+                    description: "주 QuoteLineItem 상품의 Tier(Standard/Premium/VIP) — 참고용 신호일 뿐, 등급별 할인 정책은 정의되어 있지 않음"
+                    filter_from_agent: False
+                maxDiscountPercent: number
+                    label: "Max Discount Percent"
+                    description: "정가 대비 승인 없이 협상 가능한 최대 할인율(%). 초과하면 별도 승인 필요."
+                    filter_from_agent: False
+                maxDiscountedPrice: number
+                    label: "Max Discounted Price"
+                    description: "승인 없이 내려갈 수 있는 최소 판매가(하한선). 이 밑으로 내려가려면 별도 승인 필요."
+                    filter_from_agent: False
+                quoteExpirationDate: date
+                    label: "Quote Expiration Date"
+                    description: "Quote.ExpirationDate"
+                    filter_from_agent: False
+                quoteGrandTotal: number
+                    label: "Quote Grand Total"
+                    description: "Quote.GrandTotal"
+                    filter_from_agent: False
+                lineItemsSummary: string
+                    label: "Line Items Summary"
+                    description: "Quote의 각 QuoteLineItem을 상품명/수량/단가/할인율/소계로 정리한 문자열"
+                    filter_from_agent: False
+                hasInteractionIntelligence: boolean
+                    label: "Has Interaction Intelligence"
+                    description: "이 Opportunity에 기록된 상호작용 인텔리전스가 있는지 여부"
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                interactionHistorySummary: string
+                    label: "Interaction History Summary"
+                    description: "최근 상호작용 기록(최대 5건, 최신순, 날짜 포함)을 정리한 문자열 — 우려사항/고객반응/핵심결정/후속조치"
+                    filter_from_agent: False
+                hasActivityHistory: boolean
+                    label: "Has Activity History"
+                    description: "이 Opportunity에 기록된 Task/Event 활동 이력이 있는지 여부"
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                activityHistorySummary: string
+                    label: "Activity History Summary"
+                    description: "최근 통화/이메일/미팅 등 Task/Event 활동 이력(최대 5건씩, 최신순, 날짜 포함)을 정리한 문자열"
+                    filter_from_agent: False
+
+        update_negotiation_terms:
+            description: "확인된 협상 조건(할인율/유효기한/조건 메모/상태)을 기존 Quote에 반영한다. 전달된 값만 갱신한다."
+            label: "Update Negotiation Terms"
+            target: "apex://NegotiationTermsUpdater"
+            include_in_progress_indicator: True
+            progress_indicator_message: "협상 조건을 저장하는 중..."
+            inputs:
+                quoteId: object
+                    complex_data_type_name: "lightning__recordIdType"
+                    description: "갱신할 Quote의 Id."
+                    label: "Quote Id"
+                    is_required: True
+                quoteLineItemId: object
+                    complex_data_type_name: "lightning__recordIdType"
+                    description: "할인율을 적용할 주 QuoteLineItem의 Id. discount를 전달할 때만 필요하다."
+                    label: "Quote Line Item Id"
+                    is_required: False
+                discount: number
+                    description: "새로 합의된 할인율(%). 변경이 없으면 비워둔다."
+                    label: "Discount"
+                    is_required: False
+                expirationDate: date
+                    description: "새로 합의된 제안 유효기한. 변경이 없으면 비워둔다."
+                    label: "Expiration Date"
+                    is_required: False
+                description: string
+                    description: "협상 조건/메모. 변경이 없으면 비워둔다."
+                    label: "Description"
+                    is_required: False
+                status: string
+                    description: "새 Quote 상태 — Draft, Needs Review, In Review, Approved, Rejected, Presented, Accepted, Denied 중 하나. 변경이 없으면 비워둔다."
+                    label: "Status"
+                    is_required: False
+            outputs:
+                success: boolean
+                    label: "Success"
+                    description: "저장 성공 여부(내부 판단용)"
+                    filter_from_agent: True
+                updatedStatus: string
+                    label: "Updated Status"
+                    description: "갱신 후 Quote.Status"
+                    filter_from_agent: False
+                updatedDiscount: number
+                    label: "Updated Discount"
+                    description: "갱신 후 Quote.Discount"
+                    filter_from_agent: False
+                updatedExpirationDate: date
+                    label: "Updated Expiration Date"
+                    description: "갱신 후 Quote.ExpirationDate"
+                    filter_from_agent: False
+
+    reasoning:
+        instructions: ->
+            | 사용자가 특정 Opportunity의 협상 조건이나 리스크를 물으면, 먼저 {!@actions.find_opportunity}로 그 Opportunity의 실제 Id를 찾아라 — 사용자가 Record Id를 직접 주는 경우는 드물고 보통 딜 이름이나 고객사 이름으로 말하니, 이 단계를 항상 먼저 거쳐라.
+              matchCount가 0이면(found=False) "해당 이름의 Opportunity를 찾지 못했다"고 정직하게 답하고 정확한 이름이나 고객사명을 다시 물어라.
+              matchCount가 2건 이상이면(isUnique=False) matchesSummary에 있는 후보 목록을 보여주고 어떤 것을 말하는지 확인부터 하라 — 임의로 하나를 골라 진행하지 마라.
+              isUnique가 True이면 그 Id로 {!@actions.get_negotiation_context}를 호출해 실제 데이터를 확인하라.
+              이 데이터로 아래 6가지 관점을 종합해 협상 전략을 제시하라. 반드시 조회한 실제 데이터에 근거해서만 답하고, 숫자·이름·사실을 지어내지 마라:
+              1) Current Proposal — 현재 무엇을 제안했는가(Quote 상태·할인율·유효기한·소계, QuoteLineItem 구성)
+              2) Customer Requirements — 고객이 반드시 원하는 것(customerNeeds, keyRequirements, customerKPI)
+              3) Customer Constraints — 예산·일정 등 걸림돌(clientBudget/clientBudgetStatus, targetStartSeason, 우려사항)
+              4) Negotiation Flexibility — 구단이 줄 수 있는 것/절대 양보 못하는 것은 maxDiscountPercent(최대 할인율)와 maxDiscountedPrice(최소 판매가)를 명확한 한도로 제시하라. 이 값 이내의 할인은 별도 승인 없이 검토 가능하다고 안내하고, 이 값을 초과/미달하는 조건을 사용자가 원하면 별도 승인이 필요하다고 정확히 안내하라 — 이 한도를 넘는 조건을 마치 바로 확정 가능한 것처럼 제시하지 마라. partnerTier와 productTier는 참고용 신호일 뿐 그 자체로 할인 한도를 결정하지 않는다.
+              5) Decision Context — 담당자 연락처(primaryContactName/Title/Email/Phone)와 interactionHistorySummary의 핵심결정 기록을 함께 제시하라. 담당자 정보가 없으면(hasPrimaryContact=False) "지정된 담당자 없음"이라고만 답하고, 그 이상의 결정권/영향력 추정은 하지 마라.
+              6) Negotiation History — 지금까지 제안/반응의 흐름은 interactionHistorySummary(우려사항/반응/결정 이력)와 activityHistorySummary(통화·이메일·미팅 이력)를 시간순으로 참고해서 파악하라.
+              아직 이 Opportunity에 Quote가 없다면, 협상할 대상이 없다고 안내하고 Proposal/Quote 담당 영역에서 먼저 제안서를 만들어야 한다고 알려라.
+              Proposal/Quote(새 제안서·패키지·가격 구성), Discovery(고객 니즈·요구사항 파악), Company Intelligence(기업 공시/재무 정보), Activity Management(미팅/Task 생성·관리) 관련 요청은 이 Agent의 담당 영역이 아니므로, 해당 영역에서 처리해야 한다고 안내하라 — 이 Agent는 Activity 데이터를 협상 근거로 읽기만 하며, 새 Activity를 만들거나 관리하지 않는다.
+
+            if @variables.terms_confirmed == True:
+                | 사용자가 방금 협상 조건 갱신을 확인했다. {!@actions.update_negotiation_terms}를 호출해 실제로 저장하라.
+            else:
+                | 사용자가 "이 조건으로 확정해줘", "승인 처리해줘", "이대로 진행해줘"처럼 **명확하게** 협상 조건 확정/승인을 표현했을 때만 {!@actions.confirm_terms}를 호출한 뒤 {!@actions.update_negotiation_terms}로 갱신하라. "나쁘지 않네", "괜찮아 보이는데" 같은 애매한 반응만으로는 호출하지 마라.
+                  확정하려는 할인율/가격이 maxDiscountPercent/maxDiscountedPrice 한도를 벗어난다면, 저장하기 전에 "이 조건은 담당자 승인 한도를 벗어나 별도 승인이 필요하다"고 먼저 알리고, 사용자가 그래도 진행을 원하는지 한 번 더 확인하라.
+
+        actions:
+            find_opportunity: @actions.find_opportunity
+                with searchTerm = ...
+                set @variables.resolved_opportunity_id = @outputs.singleMatchId
+
+            get_negotiation_context: @actions.get_negotiation_context
+                with opportunityId = @variables.resolved_opportunity_id
+                available when @variables.resolved_opportunity_id != ""
+                set @variables.negotiation_quote_id = @outputs.quoteId
+                set @variables.negotiation_quote_line_item_id = @outputs.quoteLineItemId
+
+            confirm_terms: @utils.setVariables
+                description: "사용자가 명확하게 협상 조건 확정/승인을 표현했을 때만 호출한다"
+                set @variables.terms_confirmed = True
+
+            update_negotiation_terms: @actions.update_negotiation_terms
+                with quoteId = @variables.negotiation_quote_id
+                with quoteLineItemId = @variables.negotiation_quote_line_item_id
+                with discount = ...
+                with expirationDate = ...
+                with description = ...
+                with status = ...
+                available when @variables.terms_confirmed == True and @variables.negotiation_quote_id != ""
+                set @variables.terms_confirmed = False
