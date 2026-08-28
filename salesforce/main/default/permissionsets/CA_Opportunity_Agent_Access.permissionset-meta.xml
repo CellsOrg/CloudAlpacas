@@ -28,6 +28,12 @@
            get_interaction_intelligence action (@InvocableMethod). It does not re-query
            anything itself — it calls ActivityIntelligenceController.getIntelligence()
            (with sharing, WITH USER_MODE) and flattens the result for the agent.
+         - ConversationHistoryAgentAction is the Activity Assistant's read-only
+           get_conversation_history action (@InvocableMethod). Same shape — it calls
+           ActivityIntelligenceController.getActivityTimeline() (with sharing,
+           WITH USER_MODE, Task/Event/EmailMessage + Interaction Intelligence join,
+           email-shadow-task dedupe) and flattens the chronological result. No new SOQL,
+           no DML. The II/Signal object + field grants below already cover its reads.
          - ActivityIntelligenceController backs the c:activityTimeline (Interactions tab)
            LWC — getActivityTimeline / getActivityContent / getIntelligence. Without this
            Manager Lee's Interactions component fails to load entirely ("상호작용 내역을
@@ -41,6 +47,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>ActivityIntelligenceController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ConversationHistoryAgentAction</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
