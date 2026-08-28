@@ -4,17 +4,30 @@
     <description>Minimum Object/Field access for the Opportunity Agent and its Subagents (Discovery, Activity, Deal Intelligence, Negotiation). Separate from CA_Opportunity_Qualification_Access, for the existing Qualification/Discovery screens.</description>
     <hasActivationRequired>false</hasActivationRequired>
 
-    <!-- Negotiation subagent (Aaron) — grants this Permission Set access to the
-         Negotiation_Assistant agent. Without an explicit agentAccesses entry (and the
-         classAccesses below), the agent's actions fail before Apex even starts (no
-         ApexLog is generated at all) for any non-Admin assignee — confirmed against a
-         real Standard User in Live Preview testing. -->
+    <!-- Agent access (grouped — Metadata API requires all agentAccesses contiguous).
+         Without an explicit agentAccesses entry, a non-Admin assignee's requests fail
+         before Apex even starts (no ApexLog at all) — confirmed against a real Standard
+         User (Manager Lee) in Live Preview testing.
+         - Opportunity_Agent hosts the Activity Assistant (activity_management subagent):
+           Task/Event query/update/create + get_interaction_intelligence read-back. Needed
+           for Manager Lee to reach the agent at all; remove only if the team decides the
+           Opportunity Agent is Admin-only.
+         - Negotiation_Assistant is Aaron's standalone negotiation agent + its 3 Apex
+           actions. -->
+    <agentAccesses>
+        <agentName>Opportunity_Agent</agentName>
+        <enabled>true</enabled>
+    </agentAccesses>
     <agentAccesses>
         <agentName>Negotiation_Assistant</agentName>
         <enabled>true</enabled>
     </agentAccesses>
 
     <!-- Apex class access (grouped — Metadata API requires all classAccesses contiguous).
+         - ActivityIntelligenceAgentAction is the Activity Assistant's read-only
+           get_interaction_intelligence action (@InvocableMethod). It does not re-query
+           anything itself — it calls ActivityIntelligenceController.getIntelligence()
+           (with sharing, WITH USER_MODE) and flattens the result for the agent.
          - ActivityIntelligenceController backs the c:activityTimeline (Interactions tab)
            LWC — getActivityTimeline / getActivityContent / getIntelligence. Without this
            Manager Lee's Interactions component fails to load entirely ("상호작용 내역을
@@ -22,6 +35,10 @@
          - NegotiationContext / NegotiationOpportunityLookup / NegotiationTermsUpdater are
            the Negotiation_Assistant's 3 Apex actions (with sharing; USER_MODE / update as
            user). -->
+    <classAccesses>
+        <apexClass>ActivityIntelligenceAgentAction</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <classAccesses>
         <apexClass>ActivityIntelligenceController</apexClass>
         <enabled>true</enabled>
