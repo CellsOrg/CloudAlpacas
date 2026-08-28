@@ -4,6 +4,16 @@
     <description>Minimum Object/Field access for the Opportunity Agent and its Subagents (Discovery Management, Activity Management, Deal Intelligence). Separate from CA_Opportunity_Qualification_Access, which stays for the existing Qualification/Discovery screens.</description>
     <hasActivationRequired>false</hasActivationRequired>
 
+    <!-- ActivityIntelligenceController backs the c:activityTimeline (Interactions tab)
+         LWC — getActivityTimeline / getActivityContent / getIntelligence. Without this
+         class access Manager Lee's Interactions component fails to load entirely
+         ("상호작용 내역을 불러오지 못했습니다"). Read-only controller (with sharing,
+         WITH USER_MODE). -->
+    <classAccesses>
+        <apexClass>ActivityIntelligenceController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+
     <!-- Task / Event / EmailMessage are intentionally NOT listed here as objectPermissions.
          Verified against this org: there is not a single ObjectPermissions row for Task,
          Event, or EmailMessage on any Profile or Permission Set (org-wide query returned 0).
@@ -79,6 +89,37 @@
         <readable>true</readable>
     </fieldPermissions>
 
+    <!-- Opportunity — Stage Progress checklist fields (read-only). The c:stageProgress
+         LWC wires these via lightning/uiRecordApi getRecord; LDS fails the whole wire
+         if the user lacks FLS on any one of them, so Manager Lee's Stage Progress
+         component errors ("Stage Progress를 불러오지 못했습니다"). Display only —
+         editable=false. -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Sponsorship_Interest_Level__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Brand_Fan_Fit__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Decision_Maker_Accessible__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Last_Contact_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Open_Tasks_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
     <!-- Event / Task — Meeting_Type__c is an Activity custom field shared by both objects
          (Salesforce links their FLS as a pair). Activity Management needs to set it when
          creating/editing an Event; Deal Intelligence's origin lookup
@@ -99,13 +140,25 @@
          ActivityIntelligenceController.getActivityContent) shows the rep-authored
          meeting note on the source Event in the Activity detail panel. These are
          the raw notes; the AI-processed versions live on Interaction_Intelligence__c
-         (already granted above). Read-only — this permission set never edits Events.
-         Note: Salesforce pairs Activity custom-field FLS across Task/Event, so
-         granting these Event fields also exposes the matching Task.* fields at
-         runtime (same underlying field; not separately used by this UI). -->
+         (already granted above). Read-only — this permission set never edits activities.
+         Key_Discussion__c / Key_Decision__c / Concerns_Objections__c / Follow_up__c /
+         Customer_Reaction__c are Activity custom fields shared by Task and Event. A
+         single-sided (Event-only) fieldPermissions entry is dropped on deploy, so both
+         Task.* and Event.* are declared explicitly — same pattern as
+         CA_Opportunity_Qualification_Access. -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Task.Key_Discussion__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
         <field>Event.Key_Discussion__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Task.Key_Decision__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -115,12 +168,27 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Task.Concerns_Objections__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Event.Concerns_Objections__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Task.Follow_up__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Event.Follow_up__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Task.Customer_Reaction__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
