@@ -82,6 +82,7 @@ private class ActivityIntelligenceAgentActionTest {
         ActivityIntelligenceAgentAction.Response r = run(String.valueOf(rich.Id));
         Test.stopTest();
 
+        System.assertEquals(true, r.opportunityResolved, '유효한 Opportunity Id면 opportunityResolved=true여야 한다');
         System.assertEquals(true, r.found, 'II가 있으면 found=true여야 한다');
         System.assertEquals(2, r.interactionCount, '이 Opportunity의 II는 2건이어야 한다');
         System.assert(r.intelligenceDigest.contains('[1]'), '다이제스트에 첫 항목 번호가 있어야 한다');
@@ -163,11 +164,16 @@ private class ActivityIntelligenceAgentActionTest {
         ActivityIntelligenceAgentAction.Response r = run('not-an-id');
         Test.stopTest();
 
+        System.assertEquals(false, r.opportunityResolved, '잘못된 형식의 Id는 opportunityResolved=false여야 한다');
         System.assertEquals(false, r.found, '잘못된 형식의 Id는 found=false여야 한다');
         System.assertEquals(0, r.interactionCount, 'interactionCount=0이어야 한다');
         System.assert(
-            r.intelligenceDigest.contains('Opportunity를 특정할 수 없습니다'),
-            '형식 오류를 사용자에게 안내해야 한다'
+            r.intelligenceDigest.contains('Opportunity를 특정하지 못했습니다'),
+            '해결 실패를 사용자에게 안내해야 한다'
+        );
+        System.assert(
+            r.intelligenceDigest.contains('없다는 뜻이 아닙니다'),
+            '해결 실패 메시지에 "인텔리전스가 없다는 뜻이 아니다" 안내가 포함되어야 한다'
         );
     }
 
@@ -180,10 +186,11 @@ private class ActivityIntelligenceAgentActionTest {
         ActivityIntelligenceAgentAction.Response r = run(String.valueOf(acc.Id));
         Test.stopTest();
 
+        System.assertEquals(false, r.opportunityResolved, 'Opportunity가 아닌 Id는 opportunityResolved=false여야 한다');
         System.assertEquals(false, r.found, 'Opportunity가 아닌 Id는 거부되어 found=false여야 한다');
         System.assert(
-            r.intelligenceDigest.contains('Opportunity를 특정할 수 없습니다'),
-            'Opportunity가 아닌 Id도 형식 안내 메시지로 처리되어야 한다'
+            r.intelligenceDigest.contains('Opportunity를 특정하지 못했습니다'),
+            'Opportunity가 아닌 Id도 해결 실패 메시지로 처리되어야 한다'
         );
     }
 
@@ -194,8 +201,33 @@ private class ActivityIntelligenceAgentActionTest {
         ActivityIntelligenceAgentAction.Response blankResp = run('   ');
         Test.stopTest();
 
+        System.assertEquals(false, nullResp.opportunityResolved, 'null Id는 opportunityResolved=false여야 한다');
         System.assertEquals(false, nullResp.found, 'null Id는 found=false여야 한다');
+        System.assertEquals(false, blankResp.opportunityResolved, 'blank Id는 opportunityResolved=false여야 한다');
         System.assertEquals(false, blankResp.found, 'blank Id는 found=false여야 한다');
+    }
+
+    @isTest
+    static void testResolutionFailureIsNotReportedAsNoIntelligence() {
+        // The distinction the agent relies on: a resolution failure must NOT look
+        // like "valid Opportunity, no intelligence".
+        Test.startTest();
+        ActivityIntelligenceAgentAction.Response badId = run('garbage-string');
+        ActivityIntelligenceAgentAction.Response validNoIi =
+            run(String.valueOf([SELECT Id FROM Opportunity WHERE Name = 'II Empty Opp' LIMIT 1].Id));
+        Test.stopTest();
+
+        System.assertEquals(false, badId.opportunityResolved, '해결 실패는 opportunityResolved=false');
+        System.assertEquals(true, validNoIi.opportunityResolved, '유효 Opportunity는 opportunityResolved=true');
+        System.assertNotEquals(
+            badId.intelligenceDigest, validNoIi.intelligenceDigest,
+            '해결 실패 메시지와 "II 없음" 메시지는 서로 달라야 한다'
+        );
+        System.assertEquals(
+            '이 Opportunity에는 저장된 Interaction Intelligence가 없습니다.',
+            validNoIi.intelligenceDigest,
+            '유효하지만 II 없는 Opportunity만 "없음" 메시지를 받아야 한다'
+        );
     }
 
     @isTest
@@ -205,6 +237,7 @@ private class ActivityIntelligenceAgentActionTest {
         ActivityIntelligenceAgentAction.Response r = run('006000000000000');
         Test.stopTest();
 
+        System.assertEquals(true, r.opportunityResolved, '형식이 유효한 Opportunity Id면 opportunityResolved=true여야 한다');
         System.assertEquals(false, r.found, '존재하지 않는 Opportunity는 found=false여야 한다');
         System.assertEquals(
             '이 Opportunity에는 저장된 Interaction Intelligence가 없습니다.',
@@ -231,7 +264,9 @@ private class ActivityIntelligenceAgentActionTest {
         Test.stopTest();
 
         System.assertEquals(2, out.size(), '요청 수만큼 응답이 나와야 한다');
+        System.assertEquals(true, out[0].opportunityResolved, '첫 응답 Opportunity는 유효해야 한다');
         System.assertEquals(true, out[0].found, '첫 응답은 II Rich Opp에 정렬되어야 한다');
+        System.assertEquals(true, out[1].opportunityResolved, '둘째 응답 Opportunity도 유효해야 한다');
         System.assertEquals(false, out[1].found, '둘째 응답은 II Empty Opp에 정렬되어야 한다');
     }
 

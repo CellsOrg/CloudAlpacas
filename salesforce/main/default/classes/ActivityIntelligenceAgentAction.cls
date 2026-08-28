@@ -30,11 +30,14 @@ public with sharing class ActivityIntelligenceAgentAction {
 
         Id opportunityId = parseOpportunityId(req == null ? null : req.opportunityId);
         if (opportunityId == null) {
+            res.opportunityResolved = false;
             res.found = false;
             res.interactionCount = 0;
-            res.intelligenceDigest = 'Opportunity를 특정할 수 없습니다 (opportunityId가 비어 있거나 형식이 올바르지 않음). 유효한 Opportunity Id로 다시 시도하세요.';
+            res.intelligenceDigest = 'Opportunity를 특정하지 못했습니다 — opportunityId가 유효한 Opportunity Id가 아닙니다. 이것은 조회 대상 확인 실패이며, 상호작용 인텔리전스가 없다는 뜻이 아닙니다. 어떤 Opportunity인지 다시 확인해야 합니다.';
             return res;
         }
+
+        res.opportunityResolved = true;
 
         List<ActivityIntelligenceController.IntelligenceItem> items =
             ActivityIntelligenceController.getIntelligence(opportunityId);
@@ -128,7 +131,10 @@ public with sharing class ActivityIntelligenceAgentAction {
     }
 
     public class Response {
-        @InvocableVariable(label='Found' description='True when at least one Interaction Intelligence record is stored for this Opportunity.')
+        @InvocableVariable(label='Opportunity Resolved' description='True when opportunityId was a valid Opportunity Id and the lookup ran. When false, the Opportunity could not be identified — this is a resolution failure, NOT an absence of interaction intelligence; do not report it as "no intelligence".')
+        public Boolean opportunityResolved = false;
+
+        @InvocableVariable(label='Found' description='True when at least one Interaction Intelligence record is stored for this Opportunity. Only meaningful when opportunityResolved is true.')
         public Boolean found = false;
 
         @InvocableVariable(label='Interaction Count' description='Number of stored Interaction Intelligence records for this Opportunity.')
