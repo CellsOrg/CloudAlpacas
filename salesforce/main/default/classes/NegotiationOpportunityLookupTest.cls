@@ -47,6 +47,7 @@ private class NegotiationOpportunityLookupTest {
         System.assertEquals(false, r.found, 'blank 검색어는 found=false여야 한다');
         System.assertEquals(false, r.isUnique, 'blank 검색어는 isUnique=false여야 한다');
         System.assertEquals(0, r.matchCount, 'blank 검색어는 matchCount=0이어야 한다');
+        System.assertEquals('', r.resolvedId, 'blank 검색어는 resolvedId가 빈 문자열이어야 한다 (null 아님)');
     }
 
     @isTest
@@ -59,6 +60,7 @@ private class NegotiationOpportunityLookupTest {
         System.assertEquals(true, r.isUnique, '정확히 1건이면 isUnique=true여야 한다');
         System.assertEquals(1, r.matchCount, 'matchCount=1이어야 한다');
         System.assertNotEquals(null, r.singleMatchId, 'isUnique일 때 singleMatchId가 설정되어야 한다');
+        System.assertEquals(String.valueOf(r.singleMatchId), r.resolvedId, 'isUnique일 때 resolvedId는 singleMatchId 문자열과 같아야 한다');
         System.assertEquals('Zephyr Solo Deal 9981', r.singleMatchName, 'singleMatchName이 일치해야 한다');
     }
 
@@ -72,6 +74,7 @@ private class NegotiationOpportunityLookupTest {
         System.assertEquals(false, r.isUnique, '2건 이상이면 isUnique=false여야 한다');
         System.assertEquals(2, r.matchCount, '공유 substring은 2건 매칭이어야 한다');
         System.assertEquals(null, r.singleMatchId, '비유일 매칭에서는 singleMatchId가 비어 있어야 한다');
+        System.assertEquals('', r.resolvedId, '비유일 매칭에서는 resolvedId가 빈 문자열이어야 한다 (downstream gate가 막히도록)');
         System.assert(r.matchesSummary.contains('Acme'), 'matchesSummary에 첫 후보가 포함되어야 한다');
         System.assert(r.matchesSummary.contains('Northwind'), 'matchesSummary에 둘째 후보가 포함되어야 한다');
     }
@@ -84,6 +87,7 @@ private class NegotiationOpportunityLookupTest {
 
         System.assertEquals(false, r.found, '매칭이 없으면 found=false여야 한다');
         System.assertEquals(0, r.matchCount, 'matchCount=0이어야 한다');
+        System.assertEquals('', r.resolvedId, 'no-match면 resolvedId가 빈 문자열이어야 한다');
     }
 
     @isTest
@@ -129,5 +133,87 @@ private class NegotiationOpportunityLookupTest {
 
         System.assertEquals(false, r.found, '잘못된 18자 문자열은 Id로 파싱되지 않고 검색되어 매칭 0건이어야 한다');
         System.assertEquals(0, r.matchCount, 'matchCount=0이어야 한다');
+    }
+
+    @isTest
+    static void testExactOpportunityNameWinsOverFuzzySiblings() {
+        // Two deals where one name is a substring of the other on the same account.
+        Account acct = new Account(Name = 'Helios Corp');
+        insert acct;
+        Opportunity baseDeal = new Opportunity(
+            Name = 'Helios - 2026 파트너십',
+            AccountId = acct.Id, StageName = 'Qualification', CloseDate = Date.today().addDays(20)
+        );
+        Opportunity siblingDeal = new Opportunity(
+            Name = 'Helios - 2026 파트너십 다년 확장',
+            AccountId = acct.Id, StageName = 'Qualification', CloseDate = Date.today().addDays(40)
+        );
+        insert new List<Opportunity>{ baseDeal, siblingDeal };
+
+        Test.startTest();
+        NegotiationOpportunityLookup.Result exact = run('Helios - 2026 파트너십');
+        NegotiationOpportunityLookup.Result fuzzy = run('Helios');
+        Test.stopTest();
+
+        // Exact Opportunity-name match -> that deal, even though a LIKE would catch both.
+        System.assertEquals(true, exact.found, '정확한 이름은 found=true');
+        System.assertEquals(true, exact.isUnique, '정확한 Opportunity 이름은 fuzzy 형제가 있어도 unique여야 한다');
+        System.assertEquals(1, exact.matchCount, 'exact match는 1건이어야 한다');
+        System.assertEquals(baseDeal.Id, exact.singleMatchId, 'exact match된 Opportunity가 선택되어야 한다');
+        System.assertEquals(String.valueOf(baseDeal.Id), exact.resolvedId, 'exact match면 resolvedId가 채워져야 한다');
+
+        // No exact hit -> fuzzy search returns both -> candidates, never auto-picked.
+        System.assertEquals(true, fuzzy.found, 'fuzzy는 매칭됨');
+        System.assertEquals(false, fuzzy.isUnique, 'fuzzy 다건은 unique가 아니어야 한다');
+        System.assertEquals(2, fuzzy.matchCount, 'Helios 2건 매칭');
+        System.assertEquals(null, fuzzy.singleMatchId, 'fuzzy 다건은 자동 선택하지 않는다');
+        System.assertEquals('', fuzzy.resolvedId, 'fuzzy 다건은 resolvedId가 비어 있어야 한다');
+    }
+
+    @isTest
+    static void testAccountExactMatchStaysCandidateSearch() {
+        // An account whose exact name equals the search term, owning 2 Opportunities:
+        // must return BOTH as candidates, not auto-pick one.
+        Account acct = new Account(Name = 'Vertex Industries');
+        insert acct;
+        insert new List<Opportunity>{
+            new Opportunity(Name = 'Vertex - A딜', AccountId = acct.Id, StageName = 'Qualification', CloseDate = Date.today().addDays(10)),
+            new Opportunity(Name = 'Vertex - B딜', AccountId = acct.Id, StageName = 'Proposal/Quote', CloseDate = Date.today().addDays(20))
+        };
+
+        Test.startTest();
+        NegotiationOpportunityLookup.Result r = run('Vertex Industries');
+        Test.stopTest();
+
+        System.assertEquals(true, r.found, 'Account 이름으로 매칭됨');
+        System.assertEquals(false, r.isUnique, 'Account에 Opportunity가 여러 개면 unique가 아니어야 한다');
+        System.assertEquals(2, r.matchCount, '해당 Account의 Opportunity 2건이 후보로 나와야 한다');
+        System.assertEquals(null, r.singleMatchId, 'Account exact match는 자동 선택하지 않는다');
+    }
+
+    @isTest
+    static void testApostropheInSearchTermStillMatches() {
+        // Regression: searchTerm is bound as :likeTerm (injection-safe), so it must NOT
+        // be escapeSingleQuotes'd — escaping injects a literal backslash and breaks LIKE
+        // for names/accounts containing an apostrophe (e.g. "d'Alba").
+        Account brand = new Account(Name = 'O\'Douls Brands');
+        insert brand;
+        Opportunity opp = new Opportunity(
+            Name = 'O\'Douls - 2026 골드 스폰서십',
+            AccountId = brand.Id,
+            StageName = 'Qualification',
+            CloseDate = Date.today().addDays(15)
+        );
+        insert opp;
+
+        Test.startTest();
+        NegotiationOpportunityLookup.Result byName = run('O\'Douls - 2026 골드 스폰서십');
+        NegotiationOpportunityLookup.Result byAccount = run('O\'Douls Brands');
+        Test.stopTest();
+
+        System.assertEquals(true, byName.found, '아포스트로피가 든 Opportunity 이름도 검색되어야 한다');
+        System.assertEquals(true, byName.isUnique, '정확히 1건 매칭되어야 한다');
+        System.assertEquals(opp.Id, byName.singleMatchId, '매칭된 Id가 일치해야 한다');
+        System.assertEquals(true, byAccount.found, '아포스트로피가 든 Account 이름으로도 검색되어야 한다');
     }
 }

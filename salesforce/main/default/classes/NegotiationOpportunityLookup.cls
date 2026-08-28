@@ -20,8 +20,9 @@ public with sharing class NegotiationOpportunityLookup {
                 continue;
             }
 
+            String term = req.searchTerm.trim();
             List<Opportunity> matches = new List<Opportunity>();
-            Id asId = tryParseOpportunityId(req.searchTerm.trim());
+            Id asId = tryParseOpportunityId(term);
             if (asId != null) {
                 matches = [
                     SELECT Id, Name, StageName, Account.Name
@@ -30,15 +31,34 @@ public with sharing class NegotiationOpportunityLookup {
                     WITH USER_MODE
                 ];
             } else {
-                String likeTerm = '%' + String.escapeSingleQuotes(req.searchTerm) + '%';
+                // 1) Exact Opportunity Name match wins outright. A fully-typed deal
+                //    name must resolve to that one deal even when a fuzzy LIKE would
+                //    also catch sibling deals on the same account.
                 matches = [
                     SELECT Id, Name, StageName, Account.Name
                     FROM Opportunity
-                    WHERE (Name LIKE :likeTerm OR Account.Name LIKE :likeTerm)
+                    WHERE Name = :term
                     WITH USER_MODE
-                    ORDER BY LastModifiedDate DESC
                     LIMIT :MAX_RESULTS
                 ];
+                // 2) No exact Opportunity-name hit — fall back to a fuzzy name/account
+                //    search. Account-name matches stay in this candidate bucket: one
+                //    account can own several Opportunities, so an account match is a
+                //    lead to disambiguate, never an outright pick. searchTerm is a
+                //    bind variable (:likeTerm) — injection-safe, so do NOT
+                //    escapeSingleQuotes it (that injects a literal backslash and
+                //    breaks any search containing an apostrophe, e.g. "d'Alba").
+                if (matches.isEmpty()) {
+                    String likeTerm = '%' + term + '%';
+                    matches = [
+                        SELECT Id, Name, StageName, Account.Name
+                        FROM Opportunity
+                        WHERE (Name LIKE :likeTerm OR Account.Name LIKE :likeTerm)
+                        WITH USER_MODE
+                        ORDER BY LastModifiedDate DESC
+                        LIMIT :MAX_RESULTS
+                    ];
+                }
             }
 
             r.matchCount = matches.size();
@@ -54,6 +74,7 @@ public with sharing class NegotiationOpportunityLookup {
             if (r.isUnique) {
                 r.singleMatchId = matches[0].Id;
                 r.singleMatchName = matches[0].Name;
+                r.resolvedId = String.valueOf(matches[0].Id);
             }
 
             results.add(r);
@@ -104,6 +125,9 @@ public with sharing class NegotiationOpportunityLookup {
 
         @InvocableVariable(label='Single Match Id' description='Id of the matched Opportunity, only set when isUnique is true.')
         public Id singleMatchId;
+
+        @InvocableVariable(label='Resolved Id' description='The matched Opportunity Id as a string when isUnique is true, otherwise an empty string (never null). Bind THIS into a conversation variable — a non-unique or no-match result then leaves the variable empty so downstream actions gated on it stay disabled.')
+        public String resolvedId = '';
 
         @InvocableVariable(label='Single Match Name' description='Name of the matched Opportunity, only set when isUnique is true.')
         public String singleMatchName;
