@@ -97,6 +97,8 @@ private class ConversationHistoryAgentActionTest {
         System.assert(posCall >= 0 && posMeeting >= 0 && posFollowUp >= 0, '세 활동이 모두 다이제스트에 있어야 한다');
         System.assert(posCall < posMeeting && posMeeting < posFollowUp, '오래된 것 → 최근 것 순서여야 한다');
         System.assert(r.historyDigest.indexOf('[1] ') >= 0 && r.historyDigest.indexOf('[3] ') >= 0, '항목 번호가 매겨져야 한다');
+        // [1]/[2]/[3] 번호가 날짜 오름차순으로 매겨져 있어야 한다 (프레젠테이션 계층이 이 순서를 유지해야 함)
+        assertDigestRowsAscendingByDate(r.historyDigest);
     }
 
     @isTest
@@ -185,10 +187,30 @@ private class ConversationHistoryAgentActionTest {
         System.assert(r.historyDigest.contains('가장 최근 2건만'), '잘림 안내가 헤더에 있어야 한다');
         // 가장 오래된 통화는 window(최근 2건)에서 제외
         System.assert(!r.historyDigest.contains('1차 예산 탐색 통화'), '가장 오래된 활동은 최근 2건 window에서 빠져야 한다');
-        // 남은 2건은 여전히 시간순
-        Integer posMeeting = r.historyDigest.indexOf('Platinum 패키지 대면 미팅');
-        Integer posFollowUp = r.historyDigest.indexOf('수정 제안서 발송 준비');
-        System.assert(posMeeting >= 0 && posFollowUp >= 0 && posMeeting < posFollowUp, 'window 내에서도 오래된 것 먼저');
+        // 남은 2건은 여전히 시간순, 그리고 [1]/[2] 번호가 오래된 것 → 최근 것에 매겨져 있어야 한다
+        assertDigestRowsAscendingByDate(r.historyDigest);
+        String meetingDate = Datetime.newInstance(Date.today().addDays(-6), Time.newInstance(0, 0, 0, 0)).format('yyyy-MM-dd');
+        String followUpDate = Datetime.newInstance(Date.today().addDays(-1), Time.newInstance(0, 0, 0, 0)).format('yyyy-MM-dd');
+        System.assert(r.historyDigest.contains('[1] ' + meetingDate), '[1]에는 더 오래된 미팅 날짜가 와야 한다: ' + r.historyDigest);
+        System.assert(r.historyDigest.contains('[2] ' + followUpDate), '[2]에는 더 최근 후속 Task 날짜가 와야 한다: ' + r.historyDigest);
+    }
+
+    // historyDigest 안의 "[N] yyyy-MM-dd ..." 행들이 번호 순서대로, 날짜 오름차순인지 검증.
+    private static void assertDigestRowsAscendingByDate(String digest) {
+        List<Integer> rowNums = new List<Integer>();
+        List<String> rowDates = new List<String>();
+        for (String line : digest.split('\n')) {
+            Matcher m = Pattern.compile('^\\[(\\d+)\\] (\\d{4}-\\d{2}-\\d{2})').matcher(line);
+            if (m.find()) {
+                rowNums.add(Integer.valueOf(m.group(1)));
+                rowDates.add(m.group(2));
+            }
+        }
+        System.assert(!rowNums.isEmpty(), '번호가 매겨진 행이 하나 이상 있어야 한다: ' + digest);
+        for (Integer i = 1; i < rowNums.size(); i++) {
+            System.assertEquals(rowNums[i - 1] + 1, rowNums[i], '행 번호는 1,2,3... 연속이어야 한다');
+            System.assert(rowDates[i - 1] <= rowDates[i], '행 날짜는 오래된 것 → 최근 것 순서여야 한다 (행 ' + rowNums[i] + '): ' + digest);
+        }
     }
 
     @isTest
