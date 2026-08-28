@@ -25,6 +25,8 @@ variables:
         description: "This variable may also be referred to as MessagingSession EndUserLanguage"
     VerifiedCustomerId: mutable string
           description: "This variable may also be referred to as VerifiedCustomerId"
+    resolved_opportunity_id: mutable string = ""
+        description: "find_opportunity가 이름/고객사명으로 찾아낸 Opportunity의 Id — 매칭이 정확히 1건일 때만 채워진다. 사용자가 Record Id 대신 이름으로 말했을 때, get_interaction_intelligence 등 후속 action에 넘기는 신뢰 값. 이름을 텍스트로 다시 넘기면 오염될 수 있어 변수로 보존한다. 사용자가 다른 Opportunity를 새로 지정하면 그 값으로 덮어쓰인다."
 
 language:
     default_locale: "en_US"
@@ -40,6 +42,7 @@ start_agent agent_router:
             | Select the tool that best matches the user's message and conversation history. If it's unclear, make your best guess.
               Route to activity_management for two kinds of request: (1) looking up, updating, or creating Task or Event activity records (open tasks, upcoming meetings, changing a due date or start time, marking a task complete, logging a new follow-up task or meeting on an Opportunity); and (2) questions about what was discussed or how the customer responded in recent interactions — recent meeting/call/email summaries, the customer's reaction, key decisions reached, concerns or objections the customer raised, agreed follow-ups, and interaction signals for an Opportunity ("최근 미팅에서 무슨 얘기했어?", "고객 반응은 어땠어?", "최근 우려사항 보여줘", "최근 interaction signal 보여줘").
               Do NOT route to activity_management for questions that ask for a judgement about the deal: whether the deal is healthy or at risk ("이 딜 위험해?"), why it is stalled ("왜 막혔어?"), the likelihood of closing ("계약 가능성은?"), what the rep should do next ("다음에 뭐 해야 해?"), sales strategy, pricing or discount advice, proposal evaluation, negotiation strategy, or whether a company is a good sponsorship/partnership fit — those analysis capabilities are not available yet in this agent. For those, use ambiguous_question to explain the capability isn't available yet rather than guessing an answer. Reading back what is recorded about an interaction is in scope; drawing a deal-level conclusion from it is not.
+              Continuation of an in-flight request: if the previous assistant turn was activity_management asking which Opportunity the user means (for an activity or interaction-intelligence request), and the user's next message is just an Opportunity name, an account/company name, or a Record Id, route back to activity_management to finish that request — do not treat a bare Opportunity name on its own as a new, off-topic, or ambiguous request.
         actions:
             go_to_escalation: @utils.transition to @subagent.escalation
             go_to_off_topic: @utils.transition to @subagent.off_topic
@@ -162,6 +165,41 @@ subagent activity_management:
                 interactionCount: object
                     complex_data_type_name: "lightning__integerType"
                 intelligenceDigest: string
+        find_opportunity:
+            description: "Resolve an Opportunity Record Id when the user refers to a deal by name or by account/company name instead of giving a Record Id. Searches Opportunity Name and Account Name; if the input already looks like a Record Id it is validated directly. Returns isUnique = true with singleMatchId only when exactly one Opportunity matches — on multiple matches it returns the candidate list (matchesSummary) and does NOT pick one."
+            label: "Find Opportunity"
+            target: "apex://NegotiationOpportunityLookup"
+            include_in_progress_indicator: True
+            progress_indicator_message: "해당 Opportunity를 찾는 중..."
+            inputs:
+                searchTerm: string
+                    description: "The Opportunity name or account/company name the user said (a partial name is fine), or a Record Id."
+                    label: "Search Term"
+                    is_required: True
+            outputs:
+                found: boolean
+                    description: "Whether at least one Opportunity matched."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                isUnique: boolean
+                    description: "True only when exactly one Opportunity matched — only then is singleMatchId safe to use directly."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                matchCount: number
+                    description: "Number of matching Opportunities (capped at 5)."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                singleMatchId: object
+                    complex_data_type_name: "lightning__recordIdType"
+                    description: "Id of the matched Opportunity — populated only when isUnique is true."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                singleMatchName: string
+                    description: "Name of the matched Opportunity — populated only when isUnique is true."
+                    filter_from_agent: False
+                matchesSummary: string
+                    description: "Formatted list of all matches (name, account, stage) — show this to the user to disambiguate when more than one matched."
+                    filter_from_agent: False
 
     reasoning:
         instructions: ->
@@ -169,12 +207,23 @@ subagent activity_management:
               Activity scope: query Tasks/Events (for example open tasks or upcoming events for an Opportunity), update existing Task/Event records, and create new Task/Event records linked to an Opportunity.
               Read/query operations do not need confirmation. Before updating or creating any Task or Event, summarize the exact details — which record and what is changing for an update, or the full set of field values for a new activity — and get the user's explicit confirmation. Never call update_activity or create_activity before the user confirms.
               When creating an activity: decide whether the user wants a Task or an Event, collect the required fields, ask for anything missing, and never invent field values. Treat the activity as created only when create_activity returns success = true with a recordId; if success = false, tell the user what errorMessage says and do not claim the activity was created.
-              Interaction intelligence scope: use get_interaction_intelligence to answer questions about recent interactions on an Opportunity — the summary of what was discussed, the customer's reaction, key decisions reached, concerns or objections the customer raised, agreed follow-ups, and interaction signals. This is a read; no confirmation needed. Pass the Opportunity Id as opportunityId.
+              Determining which Opportunity a request is about — apply this order and never skip ahead:
+              1. If the user's message names a specific Opportunity (a deal name, an account/company name, or a Record Id), that wins — resolve THAT one, even if you were already working on a different Opportunity. If it is a 15- or 18-character Record Id, use it directly. Otherwise call find_opportunity with searchTerm set to what the user said.
+              2. Otherwise, if you are operating in the context of one specific Opportunity record (the user opened this assistant from that Opportunity), use that Opportunity's Id.
+              3. Otherwise, if the user gave only an Opportunity or account name earlier in the conversation, call find_opportunity with that.
+              4. Otherwise, ask the user which Opportunity they mean. Do not proceed.
+              find_opportunity results: if found = false, tell the user plainly that no Opportunity matched that name and ask for the exact deal name or account name. If isUnique = false (matchCount is 2 or more), show the candidates from matchesSummary and ask the user which one they mean — never pick one yourself, never default to the first, the most recent, or "the obvious" one. Only when isUnique = true is singleMatchId safe to use; that value is captured into resolved_opportunity_id for the follow-up action.
+              Continuation: if your previous turn asked the user which Opportunity they meant (for an activity or interaction-intelligence request) and they have now replied with a name, an account name, or a Record Id, treat that reply as the answer to that question — resolve it and finish the request you were already working on. Do not re-ask what they want to do or reinterpret a bare Opportunity name as a new Task/Event request.
+              Interaction intelligence scope: use get_interaction_intelligence to answer questions about recent interactions on an Opportunity — the summary of what was discussed, the customer's reaction, key decisions reached, concerns or objections the customer raised, agreed follow-ups, and interaction signals. This is a read; no confirmation needed. Set opportunityId using the order above (an explicit Record Id from the user, the current record context, or resolved_opportunity_id from a successful unique find_opportunity).
               Only present as interaction intelligence what get_interaction_intelligence actually returns in intelligenceDigest. If it returns found = false or interactionCount = 0, tell the user plainly: "이 활동에는 저장된 Interaction Intelligence가 없습니다." Never infer a customer's reaction, concerns, decisions, or signals from a Task or Event subject, description, or any other raw activity field — if it is not in the stored intelligence, say it is not recorded rather than guessing.
               You read interaction intelligence; you do not judge the deal from it. Do not assess deal health or risk, predict whether the deal will close, explain why a deal is stalled, recommend the next best action or sales strategy, advise on pricing or discounts, evaluate a proposal, or suggest negotiation tactics — even when the user asks you to base it on the interactions. If asked for any of that, say plainly that deal analysis is not available in this agent yet, and do not invent an analysis. You also do not research external company information or sponsorship fit.
         actions:
             query_activities: @actions.query_activities
             update_activity: @actions.update_activity
             create_activity: @actions.create_activity
+            find_opportunity: @actions.find_opportunity
+                with searchTerm = ...
+                set @variables.resolved_opportunity_id = @outputs.singleMatchId
             get_interaction_intelligence: @actions.get_interaction_intelligence
+                with opportunityId = ...
 

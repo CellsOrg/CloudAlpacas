@@ -130,4 +130,30 @@ private class NegotiationOpportunityLookupTest {
         System.assertEquals(false, r.found, '잘못된 18자 문자열은 Id로 파싱되지 않고 검색되어 매칭 0건이어야 한다');
         System.assertEquals(0, r.matchCount, 'matchCount=0이어야 한다');
     }
+
+    @isTest
+    static void testApostropheInSearchTermStillMatches() {
+        // Regression: searchTerm is bound as :likeTerm (injection-safe), so it must NOT
+        // be escapeSingleQuotes'd — escaping injects a literal backslash and breaks LIKE
+        // for names/accounts containing an apostrophe (e.g. "d'Alba").
+        Account brand = new Account(Name = 'O\'Douls Brands');
+        insert brand;
+        Opportunity opp = new Opportunity(
+            Name = 'O\'Douls - 2026 골드 스폰서십',
+            AccountId = brand.Id,
+            StageName = 'Qualification',
+            CloseDate = Date.today().addDays(15)
+        );
+        insert opp;
+
+        Test.startTest();
+        NegotiationOpportunityLookup.Result byName = run('O\'Douls - 2026 골드 스폰서십');
+        NegotiationOpportunityLookup.Result byAccount = run('O\'Douls Brands');
+        Test.stopTest();
+
+        System.assertEquals(true, byName.found, '아포스트로피가 든 Opportunity 이름도 검색되어야 한다');
+        System.assertEquals(true, byName.isUnique, '정확히 1건 매칭되어야 한다');
+        System.assertEquals(opp.Id, byName.singleMatchId, '매칭된 Id가 일치해야 한다');
+        System.assertEquals(true, byAccount.found, '아포스트로피가 든 Account 이름으로도 검색되어야 한다');
+    }
 }

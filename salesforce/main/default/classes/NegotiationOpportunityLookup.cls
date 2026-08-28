@@ -30,7 +30,11 @@ public with sharing class NegotiationOpportunityLookup {
                     WITH USER_MODE
                 ];
             } else {
-                String likeTerm = '%' + String.escapeSingleQuotes(req.searchTerm) + '%';
+                // searchTerm is used only as a bind variable (:likeTerm), which is
+                // injection-safe — do NOT escapeSingleQuotes it. Escaping inserts a
+                // literal backslash into the LIKE pattern and breaks any name/account
+                // search containing an apostrophe (e.g. "d'Alba").
+                String likeTerm = '%' + req.searchTerm.trim() + '%';
                 matches = [
                     SELECT Id, Name, StageName, Account.Name
                     FROM Opportunity
