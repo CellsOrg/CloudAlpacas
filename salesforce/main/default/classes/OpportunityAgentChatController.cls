@@ -151,8 +151,11 @@ public with sharing class OpportunityAgentChatController {
         try {
             return new Http().send(req);
         } catch (System.CalloutException ce) {
-            // typically a missing / mis-configured Named Credential
-            throwHandled('Agent API 연결이 설정되지 않았습니다. 관리자에게 CA_Agent_API Named Credential 설정을 요청하세요.');
+            // Named Credential / External Credential problem. The platform message
+            // (e.g. "Unable to fetch the OAuth token.") is a safe, actionable hint —
+            // it never contains a token, secret or Authorization header.
+            String hint = String.isBlank(ce.getMessage()) ? '' : ' (' + ce.getMessage() + ')';
+            throwHandled('Agent API 연결에 실패했습니다. CA_Agent_API Named Credential / External Credential 설정을 확인하세요.' + hint);
         } catch (Exception e) {
             throwHandled('Agent 응답을 기다리는 중 오류가 발생했습니다.');
         }

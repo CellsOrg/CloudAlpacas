@@ -150,21 +150,24 @@ private class OpportunityAgentChatControllerTest {
 
     private class CalloutBoom implements HttpCalloutMock {
         public HttpResponse respond(HttpRequest req) {
-            throw new CalloutException('Unauthorized endpoint, or Named Credential CA_Agent_API not found');
+            throw new CalloutException('Unable to fetch the OAuth token.');
         }
     }
 
     @isTest
-    static void missingNamedCredentialSurfacesSetupHint() {
+    static void namedCredentialFailureSurfacesActionableHint() {
         OpportunityAgentChatController.agentIdForTest = '0Xxbm000000000AAAA';
         Test.setMock(HttpCalloutMock.class, new CalloutBoom());
         Test.startTest();
         try {
             OpportunityAgentChatController.sendMessage('006bm00000VXKvlAAH', null, 'hi');
-            System.assert(false, 'should throw when the Named Credential is not configured');
+            System.assert(false, 'should throw when the credential is mis-configured');
         } catch (AuraHandledException e) {
             System.assert(e.getMessage().contains('CA_Agent_API'), e.getMessage());
-            System.assert(!e.getMessage().contains('Unauthorized endpoint'), 'raw callout error not leaked');
+            // the safe platform reason is passed through so admins can act on it
+            System.assert(e.getMessage().contains('Unable to fetch the OAuth token'), e.getMessage());
+            // but never a token / secret / Authorization header
+            System.assert(!e.getMessage().containsIgnoreCase('bearer') && !e.getMessage().contains('eyJ'), 'no token leak');
         }
         Test.stopTest();
     }
