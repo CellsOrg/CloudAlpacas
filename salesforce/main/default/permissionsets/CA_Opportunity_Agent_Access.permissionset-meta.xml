@@ -72,17 +72,22 @@
          (insert as user Quote+QuoteLineItem, update as user Opportunity benefit fields — all
          `with sharing`, USER_MODE). These grants were present in Seungwoo's f762840 permission-set
          version and were lost when PRs #79-#85 redeployed CA_Opportunity_Agent_Access; restored
-         here additively. SponsorshipPackageLookup / SponsorshipProposalSaver class access is
-         restored now even though list_sponsorship_packages / save_proposal are not yet wired into
-         the .agent (blocked on Seungwoo's list_sponsorship_packages schema fix + open design
-         decisions) — the class access is harmless without a wired action and avoids a second
-         permission-set redeploy later. -->
+         here additively. The Proposal subagent is now fully wired into Opportunity_Agent
+         (feature/opportunity-proposal-integration): list_sponsorship_packages (menu digest),
+         find_sponsorship_package -> FindSponsorshipPackage (deterministic package Id resolver,
+         same pattern as NegotiationOpportunityLookup), and save_proposal (existing-Quote
+         update / new-Quote create, savepoint-guarded). All four classes are `with sharing`,
+         USER_MODE / insert-update as user. -->
     <classAccesses>
         <apexClass>OpportunityProposalContext</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>SponsorshipPackageLookup</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FindSponsorshipPackage</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

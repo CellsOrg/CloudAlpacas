@@ -24,14 +24,23 @@ public with sharing class OpportunityProposalContext {
             );
         }
 
+        // Converted Lead per Opportunity. An Opportunity can have more than one converted
+        // Lead (multiple sources merged into one deal); pick ONE deterministically —
+        // the most recently converted, then most recently created, then highest Id — so
+        // the same Opportunity always surfaces the same Lead's stored B2B signals.
+        // ORDER BY drives the choice; the first row seen per Opportunity wins.
         Map<Id, Lead> convertedLeadByOppId = new Map<Id, Lead>();
         if (!oppIds.isEmpty()) {
-            for (Lead ld : [SELECT Id, ConvertedOpportunityId, Target_Segment__c,
-                                    Segment_Match__c, Recommendation_Reason__c, Lead_Score__c
+            for (Lead ld : [SELECT Id, ConvertedOpportunityId, ConvertedDate, CreatedDate,
+                                    Target_Segment__c, Segment_Match__c,
+                                    Recommendation_Reason__c, Lead_Score__c
                              FROM Lead
                              WHERE ConvertedOpportunityId IN :oppIds
-                             WITH USER_MODE]) {
-                convertedLeadByOppId.put(ld.ConvertedOpportunityId, ld);
+                             WITH USER_MODE
+                             ORDER BY ConvertedDate DESC NULLS LAST, CreatedDate DESC, Id DESC]) {
+                if (!convertedLeadByOppId.containsKey(ld.ConvertedOpportunityId)) {
+                    convertedLeadByOppId.put(ld.ConvertedOpportunityId, ld);
+                }
             }
         }
 

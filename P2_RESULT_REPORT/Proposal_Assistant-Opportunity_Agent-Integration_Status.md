@@ -1,11 +1,29 @@
 # Proposal Assistant → Opportunity Agent 통합 현황
 
 > 브랜치: `feature/opportunity-proposal-integration` (origin/main = `ec12eff` 기준)
-> 작성: 2026-08-29 / 상태: **부분 통합 완료 — 쓰기 경로는 승우님 선행 수정 대기**
+> 최초 작성: 2026-08-29 / **갱신: 2026-08-29 — 쓰기 경로 포함 통합 완료 (merge-ready, staged / not activated)**
 
 Proposal 원본(`f762840`, 브랜치 `feature/campaign-quote-undocumented-log`, 미merge)을
-Opportunity Agent에 편입하는 작업의 통합 레이어 부분만 먼저 반영한 상태를 기록한다.
-승우님께 요청한 4가지(아래 §5)에 의존하지 않는 범위만 구현했다.
+Opportunity Agent에 편입하는 작업. 승우님이 수정 권한을 위임하고 Existing Quote 정책을
+("기존 Quote가 있을 시엔 업데이트") 확정해 주어, 아래 §5의 대기 항목을 모두 직접 정리했다.
+
+## 갱신 요약 (2026-08-29 2차 작업)
+
+| 영역 | 결과 |
+|---|---|
+| `list_sponsorship_packages` schema 손상 | **해결.** `Request.unused` 제거 → 의미 있는 `nameFilter`/`opportunityId` optional input, nested `@apexClassType` list output 제거 → flat `found`/`packageCount`/`packageDigest`. `GenAiPlannerBundle:Opportunity_Agent_v15` retrieve 성공(3개 액션 schema 모두 존재). |
+| package 결정적 바인딩 | **신규 `FindSponsorshipPackage`** (NegotiationOpportunityLookup 패턴). 이름/코드 → Product2 Id 서버 확정. `.agent`: `set resolved_proposal_package_id` → `save_proposal.productId = @variables.resolved_proposal_package_id`. LLM raw Id 경로 제거. |
+| `SponsorshipProposalSaver` 안전화 | savepoint/try-catch/rollback, 전 검증(opp·product·active·RT·PBE·currency·benefit 1000자·segment 허용값·null), raw exception 비노출(한국어 result). |
+| Existing Quote 정책 | SyncedQuoteId → 그 Quote(라인 미변경, Opp 필드만) / Quote 1개 → update(동일 Product 라인 reprice, 없으면 추가, 다른 패키지 라인이면 reject) / Quote 0개 → 신규 / Quote 2개+ 비동기 → ambiguous reject. 임의 Quote update·중복 QLI·vN naming 없음. |
+| multi-currency | `Standard PBE LIMIT 1` 제거 → Opportunity.CurrencyIsoCode 기준 PBE 선택(lookup·resolver·saver 일관). org: KRW active / USD inactive. |
+| OpportunityProposalContext multi-Lead | `ORDER BY ConvertedDate DESC NULLS LAST, CreatedDate DESC, Id DESC` + 첫 행 채택(결정적, bulk-safe). |
+| Confirmation isolation | `proposal_confirmed` / `proposal_quote_id` / `resolved_proposal_package_id` (`proposal_` namespace). `save_proposal available when proposal_confirmed==True AND resolved_opportunity_id!="" AND resolved_proposal_package_id!="" AND proposal_quote_id=="" `. 성공 후 `proposal_confirmed→False`. Negotiation `terms_confirmed`와 상호 인가 불가. |
+| Target_Segment drift | org Text(255)→restricted Picklist **API 변환 불가**("Unsupported custom field type conversion"). repo Picklist 정의는 canonical로 유지. Saver가 허용값(Decision 018-G 6값) 검증 + `.agent` instruction 제약. org 변환은 Setup UI 수동 필요(데이터는 전부 호환) — §5 참조. |
+| Apex test | 4개 신규(38 케이스). coverage: OpportunityProposalContext 100% / FindSponsorshipPackage 98% / SponsorshipPackageLookup 96% / SponsorshipProposalSaver 93%. Opportunity 도메인 regression 128/128 PASS. |
+| Agent | `sf agent validate` PASS → staged publish **v15 (Inactive)**. **v6 Active 불변. activate 안 함.** |
+
+---
+_(이하 최초 작성 시점 기록)_
 
 ---
 
