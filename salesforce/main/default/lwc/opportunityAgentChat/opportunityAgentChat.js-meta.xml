@@ -3,7 +3,7 @@
     <apiVersion>67.0</apiVersion>
     <isExposed>true</isExposed>
     <masterLabel>Opportunity Agent Chat</masterLabel>
-    <description>Embedded, multi-turn Opportunity Agent conversation for the Opportunity record page. Binds the current record automatically and talks to the Opportunity Agent via the Salesforce Agent API.</description>
+    <description>Compact Opportunity Agent composer for the Opportunity record page. Sends questions to the Opportunity Agent (Agent API), auto-binds the current record, and opens a wide modal for the full conversation and per-Opportunity history.</description>
     <targets>
         <target>lightning__RecordPage</target>
     </targets>

@@ -1,5 +1,6 @@
 import { createElement } from 'lwc';
 import OpportunityAgentChat from 'c/opportunityAgentChat';
+import { getRecord } from 'lightning/uiRecordApi';
 import sendMessage from '@salesforce/apex/OpportunityAgentChatController.sendMessage';
 import endConversation from '@salesforce/apex/OpportunityAgentChatController.endConversation';
 
@@ -15,167 +16,251 @@ jest.mock(
 );
 jest.mock('@salesforce/user/Id', () => ({ default: '005TEST' }), { virtual: true });
 
-const RECORD_ID = '006bm00000VXKvlAAH';
+const GOLD = '006bm00000VXKvlAAH';
+const SAMSUNG = '006bm00000VjTP7AAN';
+const flush = () => Promise.resolve();
 
-function mount() {
+function mount(recordId = GOLD) {
     const el = createElement('c-opportunity-agent-chat', { is: OpportunityAgentChat });
-    el.recordId = RECORD_ID;
+    el.recordId = recordId;
     document.body.appendChild(el);
+    getRecord.emit({ fields: { Name: { value: 'd\'Alba - 2026 시즌 골드 파트너십' } } });
     return el;
 }
 
-function setTextarea(el, text) {
-    const ta = el.shadowRoot.querySelector('lightning-textarea');
-    ta.value = text;
-    ta.dispatchEvent(new CustomEvent('change'));
-    return ta;
-}
+const composerInput = (el) => el.shadowRoot.querySelector('lightning-input');
+const askButton = (el) => el.shadowRoot.querySelector('lightning-button-icon');
+const historyButton = (el) => el.shadowRoot.querySelector('lightning-button');
+const modal = (el) => el.shadowRoot.querySelector('c-opportunity-agent-chat-modal');
 
-const flush = () => Promise.resolve();
+function typeCompact(el, text) {
+    const inp = composerInput(el);
+    inp.value = text;
+    inp.dispatchEvent(new CustomEvent('change'));
+}
 
 afterEach(() => {
     while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
     jest.clearAllMocks();
-    window.sessionStorage.clear();
+    window.localStorage.clear();
 });
 
-describe('c-opportunity-agent-chat', () => {
-    it('renders an empty state before any message', () => {
+describe('c-opportunity-agent-chat — compact card', () => {
+    it('renders the compact composer with the short copy and no transcript', () => {
         const el = mount();
         expect(el.shadowRoot.querySelector('lightning-card').title).toBe('Opportunity Agent');
-        expect(el.shadowRoot.textContent).toContain('이 딜 상태 어때?');
+        expect(el.shadowRoot.textContent).toContain('무엇이든 도와드립니다');
+        expect(el.shadowRoot.textContent).not.toContain('활동 · 제안 · 협상 · 딜 요약을 지원');
+        // no large transcript / message list in the compact card
+        expect(el.shadowRoot.querySelectorAll('.oac-msg').length).toBe(0);
+        expect(el.shadowRoot.querySelector('.transcript')).toBeNull();
     });
 
-    it('sends the first turn with the current recordId and renders both messages', async () => {
-        sendMessage.mockResolvedValue({ sessionId: 'sess-1', reply: '딜은 협상 단계입니다.', sessionRestarted: false });
+    it('has an explicit "이전 대화 기록 보기" action and no modal until opened', () => {
+        const el = mount();
+        expect(historyButton(el).label).toBe('이전 대화 기록 보기');
+        expect(modal(el)).toBeNull();
+    });
+
+    it('sending a question opens the wide modal in detail view with the user message', async () => {
+        let resolveTurn;
+        sendMessage.mockImplementation(() => new Promise((r) => (resolveTurn = r)));
         const el = mount();
 
-        setTextarea(el, '이 딜 상태 어때?');
-        el.shadowRoot.querySelector('lightning-button').click();
-        await flush();
+        typeCompact(el, '이 딜 상태 어때?');
+        askButton(el).click();
         await flush();
 
+        const m = modal(el);
+        expect(m).not.toBeNull();
+        expect(m.view).toBe('detail');
+        expect(m.busy).toBe(true);
         expect(sendMessage).toHaveBeenCalledWith({
-            opportunityId: RECORD_ID,
+            opportunityId: GOLD,
             sessionId: null,
             message: '이 딜 상태 어때?'
         });
-        const texts = [...el.shadowRoot.querySelectorAll('.msg lightning-formatted-text')].map((n) => n.value);
-        expect(texts).toEqual(['이 딜 상태 어때?', '딜은 협상 단계입니다.']);
+        expect(m.activeConversation.messages.map((x) => x.text)).toEqual(['이 딜 상태 어때?']);
+
+        resolveTurn({ sessionId: 'sess-1', reply: '협상 단계입니다.', sessionRestarted: false });
+        await flush();
+        await flush();
+        expect(m.busy).toBe(false);
+        expect(m.activeConversation.messages.map((x) => x.role)).toEqual(['user', 'agent']);
+        expect(m.activeConversation.sessionId).toBe('sess-1');
     });
 
-    it('keeps multi-turn order and reuses the session id', async () => {
-        sendMessage
-            .mockResolvedValueOnce({ sessionId: 'sess-1', reply: 'A1', sessionRestarted: false })
-            .mockResolvedValueOnce({ sessionId: 'sess-1', reply: 'A2', sessionRestarted: false });
-        const el = mount();
-
-        setTextarea(el, 'Q1');
-        el.shadowRoot.querySelector('lightning-button').click();
-        await flush();
-        await flush();
-
-        setTextarea(el, 'Q2');
-        el.shadowRoot.querySelector('lightning-button').click();
-        await flush();
-        await flush();
-
-        expect(sendMessage).toHaveBeenLastCalledWith({
-            opportunityId: RECORD_ID,
-            sessionId: 'sess-1',
-            message: 'Q2'
-        });
-        const texts = [...el.shadowRoot.querySelectorAll('.msg lightning-formatted-text')].map((n) => n.value);
-        expect(texts).toEqual(['Q1', 'A1', 'Q2', 'A2']);
-    });
-
-    it('shows a thinking indicator while awaiting the agent', async () => {
-        let resolve;
-        sendMessage.mockImplementation(() => new Promise((r) => (resolve = r)));
-        const el = mount();
-
-        setTextarea(el, '느린 질문');
-        el.shadowRoot.querySelector('lightning-button').click();
-        await flush();
-
-        expect(el.shadowRoot.querySelector('lightning-spinner')).not.toBeNull();
-
-        resolve({ sessionId: 's', reply: '완료', sessionRestarted: false });
-        await flush();
-        await flush();
-        expect(el.shadowRoot.querySelector('lightning-spinner')).toBeNull();
-    });
-
-    it('renders a transport error and does not add an agent bubble', async () => {
-        sendMessage.mockRejectedValue({ body: { message: '접근 권한이 없습니다.' } });
-        const el = mount();
-
-        setTextarea(el, 'x');
-        el.shadowRoot.querySelector('lightning-button').click();
-        await flush();
-        await flush();
-
-        expect(el.shadowRoot.querySelector('[role="alert"]').textContent).toContain('접근 권한이 없습니다.');
-        const texts = [...el.shadowRoot.querySelectorAll('.msg lightning-formatted-text')].map((n) => n.value);
-        expect(texts).toEqual(['x']);
-    });
-
-    it('rejects an empty message (send button disabled, no call)', async () => {
-        const el = mount();
-        setTextarea(el, '   ');
-        const btn = el.shadowRoot.querySelector('lightning-button');
-        expect(btn.disabled).toBe(true);
-        btn.click();
-        await flush();
-        expect(sendMessage).not.toHaveBeenCalled();
-    });
-
-    it('reset clears the transcript and ends the server session', async () => {
-        sendMessage.mockResolvedValue({ sessionId: 'sess-1', reply: 'hi', sessionRestarted: false });
-        endConversation.mockResolvedValue(undefined);
-        const el = mount();
-
-        setTextarea(el, 'hello');
-        el.shadowRoot.querySelector('lightning-button').click();
-        await flush();
-        await flush();
-
-        el.shadowRoot.querySelectorAll('lightning-button-icon')[0].click();
-        await flush();
-
-        expect(endConversation).toHaveBeenCalledWith({ sessionId: 'sess-1' });
-        expect(el.shadowRoot.querySelectorAll('.msg lightning-formatted-text').length).toBe(0);
-    });
-
-    it('restores a prior conversation from sessionStorage on reconnect', async () => {
-        window.sessionStorage.setItem(
-            'caOppAgentChat:005TEST:006bm00000VXKvlAAH',
+    it('"이전 대화 기록 보기" opens the modal in list view scoped to this record', async () => {
+        window.localStorage.setItem(
+            'caOppAgentHist:005TEST:' + GOLD,
             JSON.stringify({
-                sessionId: 'sess-prev',
-                messages: [
-                    { role: 'user', text: '이전 질문' },
-                    { role: 'agent', text: '이전 답변' }
+                conversations: [
+                    { id: 'c1', title: '골드 견적', sessionId: 's', createdAt: 1, updatedAt: 2, messages: [{ role: 'user', text: '견적' }] }
                 ]
             })
         );
         const el = mount();
+        historyButton(el).click();
         await flush();
 
-        const texts = [...el.shadowRoot.querySelectorAll('.msg lightning-formatted-text')].map((n) => n.value);
-        expect(texts).toEqual(['이전 질문', '이전 답변']);
+        const m = modal(el);
+        expect(m.view).toBe('list');
+        expect(m.conversations).toHaveLength(1);
+        expect(m.opportunityName).toContain('골드');
+    });
+});
+
+describe('c-opportunity-agent-chat — history & persistence', () => {
+    async function seedTwoConversations(el) {
+        sendMessage
+            .mockResolvedValueOnce({ sessionId: 's1', reply: 'A1', sessionRestarted: false })
+            .mockResolvedValueOnce({ sessionId: 's2', reply: 'A2', sessionRestarted: false });
+        typeCompact(el, '첫 번째 질문입니다');
+        askButton(el).click();
+        await flush();
+        await flush();
+        await flush();
+        // new question from compact -> new conversation
+        typeCompact(el, '두 번째 질문입니다');
+        askButton(el).click();
+        await flush();
+        await flush();
+        await flush();
+    }
+
+    it('keeps multiple conversations for the same Opportunity', async () => {
+        const el = mount();
+        await seedTwoConversations(el);
+
+        el.shadowRoot.querySelector('c-opportunity-agent-chat-modal').dispatchEvent(new CustomEvent('back'));
+        await flush();
+        const m = modal(el);
+        expect(m.view).toBe('list');
+        expect(m.conversations.length).toBe(2);
+        const titles = m.conversations.map((c) => c.title);
+        expect(titles).toContain('첫 번째 질문입니다');
+        expect(titles).toContain('두 번째 질문입니다');
     });
 
-    it('surfaces a notice when the server restarted an expired session', async () => {
+    it('"+ 새 대화" preserves older conversations and ends the previous session', async () => {
+        const el = mount();
+        await seedTwoConversations(el);
+        endConversation.mockResolvedValue(undefined);
+
+        modal(el).dispatchEvent(new CustomEvent('newconversation'));
+        await flush();
+
+        expect(endConversation).toHaveBeenCalledWith({ sessionId: 's2' });
+        // 2 old + 1 fresh empty
+        expect(modal(el).conversations.length).toBe(3);
+        expect(modal(el).activeConversation.messages.length).toBe(0);
+    });
+
+    it('persists to localStorage and restores multiple conversations after reload', async () => {
+        const el = mount();
+        await seedTwoConversations(el);
+        const stored = JSON.parse(window.localStorage.getItem('caOppAgentHist:005TEST:' + GOLD));
+        expect(stored.conversations.length).toBe(2);
+
+        document.body.removeChild(el);
+        const el2 = mount();
+        el2.shadowRoot.querySelector('lightning-button').click(); // open history
+        await flush();
+        expect(el2.shadowRoot.querySelector('c-opportunity-agent-chat-modal').conversations.length).toBe(2);
+    });
+
+    it('never persists a token / cookie / trace', async () => {
+        const el = mount();
+        sendMessage.mockResolvedValue({ sessionId: 'sess-abc', reply: 'ok', sessionRestarted: false });
+        typeCompact(el, 'hello');
+        askButton(el).click();
+        await flush();
+        await flush();
+        await flush();
+
+        const raw = window.localStorage.getItem('caOppAgentHist:005TEST:' + GOLD);
+        expect(raw).not.toMatch(/access_token|Bearer|Cookie|sid=|eyJ/i);
+        const parsed = JSON.parse(raw);
+        const keys = Object.keys(parsed.conversations[0]);
+        expect(keys.sort()).toEqual(['createdAt', 'id', 'messages', 'sessionId', 'title', 'updatedAt']);
+    });
+
+    it('isolates history by Opportunity recordId', async () => {
+        const elGold = mount(GOLD);
+        sendMessage.mockResolvedValue({ sessionId: 's', reply: 'r', sessionRestarted: false });
+        typeCompact(elGold, '골드 질문');
+        askButton(elGold).click();
+        await flush();
+        await flush();
+        await flush();
+        document.body.removeChild(elGold);
+
+        const elSamsung = mount(SAMSUNG);
+        elSamsung.shadowRoot.querySelector('lightning-button').click();
+        await flush();
+        expect(elSamsung.shadowRoot.querySelector('c-opportunity-agent-chat-modal').conversations.length).toBe(0);
+    });
+});
+
+describe('c-opportunity-agent-chat — detail follow-up', () => {
+    it('follow-up from the modal reuses the conversation sessionId', async () => {
+        sendMessage
+            .mockResolvedValueOnce({ sessionId: 'sess-1', reply: 'A1', sessionRestarted: false })
+            .mockResolvedValueOnce({ sessionId: 'sess-1', reply: 'A2', sessionRestarted: false });
+        const el = mount();
+        typeCompact(el, '이 딜 상태 어때?');
+        askButton(el).click();
+        await flush();
+        await flush();
+        await flush();
+
+        modal(el).dispatchEvent(new CustomEvent('send', { detail: { text: '그중 가장 걱정되는 건?' } }));
+        await flush();
+        await flush();
+        await flush();
+
+        expect(sendMessage).toHaveBeenLastCalledWith({
+            opportunityId: GOLD,
+            sessionId: 'sess-1',
+            message: '그중 가장 걱정되는 건?'
+        });
+        const roles = modal(el).activeConversation.messages.map((m) => m.role);
+        expect(roles).toEqual(['user', 'agent', 'user', 'agent']);
+    });
+
+    it('surfaces a restart notice when the server session expired', async () => {
         sendMessage.mockResolvedValue({ sessionId: 'sess-new', reply: '이어서 답변', sessionRestarted: true });
         const el = mount();
-
-        setTextarea(el, '계속');
-        el.shadowRoot.querySelector('lightning-button').click();
+        typeCompact(el, '계속');
+        askButton(el).click();
         await flush();
         await flush();
+        await flush();
 
-        const texts = [...el.shadowRoot.querySelectorAll('.msg lightning-formatted-text')].map((n) => n.value);
+        const texts = modal(el).activeConversation.messages.map((m) => m.text);
         expect(texts.some((t) => t.includes('새 세션에서 이어갑니다'))).toBe(true);
-        expect(texts).toContain('이어서 답변');
+    });
+
+    it('renders a transport error inline without an agent bubble', async () => {
+        sendMessage.mockRejectedValue({ body: { message: '접근 권한이 없습니다.' } });
+        const el = mount();
+        typeCompact(el, 'x');
+        askButton(el).click();
+        await flush();
+        await flush();
+        await flush();
+
+        const msgs = modal(el).activeConversation.messages;
+        expect(msgs.map((m) => m.role)).toEqual(['user', 'error']);
+        expect(msgs[1].text).toContain('접근 권한이 없습니다.');
+    });
+
+    it('rejects an empty question (button disabled, no call)', async () => {
+        const el = mount();
+        typeCompact(el, '   ');
+        expect(askButton(el).disabled).toBe(true);
+        askButton(el).click();
+        await flush();
+        expect(sendMessage).not.toHaveBeenCalled();
     });
 });
