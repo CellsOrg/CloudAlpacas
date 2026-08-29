@@ -314,4 +314,100 @@ private class DealContextTest {
         System.assert(r.daysSinceLastStageChange == null || r.daysSinceLastStageChange == 0,
             'daysSinceLastStageChange: ' + r.daysSinceLastStageChange);
     }
+
+    // A Standard User + CA_Opportunity_Agent_Access (the real agent execution context)
+    // must be able to run every DealContext SOQL — all `WITH USER_MODE` — without an
+    // FLS/CRUD exception. The Opportunity, Quote, Interaction Intelligence and Signal are
+    // all OWNED by the agent user so record-level sharing is not the variable; this
+    // isolates the field/object permission grants in the permission set.
+    @isTest
+    static void testRunsUnderAgentAccessUser() {
+        Id stdPbId = Test.getStandardPricebookId();
+        User agentUser;
+        Id ownedOppId;
+
+        System.runAs(new User(Id = UserInfo.getUserId())) {
+            PermissionSet ps = [SELECT Id FROM PermissionSet WHERE Name = 'CA_Opportunity_Agent_Access' LIMIT 1];
+            Profile std = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+            agentUser = new User(
+                FirstName = 'DC', LastName = 'QA', Alias = 'dcqa',
+                Email = 'dc.qa@example.com.invalid',
+                Username = 'dc.qa.' + System.now().getTime() + '@example.com.invalid',
+                ProfileId = std.Id, TimeZoneSidKey = 'Asia/Seoul', LocaleSidKey = 'ko_KR',
+                EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US'
+            );
+            insert agentUser;
+            insert new PermissionSetAssignment(AssigneeId = agentUser.Id, PermissionSetId = ps.Id);
+
+            Account a = new Account(Name = 'DC Agent QA Corp', OwnerId = agentUser.Id);
+            insert a;
+            // Discovery (not Negotiation) so the org's Negotiation_Followup_Flow does not
+            // fire and create a Task that would recalculate the next-activity / task-count
+            // fields set directly below.
+            Opportunity owned = new Opportunity(
+                Name = 'DC Agent QA Deal',
+                AccountId = a.Id,
+                StageName = 'Discovery',
+                CloseDate = Date.today().addDays(5),
+                Amount = 200000000,
+                Probability = 35,
+                OwnerId = agentUser.Id,
+                NextStep = '최종 조건 합의',
+                Last_Contact_Date__c = Datetime.now().addDays(-12),
+                Last_Contact_Type__c = 'Call',
+                Next_Activity_Date__c = Date.today().addDays(2),
+                Next_Activity_Subject__c = '계약서 검토',
+                Open_Tasks_Count__c = 3,
+                Overdue_Tasks_Count__c = 2,
+                Expected_Timing__c = '즉시 추진 가능',
+                Deal_Note__c = '예산 승인 대기 중',
+                Partner_Tier__c = 'Gold'
+            );
+            insert owned;
+            ownedOppId = owned.Id;
+
+            Quote q = new Quote(Name = 'DC QA Quote', OpportunityId = owned.Id, Pricebook2Id = stdPbId, Status = 'Presented');
+            insert q;
+
+            // Interaction_Intelligence__c validation ties Source_Record_Id__c's key prefix
+            // to Source_Type__c: Call → Task (00T).
+            Task callTask = new Task(Subject = 'dc qa call', Status = 'Completed', ActivityDate = Date.today().addDays(-1));
+            insert callTask;
+            Interaction_Intelligence__c ii = new Interaction_Intelligence__c(
+                Opportunity__c = owned.Id,
+                Source_Type__c = 'Call',
+                Source_Record_Id__c = callTask.Id,
+                Summary__c = '조건 재협의',
+                Concerns_Objections__c = '내부 예산 승인 지연'
+            );
+            insert ii;
+            insert new Interaction_Signal__c(
+                Interaction_Intelligence__c = ii.Id, Signal_Category__c = 'BUDGET',
+                Signal_Type__c = 'Budget Concern', Direction__c = 'Negative',
+                Confidence__c = 'High', Evidence__c = '예산 승인 지연 언급'
+            );
+        }
+
+        Test.startTest();
+        System.runAs(agentUser) {
+            DealContext.Result r = run(ownedOppId);
+
+            System.assertEquals(true, r.found, 'Agent Access 사용자도 본인 딜의 DealContext를 읽을 수 있어야 한다');
+            System.assertEquals('DC Agent QA Deal', r.opportunityName);
+            System.assertEquals('Discovery', r.stageName);
+            System.assertEquals(200000000, r.amount, '표준 Amount FLS');
+            System.assertEquals(35, r.probability, '표준 Probability FLS');
+            System.assertEquals('Call', r.lastContactType, 'Last_Contact_Type__c FLS (permission set으로 부여)');
+            System.assertEquals('계약서 검토', r.nextActivitySubject, 'Next_Activity_Subject__c FLS');
+            System.assertEquals(2, r.overdueTaskCount, 'Overdue_Tasks_Count__c FLS');
+            System.assertEquals('예산 승인 대기 중', r.dealNote, 'Deal_Note__c FLS');
+            System.assertEquals('즉시 추진 가능', r.expectedTiming, 'Expected_Timing__c FLS');
+            System.assertNotEquals(null, r.daysSinceLastContactField, 'Days_Since_Last_Contact__c (formula) FLS — 예외 없이 읽혀야 한다');
+            System.assertEquals(1, r.quoteCount, 'Quote WITH USER_MODE 조회');
+            System.assertEquals(true, r.hasInteractionIntelligence, 'II WITH USER_MODE 조회');
+            System.assertEquals(1, r.signalCount, 'Signal WITH USER_MODE 조회');
+            System.assertEquals(1, r.negativeSignalCount);
+        }
+        Test.stopTest();
+    }
 }
