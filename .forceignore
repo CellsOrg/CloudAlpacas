@@ -1,2 +1,5 @@
 **/jsconfig.json
 **/.eslintrc.json
+
+# LWC Jest tests are not deployable metadata
+**/lwc/**/__tests__/**

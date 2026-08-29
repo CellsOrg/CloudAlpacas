@@ -40,7 +40,11 @@
            불러오지 못했습니다"). Read-only controller (with sharing, WITH USER_MODE).
          - NegotiationContext / NegotiationOpportunityLookup / NegotiationTermsUpdater are
            the Negotiation_Assistant's 3 Apex actions (with sharing; USER_MODE / update as
-           user). -->
+           user).
+         - NegotiationContextController is the read-only LWC adapter behind the
+           negotiationContextSummary card (Negotiation-stage Opportunity page). It only
+           calls NegotiationContext.execute() and flattens the first Result into an
+           @AuraEnabled DTO — no new SOQL/DML. Needed for Manager Lee to load the card. -->
     <classAccesses>
         <apexClass>ActivityIntelligenceAgentAction</apexClass>
         <enabled>true</enabled>
@@ -55,6 +59,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>NegotiationContext</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NegotiationContextController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

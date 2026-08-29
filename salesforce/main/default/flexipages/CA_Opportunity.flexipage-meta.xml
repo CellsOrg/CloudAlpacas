@@ -23,11 +23,6 @@
                 <identifier>force_highlightsPanel</identifier>
             </componentInstance>
         </itemInstances>
-        <mode>Replace</mode>
-        <name>header</name>
-        <type>Region</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
@@ -38,8 +33,7 @@
                 <identifier>runtime_sales_pathassistant_pathAssistant</identifier>
             </componentInstance>
         </itemInstances>
-        <mode>Replace</mode>
-        <name>subheader</name>
+        <name>header</name>
         <type>Region</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -336,6 +330,16 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.Client_Budget_Status__c</fieldItem>
                 <identifier>CA_PotentialFit_ClientBudgetStatus</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Expected_Timing__c</fieldItem>
+                <identifier>CA_PotentialFit_ExpectedTiming</identifier>
             </fieldInstance>
         </itemInstances>
         <name>CA_PotentialFit_Col2Fields</name>
@@ -721,6 +725,78 @@
             </componentInstance>
         </itemInstances>
         <name>CA_ContactPQ_Columns</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Expected_Benefit_Short_Term__c</fieldItem>
+                <identifier>CA_ProposalDraft_BenefitShort</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Expected_Benefit_Mid_Term__c</fieldItem>
+                <identifier>CA_ProposalDraft_BenefitMid</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Expected_Benefit_Long_Term__c</fieldItem>
+                <identifier>CA_ProposalDraft_BenefitLong</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <name>CA_ProposalDraft_Col1Fields</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Target_Segment__c</fieldItem>
+                <identifier>CA_ProposalDraft_TargetSegment</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <name>CA_ProposalDraft_Col2Fields</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>body</name>
+                    <value>CA_ProposalDraft_Col1Fields</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:column</componentName>
+                <identifier>CA_ProposalDraft_Column1</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>body</name>
+                    <value>CA_ProposalDraft_Col2Fields</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:column</componentName>
+                <identifier>CA_ProposalDraft_Column2</identifier>
+            </componentInstance>
+        </itemInstances>
+        <name>CA_ProposalDraft_Columns</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -1357,7 +1433,6 @@
                 </visibilityRule>
             </componentInstance>
         </itemInstances>
-        <mode>Replace</mode>
         <name>tabs</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -1647,6 +1722,10 @@
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
+                    <name>label</name>
+                    <value>Tabs</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
                     <name>tabs</name>
                     <value>tabs</value>
                 </componentInstanceProperties>
@@ -1708,6 +1787,31 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
+                    <value>CA_ProposalDraft_Columns</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>horizontalAlignment</name>
+                    <value>false</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>label</name>
+                    <value>Proposal Draft</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:fieldSection</componentName>
+                <identifier>CA_fieldSection_ProposalDraft</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.StageName}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Proposal/Quote</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>columns</name>
                     <value>CA_DealSnapshotNEG_Columns</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
@@ -1745,6 +1849,19 @@
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>CA_fieldSection_ContactNEG</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.StageName}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Negotiation</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentName>c:negotiationContextSummary</componentName>
+                <identifier>CA_negotiationContextSummary</identifier>
                 <visibilityRule>
                     <criteria>
                         <leftValue>{!Record.StageName}</leftValue>
@@ -1804,8 +1921,7 @@
                 </visibilityRule>
             </componentInstance>
         </itemInstances>
-        <mode>Replace</mode>
-        <name>main</name>
+        <name>leftcol</name>
         <type>Region</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -1948,6 +2064,16 @@
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
+                    <name>richTextValue</name>
+                    <value>&lt;p&gt;&lt;b&gt;Opportunity Agent&lt;/b&gt;&lt;/p&gt;&lt;p&gt;상단 Agentforce 패널에서 Opportunity 이름과 함께 질문하세요. 활동 · 제안 · 협상 · 딜 요약을 지원합니다.&lt;/p&gt;</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:richText</componentName>
+                <identifier>CA_opportunityAgentSignpost</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
                     <name>columns</name>
                     <value>CA_DealNote_Columns</value>
                 </componentInstanceProperties>
@@ -1965,6 +2091,10 @@
         </itemInstances>
         <itemInstances>
             <componentInstance>
+                <componentInstanceProperties>
+                    <name>label</name>
+                    <value>Tabs</value>
+                </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>tabs</name>
                     <value>facet-9750c67c-edc5-421f-bc24-392cb3b3a3aa</value>
@@ -1991,15 +2121,13 @@
                 <identifier>force_relatedListSingleContainer9</identifier>
             </componentInstance>
         </itemInstances>
-        <mode>Replace</mode>
-        <name>sidebar</name>
+        <name>rightcol</name>
         <type>Region</type>
     </flexiPageRegions>
     <masterLabel>CA_Opportunity</masterLabel>
-    <parentFlexiPage>sfa__Opportunity_rec_L</parentFlexiPage>
     <sobjectType>Opportunity</sobjectType>
     <template>
-        <name>flexipage:recordHomeWithSubheaderTemplateDesktop</name>
+        <name>flexipage:recordHomeTwoColEqualHeaderTemplateDesktop</name>
     </template>
     <type>RecordPage</type>
 </FlexiPage>

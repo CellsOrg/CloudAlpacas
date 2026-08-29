@@ -26,3 +26,6 @@ build/
 
 # VS Code personal settings
 .vscode/
+
+# Jest coverage output
+coverage/
