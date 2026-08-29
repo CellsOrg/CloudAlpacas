@@ -1,0 +1,172 @@
+<template>
+    <section
+        role="dialog"
+        tabindex="-1"
+        aria-modal="true"
+        aria-labelledby={headingId}
+        class="slds-modal slds-fade-in-open oac-modal"
+        onkeydown={handleKeyDown}
+    >
+        <div class="slds-modal__container oac-modal__container" onclick={stop}>
+            <!-- header -->
+            <header class="slds-modal__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <template lwc:if={isDetailView}>
+                        <lightning-button-icon
+                            icon-name="utility:back"
+                            variant="bare"
+                            alternative-text="이전 대화 목록"
+                            title="이전 대화 목록"
+                            class="slds-var-m-right_x-small"
+                            onclick={back}
+                        ></lightning-button-icon>
+                    </template>
+                    <h1 id={headingId} class="slds-text-heading_medium">Opportunity Agent</h1>
+                </div>
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <template lwc:if={isListView}>
+                        <lightning-button
+                            class="oac-initial-focus"
+                            variant="brand"
+                            label="새 대화"
+                            icon-name="utility:add"
+                            onclick={newConversation}
+                        ></lightning-button>
+                    </template>
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        variant="bare"
+                        alternative-text="닫기"
+                        title="닫기"
+                        class="slds-var-m-left_x-small"
+                        onclick={close}
+                    ></lightning-button-icon>
+                </div>
+            </header>
+
+            <div class="slds-modal__content slds-var-p-around_medium oac-modal__content">
+                <p class="slds-text-title_caps slds-text-color_weak slds-var-m-bottom_medium">
+                    {opportunityName}
+                </p>
+
+                <!-- ============ LIST VIEW ============ -->
+                <template lwc:if={isListView}>
+                    <lightning-input
+                        type="search"
+                        variant="label-hidden"
+                        label="대화 기록 검색"
+                        placeholder="견적서 / 할인 / 미팅 내용..."
+                        value={searchTerm}
+                        onchange={handleSearch}
+                        class="slds-var-m-bottom_medium oac-initial-focus"
+                    ></lightning-input>
+
+                    <template lwc:if={hasConversations}>
+                        <template for:each={groupedConversations} for:item="group">
+                            <div key={group.key} class="slds-var-m-bottom_large">
+                                <p class="slds-text-heading_small slds-var-m-bottom_x-small">{group.label}</p>
+                                <template for:each={group.items} for:item="c">
+                                    <button
+                                        key={c.id}
+                                        type="button"
+                                        data-id={c.id}
+                                        class="oac-convo-card slds-box slds-box_x-small slds-var-m-bottom_x-small slds-grid slds-grid_align-spread slds-grid_vertical-align-center"
+                                        onclick={openConversation}
+                                    >
+                                        <span class="oac-convo-card__body">
+                                            <span class="slds-text-body_regular slds-text-color_default oac-convo-card__title">{c.title}</span>
+                                            <span class="slds-text-body_small slds-text-color_weak oac-convo-card__preview">{c.preview}</span>
+                                            <span class="slds-text-body_small slds-text-color_weak">{c.time} · {c.count}</span>
+                                        </span>
+                                        <lightning-icon
+                                            icon-name="utility:chevronright"
+                                            size="x-small"
+                                            alternative-text="열기"
+                                        ></lightning-icon>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+                    <template lwc:else>
+                        <p class="slds-text-color_weak slds-var-p-vertical_large slds-align_absolute-center">
+                            이 Opportunity에 저장된 대화가 없습니다. "새 대화"로 시작하세요.
+                        </p>
+                    </template>
+                </template>
+
+                <!-- ============ DETAIL VIEW ============ -->
+                <template lwc:if={isDetailView}>
+                    <p class="slds-text-heading_small">{detailTitle}</p>
+                    <p class="slds-text-body_small slds-text-color_weak slds-var-m-bottom_medium">{detailDate}</p>
+                    <hr class="slds-var-m-bottom_medium" />
+
+                    <div class="oac-transcript">
+                        <template lwc:if={hasDetailMessages}>
+                            <template for:each={detailMessages} for:item="m">
+                                <div key={m.key} class={m.rowClass}>
+                                    <template lwc:if={m.isMeta}>
+                                        <p class={m.metaClass}>
+                                            <lightning-formatted-text value={m.text}></lightning-formatted-text>
+                                        </p>
+                                    </template>
+                                    <template lwc:else>
+                                        <p class="slds-text-title_caps slds-text-color_weak slds-var-m-bottom_xx-small">{m.roleLabel}</p>
+                                        <div class="oac-msg__bubble">
+                                            <lightning-formatted-text value={m.text}></lightning-formatted-text>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </template>
+                        <template lwc:else>
+                            <p class="slds-text-color_weak slds-var-p-vertical_medium">
+                                이 Opportunity에 대해 질문을 입력하세요.
+                            </p>
+                        </template>
+
+                        <template lwc:if={busy}>
+                            <div class="oac-msg oac-msg_agent">
+                                <p class="slds-text-title_caps slds-text-color_weak slds-var-m-bottom_xx-small">Opportunity Agent</p>
+                                <div class="oac-msg__bubble slds-grid slds-grid_vertical-align-center">
+                                    <lightning-spinner size="x-small" variant="brand" alternative-text="응답 생성 중"></lightning-spinner>
+                                    <span class="slds-var-m-left_x-small slds-text-color_weak">생각 중…</span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- detail composer -->
+            <template lwc:if={isDetailView}>
+                <footer class="slds-modal__footer">
+                    <div class="slds-grid slds-grid_vertical-align-end">
+                        <lightning-textarea
+                            class="slds-col slds-grow"
+                            name="followUp"
+                            variant="label-hidden"
+                            label="이어서 질문하기"
+                            placeholder="이어서 질문하기..."
+                            value={followUpDraft}
+                            max-length="2000"
+                            disabled={busy}
+                            onchange={handleFollowUpInput}
+                            onkeydown={handleFollowUpKey}
+                        ></lightning-textarea>
+                        <lightning-button-icon
+                            class="slds-col slds-shrink-none slds-var-m-left_x-small"
+                            icon-name="utility:send"
+                            variant="brand"
+                            alternative-text="전송"
+                            title="전송"
+                            onclick={sendFollowUp}
+                            disabled={followUpDisabled}
+                        ></lightning-button-icon>
+                    </div>
+                </footer>
+            </template>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" onclick={handleBackdrop}></div>
+</template>

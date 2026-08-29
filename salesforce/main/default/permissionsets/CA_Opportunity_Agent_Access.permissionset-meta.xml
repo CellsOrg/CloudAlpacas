@@ -4,6 +4,16 @@
     <description>Minimum Object/Field access for the Opportunity Agent and its Subagents (Discovery, Activity, Deal Intelligence, Negotiation). Separate from CA_Opportunity_Qualification_Access, for the existing Qualification/Discovery screens.</description>
     <hasActivationRequired>false</hasActivationRequired>
 
+    <!-- Per-User principal access to the Agent API External Credential used by the
+         embedded Opportunity Agent chat (OpportunityAgentChatController -> CA_Agent_API_PerUser).
+         This enables the assignee to authorize the credential; each user still completes the
+         one-time OAuth "Allow" themselves. Without this the callout throws
+         "We couldn't access the credential(s)". -->
+    <externalCredentialPrincipalAccesses>
+        <enabled>true</enabled>
+        <externalCredentialPrincipal>CA_Agent_API_PerUser_Cred-CA_Agent_API_PerUser_Principal</externalCredentialPrincipal>
+    </externalCredentialPrincipalAccesses>
+
     <!-- Agent access (grouped — Metadata API requires all agentAccesses contiguous).
          Without an explicit agentAccesses entry, a non-Admin assignee's requests fail
          before Apex even starts (no ApexLog at all) — confirmed against a real Standard
@@ -110,6 +120,20 @@
          The LLM synthesis layer in the deal subagent does the interpretation. -->
     <classAccesses>
         <apexClass>DealContext</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <!-- Embedded Opportunity Agent chat (opportunityAgentChat LWC, feature/opportunity-agent-embedded-chat).
+         OpportunityAgentChatController is a transport-only bridge: it relays turns to the
+         Opportunity Agent through the Salesforce Agent API, authenticated by the
+         CA_Agent_API_PerUser Named Credential — a Per-User OAuth (Browser Flow) External
+         Credential (CA_Agent_API_PerUser_Cred). Opportunity_Agent is an internal Employee
+         Agent, so it needs a token that represents the running user; each user authorizes
+         the External Credential principal (CA_Agent_API_PerUser_Principal) once. The token
+         is never handled in Apex or sent to the browser. Zero DML, no deal logic — all
+         reasoning stays in the agent and its subagents. This grant only adds the class;
+         Per-User principal authorization is done by each user, not via this permission set. -->
+    <classAccesses>
+        <apexClass>OpportunityAgentChatController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
 

@@ -1,0 +1,67 @@
+.oac-modal {
+    display: block;
+}
+
+.oac-modal__container {
+    width: 80vw;
+    max-width: 72rem;
+    min-width: 20rem;
+}
+
+.oac-modal__content {
+    height: 78vh;
+    max-height: 78vh;
+    overflow-y: auto;
+}
+
+.oac-transcript {
+    padding-right: 0.25rem;
+}
+
+.oac-convo-card {
+    width: 100%;
+    text-align: left;
+    background: var(--slds-g-color-neutral-base-100, #fff);
+    cursor: pointer;
+}
+
+.oac-convo-card:hover {
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+}
+
+.oac-convo-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.oac-convo-card__title {
+    font-weight: 600;
+}
+
+.oac-convo-card__preview {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.oac-msg__bubble {
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    max-width: 46rem;
+}
+
+.oac-msg_user .oac-msg__bubble {
+    background: var(--slds-g-color-brand-base-95, #eef4ff);
+    margin-left: auto;
+}
+
+.oac-msg_user {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
