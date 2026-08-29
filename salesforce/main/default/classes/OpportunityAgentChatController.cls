@@ -4,11 +4,12 @@
  * This class does NOT reason about the deal. It only starts / continues / ends an
  * Agent API conversation and hands the agent's text back to the component.
  *
- * Authentication: the Salesforce Agent API (api.salesforce.com/einstein/ai-agent)
- * requires an OAuth token with sfap_api + chatbot_api scope. That token is minted by
- * the CA_Agent_API Named Credential (linked External Credential) — never handled in
- * Apex, never sent to the browser. See P2_RESULT_REPORT and the Named Credential /
- * External Credential metadata for the one-time Setup.
+ * Authentication: the Salesforce Agent API (api.salesforce.com/einstein/ai-agent) is
+ * an internal Employee Agent, so it needs a user-context SFAP token, not an app-only
+ * one. That token comes from the CA_Agent_API_PerUser Named Credential — a Per-User
+ * OAuth (Browser Flow) External Credential whose token represents the running user.
+ * The token is never handled in Apex and never sent to the browser. Each user
+ * authorizes the External Credential principal once.
  *
  * All deal logic (activity / proposal / negotiation / deal) stays inside the
  * Opportunity Agent and its subagents. The current Opportunity is bound by prefixing
@@ -20,8 +21,8 @@
 public with sharing class OpportunityAgentChatController {
 
     private static final String AGENT_DEV_NAME = 'Opportunity_Agent';
-    // Named Credential CA_Agent_API -> https://api.salesforce.com ; auth via its External Credential.
-    private static final String AGENT_API = 'callout:CA_Agent_API/einstein/ai-agent/v1';
+    // Per-User OAuth Named Credential CA_Agent_API_PerUser -> https://api.salesforce.com.
+    private static final String AGENT_API = 'callout:CA_Agent_API_PerUser/einstein/ai-agent/v1';
     private static final Integer CALLOUT_TIMEOUT_MS = 110000;
 
     @TestVisible
@@ -155,7 +156,7 @@ public with sharing class OpportunityAgentChatController {
             // (e.g. "Unable to fetch the OAuth token.") is a safe, actionable hint —
             // it never contains a token, secret or Authorization header.
             String reason = String.isBlank(ce.getMessage()) ? '' : ' (' + ce.getMessage() + ')';
-            throwHandled('Agent API 연결에 실패했습니다. CA_Agent_API Named Credential / External Credential 설정을 확인하세요.' + reason);
+            throwHandled('Agent API 연결에 실패했습니다. CA_Agent_API_PerUser Named Credential 인증을 확인하세요 (사용자별 승인 필요).' + reason);
         } catch (Exception e) {
             throwHandled('Agent 응답을 기다리는 중 오류가 발생했습니다.');
         }

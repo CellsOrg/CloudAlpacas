@@ -15,9 +15,10 @@ private class OpportunityAgentChatControllerTest {
             res.setHeader('Content-Type', 'application/json');
             String url = req.getEndpoint();
 
-            // Callouts go through the CA_Agent_API Named Credential — auth header is
-            // injected by the platform, never built here.
-            System.assert(url.startsWith('callout:CA_Agent_API/'), 'must call via the Named Credential: ' + url);
+            // Callouts go through the CA_Agent_API_PerUser Named Credential — the
+            // user-context OAuth token is injected by the platform, never built here.
+            System.assert(url.startsWith('callout:CA_Agent_API_PerUser/einstein/ai-agent/v1/'),
+                'must call the Agent API via the Per-User Named Credential: ' + url);
             System.assertEquals(null, req.getHeader('Authorization'), 'Apex never sets Authorization; the Named Credential does');
 
             if (url.endsWith('/sessions') && req.getMethod() == 'POST') {
@@ -163,7 +164,7 @@ private class OpportunityAgentChatControllerTest {
             OpportunityAgentChatController.sendMessage('006bm00000VXKvlAAH', null, 'hi');
             System.assert(false, 'should throw when the credential is mis-configured');
         } catch (AuraHandledException e) {
-            System.assert(e.getMessage().contains('CA_Agent_API'), e.getMessage());
+            System.assert(e.getMessage().contains('CA_Agent_API_PerUser'), e.getMessage());
             // the safe platform reason is passed through so admins can act on it
             System.assert(e.getMessage().contains('Unable to fetch the OAuth token'), e.getMessage());
             // but never a token / secret / Authorization header
