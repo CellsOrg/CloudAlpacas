@@ -12,14 +12,23 @@
             <header class="oac-modal__header">
                 <div class="oac-modal__identity">
                     <template lwc:if={isDetailView}>
-                        <lightning-button-icon
-                            icon-name="utility:back"
-                            variant="bare"
-                            alternative-text="이전 대화 목록"
+                        <button
+                            type="button"
+                            class="oac-iconbtn"
+                            aria-label="이전 대화 목록"
                             title="이전 대화 목록"
-                            class="oac-modal__back"
                             onclick={back}
-                        ></lightning-button-icon>
+                        >
+                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                                <path
+                                    d="M12.5 4 6.5 10l6 6"
+                                    fill="none"
+                                    stroke-width="1.8"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                ></path>
+                            </svg>
+                        </button>
                     </template>
 
                     <span class="oac-mascot oac-mascot_lg" aria-hidden="true">
@@ -64,14 +73,17 @@
                         icon-name="utility:add"
                         onclick={newConversation}
                     ></lightning-button>
-                    <lightning-button-icon
-                        icon-name="utility:close"
-                        variant="bare"
-                        alternative-text="닫기"
+                    <button
+                        type="button"
+                        class="oac-iconbtn"
+                        aria-label="닫기"
                         title="닫기"
-                        class="oac-modal__close"
                         onclick={close}
-                    ></lightning-button-icon>
+                    >
+                        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                            <path d="M5 5 15 15M15 5 5 15" fill="none" stroke-width="1.8" stroke-linecap="round"></path>
+                        </svg>
+                    </button>
                 </div>
             </header>
 

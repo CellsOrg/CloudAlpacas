@@ -139,10 +139,8 @@ describe('c-opportunity-agent-chat-modal — detail view', () => {
     it('has a follow-up composer with the shared placeholder and a back control', () => {
         const el = mount(detailProps);
         expect(el.shadowRoot.querySelector('lightning-textarea').placeholder).toBe('무엇이든 요청하세요!');
-        const back = [...el.shadowRoot.querySelectorAll('lightning-button-icon')].find(
-            (b) => b.alternativeText === '이전 대화 목록'
-        );
-        expect(back).toBeDefined();
+        const back = el.shadowRoot.querySelector('button[aria-label="이전 대화 목록"]');
+        expect(back).not.toBeNull();
     });
 
     it('emits send with the follow-up text', () => {
@@ -160,9 +158,7 @@ describe('c-opportunity-agent-chat-modal — detail view', () => {
         const el = mount(detailProps);
         const handler = jest.fn();
         el.addEventListener('back', handler);
-        [...el.shadowRoot.querySelectorAll('lightning-button-icon')]
-            .find((b) => b.alternativeText === '이전 대화 목록')
-            .click();
+        el.shadowRoot.querySelector('button[aria-label="이전 대화 목록"]').click();
         expect(handler).toHaveBeenCalled();
     });
 
@@ -175,7 +171,7 @@ describe('c-opportunity-agent-chat-modal — detail view', () => {
         const el = mount(detailProps);
         const handler = jest.fn();
         el.addEventListener('close', handler);
-        [...el.shadowRoot.querySelectorAll('lightning-button-icon')].find((b) => b.alternativeText === '닫기').click();
+        el.shadowRoot.querySelector('button[aria-label="닫기"]').click();
         expect(handler).toHaveBeenCalledTimes(1);
 
         el.shadowRoot.querySelector('section.slds-modal').dispatchEvent(

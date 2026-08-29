@@ -31,6 +31,7 @@
     flex-direction: column;
     overflow: hidden;
     font-family: var(--oac-font);
+    background: #fff;
     border-radius: 16px;
 }
 
@@ -46,8 +47,9 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--oac-border);
+    padding: 14px 18px;
+    background: var(--oac-navy);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .oac-modal__identity {
@@ -67,7 +69,7 @@
 .oac-modal__oppname {
     font-size: 12px;
     font-weight: 500;
-    color: var(--oac-text-secondary);
+    color: rgba(255, 255, 255, 0.82);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -87,15 +89,42 @@
     --slds-c-button-brand-color-border-hover: var(--oac-orange-hover);
     --slds-c-button-brand-color-background-active: var(--oac-orange-hover);
     --slds-c-button-brand-color-border-active: var(--oac-orange-hover);
+    --slds-c-button-brand-text-color: #ffffff;
     --slds-c-button-radius-border: 10px;
 }
 
-.oac-modal__back,
-.oac-modal__close {
-    --slds-c-icon-color-foreground-default: var(--oac-text-secondary);
+/* white icon buttons on the navy header */
+.oac-iconbtn {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.12s ease;
 }
 
-/* ---- wordmark + mascot (shared) ---------------------------- */
+.oac-iconbtn:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.oac-iconbtn:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.oac-iconbtn svg {
+    width: 20px;
+    height: 20px;
+    stroke: #ffffff;
+}
+
+/* ---- wordmark + mascot ------------------------------------- */
 
 .oac-wordmark {
     font-size: 16px;
@@ -104,8 +133,9 @@
     line-height: 1.2;
 }
 
+/* modal wordmark sits on the navy header bar */
 .oac-wordmark__primary {
-    color: var(--oac-navy);
+    color: #ffffff;
 }
 
 .oac-wordmark__accent {
