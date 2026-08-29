@@ -1121,6 +1121,16 @@ Business/UX와 Technical Decision(Standard First, Decision 003)이 이미 충분
 > 반영 시 팀이 최소한으로 정한다(새 값을 지금 임의로 추가하지 않는다).
 >
 > **Status: ✅ CONFIRMED — Option A, Picklist (05_DECISIONS.md Decision 018-G) — Picklist 값 TBD**
+>
+> **구현 메모 (2026-08-29):** `Opportunity.Target_Segment__c` 는 repo 메타데이터 기준
+> **restricted Picklist** 이며 값 6개(`10-30 Female` · `10-30 Male` · `40-60 Female` ·
+> `40-60 Male` · `Family` · `etc`) 를 canonical 로 정의한다. 이 필드는 2026-08-20
+> Picklist 로 생성되었으나 2026-08-27 org 에서 Text(255) 로 변경되어 repo/org drift 가
+> 발생했다. 2026-08-29 Setup UI 에서 restricted Picklist(위 6값) 로 복원했고 기존
+> Opportunity 5건의 값은 그대로 보존되었다. Proposal Assistant 의 Apex(`OpportunityProposalContext` /
+> `SponsorshipProposalSaver`)는 이 Picklist 를 compile-time 으로 참조하며, 허용값 검증은
+> live Picklist describe 를 source of truth 로 사용한다. (위 "Picklist 값 TBD" 는 팀의
+> 공식 값 확정 절차를 의미하며, 현재 구현값은 Decision 018-G canonical 목록이다.)
 
 #### H. Segment Match
 
