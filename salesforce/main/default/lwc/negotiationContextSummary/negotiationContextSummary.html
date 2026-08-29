@@ -1,0 +1,98 @@
+<template>
+    <lightning-card title="협상 컨텍스트" icon-name="standard:quotes">
+        <div class="slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+            <template lwc:if={hasError}>
+                <p class="slds-text-color_error">{errorMessage}</p>
+            </template>
+
+            <template lwc:if={noContext}>
+                <p class="slds-text-color_weak">협상 컨텍스트 정보 없음</p>
+            </template>
+
+            <template lwc:if={hasData}>
+                <dl class="slds-list_horizontal slds-wrap">
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">Quote 상태</dt>
+                    <dd class="slds-item_detail slds-truncate">{quoteStatusDisplay}</dd>
+
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">고객 예산</dt>
+                    <dd class="slds-item_detail slds-truncate">
+                        <template lwc:if={hasClientBudget}>
+                            <lightning-formatted-number
+                                value={clientBudget}
+                                format-style="currency"
+                                currency-code="KRW"
+                                currency-display-as="symbol"
+                            ></lightning-formatted-number>
+                            <span class="slds-text-color_weak"> ({clientBudgetStatusDisplay})</span>
+                        </template>
+                        <template lwc:else>정보 없음</template>
+                    </dd>
+
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">Quote 총액</dt>
+                    <dd class="slds-item_detail slds-truncate">
+                        <template lwc:if={hasQuoteTotal}>
+                            <lightning-formatted-number
+                                value={quoteTotal}
+                                format-style="currency"
+                                currency-code="KRW"
+                                currency-display-as="symbol"
+                            ></lightning-formatted-number>
+                        </template>
+                        <template lwc:else>정보 없음</template>
+                    </dd>
+
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">예산 대비 견적 차이</dt>
+                    <dd class="slds-item_detail slds-truncate">
+                        <template lwc:if={hasBudgetVsQuote}>
+                            <lightning-formatted-number
+                                value={budgetVsQuote}
+                                format-style="currency"
+                                currency-code="KRW"
+                                currency-display-as="symbol"
+                            ></lightning-formatted-number>
+                        </template>
+                        <template lwc:else>—</template>
+                    </dd>
+
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">현재 할인율</dt>
+                    <dd class="slds-item_detail slds-truncate">{currentDiscountDisplay}</dd>
+
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">승인 없이 가능한 최대 할인율</dt>
+                    <dd class="slds-item_detail slds-truncate">
+                        {approvalDiscountLimitDisplay}
+                        <template lwc:if={hasMaxDiscountedPrice}>
+                            <span class="slds-text-color_weak">
+                                (최소 판매가
+                                <lightning-formatted-number
+                                    value={maxDiscountedPrice}
+                                    format-style="currency"
+                                    currency-code="KRW"
+                                    currency-display-as="symbol"
+                                ></lightning-formatted-number>)
+                            </span>
+                        </template>
+                    </dd>
+
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">Quote 유효기한</dt>
+                    <dd class="slds-item_detail slds-truncate">
+                        <template lwc:if={hasQuoteExpirationDate}>
+                            <lightning-formatted-date-time
+                                value={quoteExpirationDate}
+                                year="numeric"
+                                month="2-digit"
+                                day="2-digit"
+                            ></lightning-formatted-date-time>
+                        </template>
+                        <template lwc:else>—</template>
+                    </dd>
+
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">할인율 변경 제한</dt>
+                    <dd class="slds-item_detail">{discountRestrictionText}</dd>
+
+                    <dt class="slds-item_label slds-text-color_weak slds-truncate">최근 상호작용</dt>
+                    <dd class="slds-item_detail">{recentConcernDisplay}</dd>
+                </dl>
+            </template>
+        </div>
+    </lightning-card>
+</template>

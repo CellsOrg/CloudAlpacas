@@ -1,0 +1,9 @@
+dl.slds-list_horizontal > dt {
+    width: 45%;
+    padding-top: 0.25rem;
+}
+
+dl.slds-list_horizontal > dd {
+    width: 55%;
+    padding-top: 0.25rem;
+}
