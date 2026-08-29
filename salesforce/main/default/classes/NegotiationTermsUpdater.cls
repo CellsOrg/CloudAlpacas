@@ -9,6 +9,25 @@ public with sharing class NegotiationTermsUpdater {
     public static List<Result> execute(List<Request> requests) {
         List<Result> results = new List<Result>();
 
+        // Pre-flight: Salesforce blocks any Discount change on a revenue-scheduled
+        // QuoteLineItem with FIELD_INTEGRITY_EXCEPTION ("cannot modify discount when the
+        // item is revenue scheduled"). Detect it up front, before any DML, so the agent
+        // can explain it in Korean rather than surfacing a raw platform failure.
+        Set<Id> discountLineItemIds = new Set<Id>();
+        for (Request req : requests) {
+            if (req.discount != null && req.quoteLineItemId != null) {
+                discountLineItemIds.add(req.quoteLineItemId);
+            }
+        }
+        Map<Id, QuoteLineItem> lineItemsById = discountLineItemIds.isEmpty()
+            ? new Map<Id, QuoteLineItem>()
+            : new Map<Id, QuoteLineItem>([
+                SELECT Id, HasRevenueSchedule
+                FROM QuoteLineItem
+                WHERE Id IN :discountLineItemIds
+                WITH USER_MODE
+            ]);
+
         for (Request req : requests) {
             Result r = new Result();
 
@@ -33,6 +52,14 @@ public with sharing class NegotiationTermsUpdater {
                 if (req.quoteLineItemId == null) {
                     throw new NegotiationTermsUpdaterException(
                         'quoteLineItemId is required to update discount on Quote ' + req.quoteId
+                    );
+                }
+                QuoteLineItem targetLineItem = lineItemsById.get(req.quoteLineItemId);
+                if (targetLineItem != null && targetLineItem.HasRevenueSchedule == true) {
+                    throw new NegotiationTermsUpdaterException(
+                        '이 견적 라인 아이템에는 매출 일정(Revenue Schedule)이 설정되어 있어 할인율(Discount)을 ' +
+                        '변경할 수 없습니다. 할인율을 조정하려면 먼저 매출 일정을 재구성해야 하며, 이는 협상 도구의 ' +
+                        '범위를 벗어납니다. 상태·유효기한·조건 메모 변경은 별도로 요청해 주세요.'
                     );
                 }
                 hasLineItemUpdate = true;
