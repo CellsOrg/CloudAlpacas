@@ -65,6 +65,35 @@
         <apexClass>NegotiationTermsUpdater</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <!-- Proposal subagent (Seungwoo / f762840) — 3 Apex actions folded into Opportunity_Agent
+         (feature/opportunity-proposal-integration). OpportunityProposalContext (read-only:
+         Opportunity B2B fields + converted-Lead segment/score), SponsorshipPackageLookup
+         (read-only: active Sponsorship_Package Product2 + standard price), SponsorshipProposalSaver
+         (insert as user Quote+QuoteLineItem, update as user Opportunity benefit fields — all
+         `with sharing`, USER_MODE). These grants were present in Seungwoo's f762840 permission-set
+         version and were lost when PRs #79-#85 redeployed CA_Opportunity_Agent_Access; restored
+         here additively. The Proposal subagent is now fully wired into Opportunity_Agent
+         (feature/opportunity-proposal-integration): list_sponsorship_packages (menu digest),
+         find_sponsorship_package -> FindSponsorshipPackage (deterministic package Id resolver,
+         same pattern as NegotiationOpportunityLookup), and save_proposal (existing-Quote
+         update / new-Quote create, savepoint-guarded). All four classes are `with sharing`,
+         USER_MODE / insert-update as user. -->
+    <classAccesses>
+        <apexClass>OpportunityProposalContext</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SponsorshipPackageLookup</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FindSponsorshipPackage</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SponsorshipProposalSaver</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
 
     <!-- Task / Event / EmailMessage are intentionally NOT listed here as objectPermissions.
          Re-verified 2026-08-29: there is not a single ObjectPermissions row for Task,
@@ -107,8 +136,13 @@
         <object>Account</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
+    <!-- Quote: read+edit for the Negotiation subagent (update existing Quote terms), plus
+         create for the Proposal subagent's save_proposal (SponsorshipProposalSaver does
+         `insert as user` on Quote + QuoteLineItem). allowCreate restored from Seungwoo's
+         f762840 version (lost in PRs #79-#85). This is the "Create vs. Edit merge additively"
+         case the Negotiation comment above anticipated — no conflict. -->
     <objectPermissions>
-        <allowCreate>false</allowCreate>
+        <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
@@ -161,6 +195,34 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Interaction_Signal__c</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+
+    <!-- Proposal subagent (Seungwoo / f762840) — read-only object grants, restored from the
+         f762840 permission-set version (lost in PRs #79-#85):
+         - Lead: OpportunityProposalContext reads the converted Lead (Lead.ConvertedOpportunityId
+           back-reference) for its stored Segment Match / Recommendation Reason / Lead Score.
+         - Pricebook2: SponsorshipProposalSaver resolves the Standard Price Book
+           (SELECT Id FROM Pricebook2 WHERE IsStandard = true) before creating the Quote;
+           SponsorshipPackageLookup reads standard-book PricebookEntries via subquery.
+         PricebookEntry carries no objectPermissions of its own — it inherits from
+         Product2 / Pricebook2 (same parent-controlled pattern as QuoteLineItem above). -->
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Lead</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Pricebook2</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
 
@@ -396,6 +458,54 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Opportunity.Partner_Tier__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
+    <!-- Proposal subagent (Seungwoo / f762840) — field grants restored from the f762840
+         permission-set version (lost in PRs #79-#85):
+         - Opportunity.Expected_Benefit_Short/Mid/Long_Term__c (Long Text Area 1000):
+           OpportunityProposalContext reads the existing draft; SponsorshipProposalSaver
+           writes the confirmed proposal draft back — hence read + edit.
+         - Lead.Segment_Match__c / Recommendation_Reason__c / Lead_Score__c / Target_Segment__c:
+           read only — OpportunityProposalContext surfaces the converted Lead's stored
+           B2B-matching signals as proposal background. The Proposal subagent never edits Lead.
+         (Opportunity.Target_Segment__c already has read+edit above from the Discovery grant;
+         SponsorshipProposalSaver reuses it. NOTE: repo metadata for Opportunity.Target_Segment__c
+         still defines it as a restricted Picklist while the org has it as Text(255) — repo/org
+         drift introduced by f762840's deploy, flagged to Seungwoo, not resolved here.) -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Expected_Benefit_Short_Term__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Expected_Benefit_Mid_Term__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Expected_Benefit_Long_Term__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Lead.Segment_Match__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Lead.Recommendation_Reason__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Lead.Lead_Score__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Lead.Target_Segment__c</field>
         <readable>true</readable>
     </fieldPermissions>
 </PermissionSet>
