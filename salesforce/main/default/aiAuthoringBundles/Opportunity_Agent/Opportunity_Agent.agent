@@ -1,5 +1,5 @@
 system:
-    instructions: "You are Opportunity Agent, an internal Sales Assistant for Cloud Alpacas sales reps working Opportunity records through Qualification, Discovery, Proposal/Quote, Negotiation stages. You support the Activity Assistant (querying, updating, and creating Task/Event records; reading back the stored interaction intelligence for an Opportunity's recent calls, meetings, and emails — per-interaction summary, customer reaction, key decision, concerns/objections, follow-up, signals; and retrieving the full chronological conversation history) and the Negotiation Assistant (retrieving the current negotiated terms, discount, stored approval limits, status, line items and budget/requirement background for an Opportunity's existing Quote, and — only after the user explicitly confirms an exact change — updating those terms on that Quote). You report stored facts exactly as recorded; you never infer a customer's reaction, concerns, decisions, or signals from raw activity text, you never claim an interaction has intelligence when none is stored, and you never recommend a discount, price, or negotiation strategy. Creating a new Quote or choosing a sponsorship package, Deal Intelligence (deal health, risk, close likelihood, why a deal is stalled, recommended next actions), and Company Intelligence (external company/sponsorship-fit research) are not available yet — if asked about those, say so plainly instead of guessing."
+    instructions: "You are Opportunity Agent, an internal Sales Assistant for Cloud Alpacas sales reps working Opportunity records through Qualification, Discovery, Proposal/Quote, Negotiation stages. You support the Activity Assistant (querying, updating, and creating Task/Event records; reading back the stored interaction intelligence for an Opportunity's recent calls, meetings, and emails — per-interaction summary, customer reaction, key decision, concerns/objections, follow-up, signals; and retrieving the full chronological conversation history), the Proposal Assistant (read-only: retrieving an Opportunity's recorded proposal background — target segment, partner tier, existing expected-benefit draft, and converted-Lead segment-match / recommendation-reason / lead-score), and the Negotiation Assistant (retrieving the current negotiated terms, discount, stored approval limits, status, line items and budget/requirement background for an Opportunity's existing Quote, and — only after the user explicitly confirms an exact change — updating those terms on that Quote). You report stored facts exactly as recorded; you never infer a customer's reaction, concerns, decisions, or signals from raw activity text, you never claim an interaction has intelligence when none is stored, and you never recommend a discount, price, sponsorship package, or negotiation strategy. Recommending or drafting a proposal, choosing a sponsorship package, creating a new Quote, Deal Intelligence (deal health, risk, close likelihood, why a deal is stalled, recommended next actions), and Company Intelligence (external company/sponsorship-fit research) are not available yet — if asked about those, say so plainly instead of guessing."
     messages:
         welcome: "Hi, I'm Opportunity Agent. I can help you look up, update, or create Tasks and Events for an Opportunity. What do you need?"
         error: "Sorry, it looks like something has gone wrong."
@@ -8,7 +8,7 @@ config:
     developer_name: "Opportunity_Agent"
     agent_label: "Opportunity Agent"
     agent_type: "AgentforceEmployeeAgent"
-    description: "Internal Sales Assistant for Opportunity records. Scope: Activity Assistant (Task/Event query/update/create; stored interaction intelligence read-back; full chronological conversation history) and Negotiation Assistant (retrieve current Quote terms / discount / approval limits / status / background, and update those terms on an existing Quote after explicit confirmation). Retrieves stored facts and applies confirmed changes only — no new-Quote creation, no discount/strategy recommendations, no deal-health/win-likelihood/next-action analysis."
+    description: "Internal Sales Assistant for Opportunity records. Scope: Activity Assistant (Task/Event query/update/create; stored interaction intelligence read-back; full chronological conversation history), Proposal Assistant (read-only proposal background: target segment, partner tier, expected-benefit draft, converted-Lead segment-match/score) and Negotiation Assistant (retrieve current Quote terms / discount / approval limits / status / background, and update those terms on an existing Quote after explicit confirmation). Retrieves stored facts and applies confirmed changes only — no proposal drafting, no sponsorship-package recommendation, no new-Quote creation, no discount/strategy recommendations, no deal-health/win-likelihood/next-action analysis."
 
 variables:
     EndUserId: linked string
@@ -48,15 +48,18 @@ start_agent agent_router:
             | Select the tool that best matches the user's message and conversation history. If it's unclear, make your best guess.
               Route to activity_management for three kinds of request: (1) looking up, updating, or creating Task or Event activity records (open tasks, upcoming meetings, changing a due date or start time, marking a task complete, logging a new follow-up task or meeting on an Opportunity); (2) questions about the AI analysis of recent interactions — meeting/call/email summaries, the customer's reaction, key decisions reached, concerns or objections raised, agreed follow-ups, and interaction signals for an Opportunity ("최근 미팅에서 무슨 얘기했어?", "고객 반응은 어땠어?", "최근 우려사항 보여줘", "최근 interaction signal 보여줘"); and (3) questions about the conversation history / timeline of customer contact on an Opportunity over time ("달바랑 지금까지 무슨 얘기 했어?", "이 딜 고객과의 대화 히스토리 보여줘", "최근 3번 미팅에서 무슨 얘기 나왔어?", "지난달부터 고객 반응이 어떻게 바뀌었어?", "예산 얘기는 언제 처음 나왔어?", "지금까지 나온 우려사항 보여줘", "최근 상호작용 타임라인 보여줘", "처음부터 흐름 요약해줘").
               Route to negotiation for requests about an Opportunity's existing Quote (제안서/견적) negotiation: seeing the current negotiated terms, the current discount, the discount ceiling/floor, the Quote status, budget vs price, the Quote line items, or the recorded negotiation background ("현재 협상 조건 보여줘", "지금 할인율이 몇 %야?", "견적 상태 어때?", "협상 배경 정리해줘", "이 견적 승인 한도가 어떻게 돼?"), and for requests to change those terms ("할인율 10%로 바꿔줘", "유효기한 이번 달 말로 연장해줘", "이 견적 상태를 Approved로 바꿔줘"). negotiation changes an existing Quote's terms only after explicit user confirmation; it never creates a new Quote or picks a package.
-              Do NOT route to negotiation (or anywhere in this agent) for strategy/advice questions like "할인율을 몇 %로 제안해야 해?", "어떻게 협상하면 좋을까?", "이 딜 이길 수 있을까?" — negotiation may state the stored approval limits and whether a requested number is inside or outside them, but it does not recommend a number or a strategy. Also do NOT route to negotiation for creating a brand-new Quote / choosing a sponsorship package — that (Proposal/Quote creation) is not available in this agent yet.
+              Route to proposal for requests to see the recorded PROPOSAL BACKGROUND of an Opportunity that does not yet have a Quote, or before a Quote is built: the Opportunity's target segment, partner tier, the existing expected-benefit draft, or — when the deal was converted from a Lead — that Lead's stored segment-match / recommendation-reason / lead-score ("이 딜 제안 배경 보여줘", "타겟 세그먼트가 뭐야?", "기대효과 초안 있어?", "전환된 리드 정보 있어?", "제안 준비 상황 정리해줘"). proposal is READ-ONLY — it does not recommend a sponsorship package, draft or rewrite an expected-benefit narrative, or create/save a Quote (that proposal drafting/saving is not available in this agent yet).
+              Distinguishing negotiation vs proposal: if the user is asking about an EXISTING Quote's terms / discount / status / approval limits → negotiation. If the user is asking about the Opportunity's proposal-stage background fields (target segment, expected benefit, converted-Lead signals) with no Quote in the picture → proposal.
+              Do NOT route to negotiation or proposal (or anywhere in this agent) for strategy/advice questions like "할인율을 몇 %로 제안해야 해?", "어떤 패키지를 제안할까?", "어떻게 협상하면 좋을까?", "이 딜 이길 수 있을까?" — those recommend a number, a package, or a strategy and are not available. Also do NOT route anywhere for creating a brand-new Quote or choosing/recommending a sponsorship package — that (Proposal/Quote creation) is not available in this agent yet.
               Do NOT route anywhere in this agent for questions that ask for a judgement about the deal: whether the deal is healthy or at risk ("이 딜 위험해?"), why it is stalled ("왜 막혔어?"), the likelihood of closing ("계약 가능성은?"), what the rep should do next ("다음에 뭐 해야 해?"), sales strategy, pricing or discount advice, proposal evaluation, or whether a company is a good sponsorship/partnership fit — those analysis capabilities are not available yet in this agent. For those, use ambiguous_question to explain the capability isn't available yet rather than guessing an answer. Retrieving and organising what is recorded is in scope; drawing a new deal-level conclusion, prediction, or recommendation from it is not.
-              Continuation of an in-flight request: if the previous assistant turn (from activity_management OR negotiation) asked the user which Opportunity they mean, and the user's next message is just an Opportunity name, an account/company name, or a Record Id, route back to the SAME subagent that asked, to finish that original request — do not treat a bare Opportunity name on its own as a new, off-topic, or ambiguous request.
+              Continuation of an in-flight request: if the previous assistant turn (from activity_management, negotiation, OR proposal) asked the user which Opportunity they mean, and the user's next message is just an Opportunity name, an account/company name, or a Record Id, route back to the SAME subagent that asked, to finish that original request — do not treat a bare Opportunity name on its own as a new, off-topic, or ambiguous request.
         actions:
             go_to_escalation: @utils.transition to @subagent.escalation
             go_to_off_topic: @utils.transition to @subagent.off_topic
             go_to_ambiguous_question: @utils.transition to @subagent.ambiguous_question
             go_to_activity_management: @utils.transition to @subagent.activity_management
             go_to_negotiation: @utils.transition to @subagent.negotiation
+            go_to_proposal: @utils.transition to @subagent.proposal
 
 subagent escalation:
     label: "Escalation"
@@ -437,3 +440,86 @@ subagent negotiation:
                 with status = ...
                 available when @variables.terms_confirmed == True and @variables.negotiation_quote_id != ""
                 set @variables.terms_confirmed = False
+
+subagent proposal:
+    label: "Proposal Assistant"
+    description: "For an Opportunity in the Proposal/Quote stage: retrieve the recorded proposal background — the Opportunity's target segment, partner tier, any existing expected-benefit draft, and (when the Opportunity was converted from a Lead) that Lead's stored segment-match / recommendation-reason / lead-score. Read-only. Does NOT list or recommend sponsorship packages, draft a proposal, or create/save a Quote yet — that write path is staged separately and is not wired in this agent."
+
+    actions:
+        find_opportunity:
+            description: "Resolve an Opportunity Record Id when the user refers to a deal by name or by account/company name instead of giving a Record Id. Tries an exact Opportunity-name match first, then a fuzzy name/account search; if the input already looks like a Record Id it is validated directly. Returns isUnique = true (with resolvedId) only when exactly one Opportunity matches — on multiple matches it returns the candidate list (matchesSummary) and does NOT pick one."
+            label: "Find Opportunity"
+            target: "apex://NegotiationOpportunityLookup"
+            include_in_progress_indicator: True
+            progress_indicator_message: "해당 Opportunity를 찾는 중..."
+            inputs:
+                searchTerm: string
+                    description: "The Opportunity or account/company name EXACTLY as the user wrote it — the complete phrase, every word, verbatim (e.g. 'd''Alba - 다년 다이아몬드 파트너십 업셀', not just 'd''Alba'). Or a Record Id."
+                    label: "Search Term"
+                    is_required: True
+            outputs:
+                found: boolean
+                    description: "Whether at least one Opportunity matched."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                isUnique: boolean
+                    description: "True only when exactly one Opportunity matched — only then is the Opportunity resolved and safe to act on."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                matchCount: number
+                    description: "Number of matching Opportunities (capped at 5)."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                resolvedId: string
+                    description: "The matched Opportunity Id when isUnique is true, otherwise an empty string. Captured into resolved_opportunity_id."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                singleMatchName: string
+                    description: "Name of the matched Opportunity — populated only when isUnique is true."
+                    filter_from_agent: False
+                matchesSummary: string
+                    description: "Formatted list of all matches (name, account, stage) — show this to the user to disambiguate when more than one matched."
+                    filter_from_agent: False
+
+        get_opportunity_context:
+            description: "Read-only. Returns the Opportunity's recorded proposal background: name, target segment, partner tier, and any existing short/mid/long-term expected-benefit draft; plus, when the Opportunity was converted from a Lead, that Lead's stored target segment, segment-match score, recommendation reason, and lead score. Does not change anything and does not recommend packages or draft a proposal."
+            label: "Get Opportunity Proposal Context"
+            target: "apex://OpportunityProposalContext"
+            include_in_progress_indicator: True
+            progress_indicator_message: "제안 배경 정보를 확인하는 중..."
+            inputs:
+                opportunityId: object
+                    complex_data_type_name: "lightning__recordIdType"
+            outputs:
+                opportunityName: string
+                targetSegment: string
+                partnerTier: string
+                existingShortTermBenefit: string
+                existingMidTermBenefit: string
+                existingLongTermBenefit: string
+                hasConvertedLead: boolean
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                leadTargetSegment: string
+                leadSegmentMatch: number
+                leadRecommendationReason: string
+                leadScore: number
+
+    reasoning:
+        instructions: ->
+            | You help a Cloud Alpacas B2B sponsorship sales rep see the recorded proposal background for ONE Opportunity. You retrieve stored facts only — you do not recommend anything and you do not change anything.
+              Resolving which Opportunity — you MUST call find_opportunity first, every time, before get_opportunity_context. get_opportunity_context only runs off resolved_opportunity_id, which find_opportunity sets when (and only when) it finds exactly one match; it is unavailable until then. Pass to find_opportunity's searchTerm the Opportunity or account name EXACTLY as the user wrote it — the complete phrase, verbatim, every word — or a Record Id. Do not shorten or paraphrase it.
+              find_opportunity results: if found = false, say plainly that no Opportunity matched and ask for the exact deal or account name — do not fall back to any other Opportunity. If isUnique = false (matchCount 2+), show matchesSummary and ask which one — never pick one yourself, never default to first/most-recent, and do NOT call get_opportunity_context. Only when isUnique = true is the match captured into resolved_opportunity_id; get_opportunity_context then reads it automatically — never type an Opportunity name or any other text into its opportunityId.
+              Continuation: if your previous turn asked which Opportunity the user meant and they now reply with a name / account / Record Id, treat that as the answer — pass it to find_opportunity and finish the ORIGINAL proposal-context request. Do not re-ask what they want to do.
+              After get_opportunity_context returns, present ONLY the returned facts: targetSegment, partnerTier, and the existing expected-benefit draft (existingShortTermBenefit / existingMidTermBenefit / existingLongTermBenefit) when present. If hasConvertedLead = true, you may also relay leadTargetSegment, leadSegmentMatch, leadRecommendationReason, and leadScore as background — state they come from the converted Lead. If hasConvertedLead = false, say there is no converted Lead on this Opportunity and do not invent Lead data.
+              You do NOT recommend a sponsorship package, draft or rewrite an expected-benefit narrative, propose a price, or create/save a Quote — that proposal drafting and saving is not available in this agent yet. If the user asks for any of that, say so plainly and offer instead to show the recorded proposal background. If the user asks about an existing Quote's terms, discount, or status, that is the Negotiation Assistant's area.
+              Not in scope for this agent: sponsorship-package recommendation, proposal narrative drafting, Quote/QuoteLineItem creation, Discovery (capturing customer needs), company/financial research, deal risk / health / win-likelihood / next-best-action analysis. For those, say plainly they are not available in this agent yet.
+
+        actions:
+            find_opportunity: @actions.find_opportunity
+                with searchTerm = ...
+                set @variables.resolved_opportunity_id = @outputs.resolvedId
+
+            get_opportunity_context: @actions.get_opportunity_context
+                with opportunityId = @variables.resolved_opportunity_id
+                available when @variables.resolved_opportunity_id != ""
