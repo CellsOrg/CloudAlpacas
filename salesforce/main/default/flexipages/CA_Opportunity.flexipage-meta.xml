@@ -2063,12 +2063,8 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentInstanceProperties>
-                    <name>richTextValue</name>
-                    <value>&lt;p&gt;&lt;b&gt;Opportunity Agent&lt;/b&gt;&lt;/p&gt;&lt;p&gt;상단 Agentforce 패널에서 Opportunity 이름과 함께 질문하세요. 활동 · 제안 · 협상 · 딜 요약을 지원합니다.&lt;/p&gt;</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:richText</componentName>
-                <identifier>CA_opportunityAgentSignpost</identifier>
+                <componentName>c:opportunityAgentChat</componentName>
+                <identifier>CA_opportunityAgentChat</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>

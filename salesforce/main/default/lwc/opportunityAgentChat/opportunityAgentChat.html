@@ -1,0 +1,69 @@
+<template>
+    <lightning-card title="Opportunity Agent" icon-name="utility:agent_astro">
+        <span slot="actions" class="slds-text-body_small slds-text-color_weak">{statusLabel}</span>
+        <lightning-button-icon
+            slot="actions"
+            icon-name="utility:refresh"
+            variant="border-filled"
+            alternative-text="새 대화"
+            title="새 대화"
+            onclick={handleReset}
+            disabled={isThinking}
+        ></lightning-button-icon>
+
+        <div class="slds-var-p-horizontal_small slds-var-p-bottom_small">
+            <div class="transcript slds-scrollable_y slds-var-p-around_x-small slds-var-m-bottom_x-small">
+                <template lwc:if={hasMessages}>
+                    <template for:each={renderedMessages} for:item="m">
+                        <div key={m.key} class={m.cssClass}>
+                            <lightning-formatted-text value={m.text}></lightning-formatted-text>
+                        </div>
+                    </template>
+                </template>
+                <template lwc:else>
+                    <p class="slds-text-color_weak slds-var-p-around_x-small">
+                        이 Opportunity에 대해 물어보세요. 활동 · 제안 · 협상 · 딜 요약을 지원하며,
+                        현재 레코드가 자동으로 대상이 됩니다. (예: "이 딜 상태 어때?")
+                    </p>
+                </template>
+
+                <template lwc:if={isThinking}>
+                    <div class="msg msg_agent slds-var-p-around_x-small">
+                        <lightning-spinner size="x-small" variant="brand" alternative-text="생성 중"></lightning-spinner>
+                        <span class="slds-var-m-left_x-small slds-text-color_weak">생각 중…</span>
+                    </div>
+                </template>
+            </div>
+
+            <template lwc:if={hasError}>
+                <div class="slds-text-color_error slds-text-body_small slds-var-m-bottom_x-small" role="alert">
+                    {errorText}
+                </div>
+            </template>
+
+            <div class="slds-grid slds-grid_vertical-align-end">
+                <div class="slds-col slds-grow">
+                    <lightning-textarea
+                        name="agentInput"
+                        label="메시지"
+                        variant="label-hidden"
+                        placeholder="메시지를 입력하고 Enter로 전송 (Shift+Enter 줄바꿈)"
+                        value={draft}
+                        max-length="2000"
+                        disabled={inputDisabled}
+                        onchange={handleInput}
+                        onkeydown={handleKeyDown}
+                    ></lightning-textarea>
+                </div>
+                <div class="slds-col slds-shrink-none slds-var-m-left_x-small">
+                    <lightning-button
+                        label="전송"
+                        variant="brand"
+                        onclick={handleSend}
+                        disabled={sendDisabled}
+                    ></lightning-button>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>

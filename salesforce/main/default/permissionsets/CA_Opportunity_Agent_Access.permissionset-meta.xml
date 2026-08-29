@@ -112,6 +112,16 @@
         <apexClass>DealContext</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <!-- Embedded Opportunity Agent chat (opportunityAgentChat LWC, feature/opportunity-agent-embedded-chat).
+         OpportunityAgentChatController is a transport-only bridge: it bootstraps a named-user
+         SFAP token for the running user (no client secret / no stored credential) and relays
+         turns to the Opportunity Agent through the Salesforce Agent API. Zero DML, no deal
+         logic — all reasoning stays in the agent and its subagents. Manager Lee already has
+         the Opportunity_Agent agentAccesses grant above; this only adds the class. -->
+    <classAccesses>
+        <apexClass>OpportunityAgentChatController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
 
     <!-- Task / Event / EmailMessage are intentionally NOT listed here as objectPermissions.
          Re-verified 2026-08-29: there is not a single ObjectPermissions row for Task,
