@@ -15,12 +15,11 @@ private class OpportunityAgentChatControllerTest {
             res.setHeader('Content-Type', 'application/json');
             String url = req.getEndpoint();
 
-            if (url.contains('/agentforce/bootstrap/nameduser')) {
-                System.assertEquals('sid=' + UserInfo.getSessionId(), req.getHeader('Cookie'), 'must pass current-user session');
-                res.setStatusCode(200);
-                res.setBody('{"access_token":"eyJhbGciOiJ.header.sig"}');
-                return res;
-            }
+            // Callouts go through the CA_Agent_API Named Credential — auth header is
+            // injected by the platform, never built here.
+            System.assert(url.startsWith('callout:CA_Agent_API/'), 'must call via the Named Credential: ' + url);
+            System.assertEquals(null, req.getHeader('Authorization'), 'Apex never sets Authorization; the Named Credential does');
+
             if (url.endsWith('/sessions') && req.getMethod() == 'POST') {
                 res.setStatusCode(sessionStatus);
                 res.setBody(sessionStatus == 200
@@ -145,6 +144,27 @@ private class OpportunityAgentChatControllerTest {
             System.assert(false, 'should throw');
         } catch (AuraHandledException e) {
             System.assert(e.getMessage().contains('대화 세션을 시작하지 못했습니다'), e.getMessage());
+        }
+        Test.stopTest();
+    }
+
+    private class CalloutBoom implements HttpCalloutMock {
+        public HttpResponse respond(HttpRequest req) {
+            throw new CalloutException('Unauthorized endpoint, or Named Credential CA_Agent_API not found');
+        }
+    }
+
+    @isTest
+    static void missingNamedCredentialSurfacesSetupHint() {
+        OpportunityAgentChatController.agentIdForTest = '0Xxbm000000000AAAA';
+        Test.setMock(HttpCalloutMock.class, new CalloutBoom());
+        Test.startTest();
+        try {
+            OpportunityAgentChatController.sendMessage('006bm00000VXKvlAAH', null, 'hi');
+            System.assert(false, 'should throw when the Named Credential is not configured');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('CA_Agent_API'), e.getMessage());
+            System.assert(!e.getMessage().contains('Unauthorized endpoint'), 'raw callout error not leaked');
         }
         Test.stopTest();
     }

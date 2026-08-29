@@ -1,25 +1,27 @@
 /**
  * Transport bridge for the embedded Opportunity Agent chat (opportunityAgentChat LWC).
  *
- * This class does NOT reason about the deal. It only:
- *   1. bootstraps a named-user SFAP token for the running user
- *      (GET /agentforce/bootstrap/nameduser — no client secret, no stored credential),
- *   2. starts / continues / ends an Agent API conversation
- *      (POST https://api.salesforce.com/einstein/ai-agent/v1 ...),
- *   3. hands the agent's text back to the component.
+ * This class does NOT reason about the deal. It only starts / continues / ends an
+ * Agent API conversation and hands the agent's text back to the component.
+ *
+ * Authentication: the Salesforce Agent API (api.salesforce.com/einstein/ai-agent)
+ * requires an OAuth token with sfap_api + chatbot_api scope. That token is minted by
+ * the CA_Agent_API Named Credential (linked External Credential) — never handled in
+ * Apex, never sent to the browser. See P2_RESULT_REPORT and the Named Credential /
+ * External Credential metadata for the one-time Setup.
  *
  * All deal logic (activity / proposal / negotiation / deal) stays inside the
- * Opportunity Agent and its subagents. The current Opportunity is bound by
- * prefixing the FIRST user turn with its Record Id, which routes through the
- * agent's own find_opportunity resolution (resolved_opportunity_id) — the LWC
- * never sets an Opportunity Id on an action directly.
+ * Opportunity Agent and its subagents. The current Opportunity is bound by prefixing
+ * the FIRST user turn with its Record Id, which routes through the agent's own
+ * find_opportunity resolution (resolved_opportunity_id).
  *
  * with sharing, zero DML, callouts only.
  */
 public with sharing class OpportunityAgentChatController {
 
     private static final String AGENT_DEV_NAME = 'Opportunity_Agent';
-    private static final String AGENT_API_BASE = 'https://api.salesforce.com/einstein/ai-agent/v1';
+    // Named Credential CA_Agent_API -> https://api.salesforce.com ; auth via its External Credential.
+    private static final String AGENT_API = 'callout:CA_Agent_API/einstein/ai-agent/v1';
     private static final Integer CALLOUT_TIMEOUT_MS = 110000;
 
     @TestVisible
@@ -42,25 +44,24 @@ public with sharing class OpportunityAgentChatController {
             throwHandled('메시지를 입력하세요.');
         }
 
-        String token = bootstrapToken();
         ChatTurn turn = new ChatTurn();
         Boolean firstTurn = String.isBlank(sessionId);
 
         if (firstTurn) {
-            sessionId = startSession(token);
+            sessionId = startSession();
         }
 
         String outbound = (firstTurn && opportunityId != null)
             ? withRecordContext(opportunityId, clean)
             : clean;
 
-        HttpResponse res = rawPostMessage(token, sessionId, outbound);
+        HttpResponse res = rawPostMessage(sessionId, outbound);
 
         // Server-side session idle-expiry: restart once, transparently, keeping record context.
         if (res.getStatusCode() == 404 && !firstTurn) {
-            sessionId = startSession(token);
+            sessionId = startSession();
             outbound = (opportunityId != null) ? withRecordContext(opportunityId, clean) : clean;
-            res = rawPostMessage(token, sessionId, outbound);
+            res = rawPostMessage(sessionId, outbound);
             turn.sessionRestarted = true;
         }
 
@@ -80,11 +81,9 @@ public with sharing class OpportunityAgentChatController {
             return;
         }
         try {
-            String token = bootstrapToken();
             HttpRequest req = new HttpRequest();
-            req.setEndpoint(AGENT_API_BASE + '/sessions/' + sessionId);
+            req.setEndpoint(AGENT_API + '/sessions/' + sessionId);
             req.setMethod('DELETE');
-            req.setHeader('Authorization', 'Bearer ' + token);
             req.setHeader('x-session-end-reason', 'UserRequest');
             req.setTimeout(30000);
             new Http().send(req);
@@ -101,36 +100,7 @@ public with sharing class OpportunityAgentChatController {
             + message;
     }
 
-    private static String bootstrapToken() {
-        HttpRequest req = new HttpRequest();
-        req.setEndpoint(URL.getOrgDomainUrl().toExternalForm() + '/agentforce/bootstrap/nameduser');
-        req.setMethod('GET');
-        req.setHeader('Content-Type', 'application/json');
-        req.setHeader('Cookie', 'sid=' + UserInfo.getSessionId());
-        req.setTimeout(30000);
-
-        HttpResponse res;
-        try {
-            res = new Http().send(req);
-        } catch (Exception e) {
-            throwHandled('Agentforce 연결에 실패했습니다.');
-        }
-        if (res.getStatusCode() != 200) {
-            throwHandled('Agentforce 인증에 실패했습니다 (' + res.getStatusCode() + '). 사용자에게 Agent 접근 권한이 있는지 확인하세요.');
-        }
-        Object accessToken;
-        try {
-            accessToken = ((Map<String, Object>) JSON.deserializeUntyped(res.getBody())).get('access_token');
-        } catch (Exception e) {
-            accessToken = null;
-        }
-        if (accessToken == null || String.isBlank(String.valueOf(accessToken))) {
-            throwHandled('Agentforce 토큰을 받지 못했습니다.');
-        }
-        return String.valueOf(accessToken);
-    }
-
-    private static String startSession(String token) {
+    private static String startSession() {
         Map<String, Object> body = new Map<String, Object>{
             'externalSessionKey' => 'oppchat-' + Crypto.getRandomLong(),
             'instanceConfig' => new Map<String, Object>{ 'endpoint' => URL.getOrgDomainUrl().toExternalForm() },
@@ -138,7 +108,7 @@ public with sharing class OpportunityAgentChatController {
             'variables' => new List<Object>(),
             'bypassUser' => false
         };
-        HttpResponse res = agentApi('POST', '/agents/' + resolveAgentId() + '/sessions', token, JSON.serialize(body));
+        HttpResponse res = agentApi('POST', '/agents/' + resolveAgentId() + '/sessions', JSON.serialize(body));
         if (res.getStatusCode() != 200) {
             throwHandled(sanitizeApiError(res, '대화 세션을 시작하지 못했습니다.'));
         }
@@ -154,7 +124,7 @@ public with sharing class OpportunityAgentChatController {
         return String.valueOf(sid);
     }
 
-    private static HttpResponse rawPostMessage(String token, String sessionId, String text) {
+    private static HttpResponse rawPostMessage(String sessionId, String text) {
         Map<String, Object> body = new Map<String, Object>{
             'message' => new Map<String, Object>{
                 'sequenceId' => Datetime.now().getTime(),
@@ -163,14 +133,13 @@ public with sharing class OpportunityAgentChatController {
             },
             'variables' => new List<Object>()
         };
-        return agentApi('POST', '/sessions/' + sessionId + '/messages', token, JSON.serialize(body));
+        return agentApi('POST', '/sessions/' + sessionId + '/messages', JSON.serialize(body));
     }
 
-    private static HttpResponse agentApi(String method, String path, String token, String body) {
+    private static HttpResponse agentApi(String method, String path, String body) {
         HttpRequest req = new HttpRequest();
-        req.setEndpoint(AGENT_API_BASE + path);
+        req.setEndpoint(AGENT_API + path);
         req.setMethod(method);
-        req.setHeader('Authorization', 'Bearer ' + token);
         req.setHeader('Content-Type', 'application/json');
         // Suppress Builder-only markdown so the LWC renders plain text.
         req.setHeader('x-attributed-client', 'no-builder');
@@ -181,6 +150,9 @@ public with sharing class OpportunityAgentChatController {
         req.setTimeout(CALLOUT_TIMEOUT_MS);
         try {
             return new Http().send(req);
+        } catch (System.CalloutException ce) {
+            // typically a missing / mis-configured Named Credential
+            throwHandled('Agent API 연결이 설정되지 않았습니다. 관리자에게 CA_Agent_API Named Credential 설정을 요청하세요.');
         } catch (Exception e) {
             throwHandled('Agent 응답을 기다리는 중 오류가 발생했습니다.');
         }

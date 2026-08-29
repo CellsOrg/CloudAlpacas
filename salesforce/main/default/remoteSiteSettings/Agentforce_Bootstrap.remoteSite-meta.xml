@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RemoteSiteSetting xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>This org My Domain — Agentforce named-user token bootstrap (/agentforce/bootstrap/nameduser). Used by the opportunityAgentChat LWC bridge only.</description>
-    <disableProtocolSecurity>false</disableProtocolSecurity>
-    <isActive>true</isActive>
-    <url>https://trailsignup-2abe91721f6a94.my.salesforce.com</url>
-</RemoteSiteSetting>

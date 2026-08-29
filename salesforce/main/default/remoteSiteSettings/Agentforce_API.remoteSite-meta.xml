@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RemoteSiteSetting xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Salesforce API Platform host for the Agent API (Einstein AI Agent). Used by the opportunityAgentChat LWC bridge only.</description>
-    <disableProtocolSecurity>false</disableProtocolSecurity>
-    <isActive>true</isActive>
-    <url>https://api.salesforce.com</url>
-</RemoteSiteSetting>
