@@ -23,9 +23,11 @@ public with sharing class SponsorshipProposalSaver {
     private static final Integer BENEFIT_MAX_LENGTH = 1000;
     private static final String SPONSORSHIP_PACKAGE_RT = 'Sponsorship_Package';
 
-    // Decision 018-G canonical Target Segment values. Used when the org field does not
-    // expose picklist values (it is currently Text(255) in this org — repo/org drift);
-    // once the canonical restricted picklist is deployed, the live picklist wins.
+    // Decision 018-G canonical Target Segment values. Opportunity.Target_Segment__c is the
+    // canonical restricted picklist (restored 2026-08-29 after a Text drift), so
+    // resolveAllowedSegments() takes the LIVE picklist describe as the source of truth;
+    // this constant is only a defensive fallback for the case where the describe returns
+    // no values (e.g. FLS hides the field from the running user).
     private static final Set<String> CANONICAL_TARGET_SEGMENTS = new Set<String>{
         '10-30 Female', '10-30 Male', '40-60 Female', '40-60 Male', 'Family', 'etc'
     };
