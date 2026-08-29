@@ -94,6 +94,16 @@
         <apexClass>SponsorshipProposalSaver</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <!-- Deal Assistant (deal subagent, feature/opportunity-deal-assistant). DealContext is
+         a read-only Opportunity-level snapshot action (@InvocableMethod, `with sharing`,
+         all SOQL `WITH USER_MODE`, zero DML). It returns stored facts + threshold-free
+         derived date/count values only — no deal-health / risk / win-probability / stalled
+         / next-action fields (DealContextTest.testNoJudgementFieldsExist enforces this).
+         The LLM synthesis layer in the deal subagent does the interpretation. -->
+    <classAccesses>
+        <apexClass>DealContext</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
 
     <!-- Task / Event / EmailMessage are intentionally NOT listed here as objectPermissions.
          Re-verified 2026-08-29: there is not a single ObjectPermissions row for Task,
@@ -458,6 +468,56 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Opportunity.Partner_Tier__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
+    <!-- Deal Assistant (deal subagent, feature/opportunity-deal-assistant) — additive
+         READ-ONLY FLS for the Opportunity fields DealContext's SOQL selects that are not
+         already granted above. All editable=false (DealContext is read-only; the deal
+         subagent never writes). Standard Opportunity fields DealContext also reads
+         (StageName, Amount, Probability, ForecastCategoryName, CloseDate, CreatedDate,
+         LastStageChangeDate, LastActivityDate, NextStep, IsClosed, IsWon, SyncedQuoteId,
+         Account.Name, SDO_Sales_Primary_Contact__r.Name) and the Quote / Interaction
+         Intelligence / Interaction Signal reads are covered by the internal-user baseline
+         and the object/field grants already present. -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Last_Contact_Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Days_Since_Last_Contact__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Next_Activity_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Next_Activity_Subject__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Overdue_Tasks_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Expected_Timing__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Deal_Note__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.SDO_Sales_Reason_Lost__c</field>
         <readable>true</readable>
     </fieldPermissions>
 
