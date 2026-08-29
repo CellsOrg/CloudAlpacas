@@ -116,6 +116,16 @@
         <object>Quote</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
+    <!-- QuoteLineItem is intentionally NOT listed as objectPermissions. Like the
+         Activity family, this org silently drops a QuoteLineItem objectPermissions
+         block on deploy (verified 2026-08-29 — retrieved the deployed permission set
+         and the block was gone). QuoteLineItem CRUD is controlled by its parent Quote:
+         NegotiationContext reads it and NegotiationTermsUpdater does `update as user`
+         on the primary line item's Discount, and both succeed for an assignee who can
+         see / edit the parent Quote (covered by the Quote read+edit grant above and the
+         assignee's sharing access to the Opportunity). If the assignee cannot edit the
+         Quote for a given deal, the WITH USER_MODE / update-as-user calls correctly fail
+         and the agent reports the failure rather than bypassing access. -->
     <objectPermissions>
         <allowCreate>false</allowCreate>
         <allowDelete>false</allowDelete>
@@ -370,6 +380,22 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>PricebookEntry.Max_Discounted_Price__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
+    <!-- Negotiation subagent — folded into Opportunity_Agent (feature/opportunity-proposal-negotiation-integration).
+         NegotiationContext reads Opportunity.Partner_Tier__c as a reference signal in the
+         negotiation background; it is the only custom field it reads that was not already
+         granted here. Read only — the negotiation subagent never edits Partner Tier.
+         All other NegotiationContext / NegotiationTermsUpdater reads and writes are covered
+         by grants already present: NegotiationContext / NegotiationTermsUpdater class access,
+         Quote read+edit, the Opportunity Discovery FLS, Product2.Tier__c, the two
+         PricebookEntry discount-policy fields, and the Interaction Intelligence / Signal
+         grants. Quote.* and QuoteLineItem.* updates by NegotiationTermsUpdater are standard
+         fields covered by the Quote edit grant and the internal-user baseline. -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Partner_Tier__c</field>
         <readable>true</readable>
     </fieldPermissions>
 </PermissionSet>
