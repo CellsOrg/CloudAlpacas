@@ -59,18 +59,30 @@ describe('c-opportunity-agent-chat-modal — list view', () => {
 
     it('groups conversations by date', () => {
         const el = mount();
-        const groupLabels = [...el.shadowRoot.querySelectorAll('.slds-text-heading_small')].map((n) => n.textContent);
-        expect(groupLabels).toEqual(expect.arrayContaining(['8월 28일', '8월 29일']));
+        const groupLabels = [...el.shadowRoot.querySelectorAll('.oac-daygroup__label')].map((n) => n.textContent);
+        expect(groupLabels.some((l) => l.includes('8월 28일'))).toBe(true);
+        expect(groupLabels.some((l) => l.includes('8월 29일'))).toBe(true);
     });
 
-    it('each conversation card shows title, last-message preview and message count', () => {
+    it('each conversation card shows title, last-message preview and time (no message count)', () => {
         const el = mount();
         const cards = el.shadowRoot.querySelectorAll('.oac-convo-card');
         expect(cards.length).toBe(2);
         const text = cards[0].textContent + cards[1].textContent;
         expect(text).toContain('골드 패키지 견적 구성');
         expect(text).toContain('마지막 대화:');
-        expect(text).toContain('메시지 2개');
+        expect(text).not.toContain('메시지 2개');
+        expect(text).not.toContain('메시지 1개');
+    });
+
+    it('hides empty "새 대화" rows from the history list without deleting them', () => {
+        const el = mount({
+            conversations: [
+                ...CONVERSATIONS,
+                { id: 'c-blank', title: '', sessionId: null, createdAt: Date.now(), updatedAt: Date.now(), messages: [] }
+            ]
+        });
+        expect(el.shadowRoot.querySelectorAll('.oac-convo-card').length).toBe(2);
     });
 
     it('search filters conversations by title and message text', async () => {
@@ -112,17 +124,21 @@ describe('c-opportunity-agent-chat-modal — list view', () => {
 describe('c-opportunity-agent-chat-modal — detail view', () => {
     const detailProps = { view: 'detail', activeConversation: CONVERSATIONS[0] };
 
-    it('renders messages chronologically labelled 나 / Opportunity Agent', () => {
+    it('renders messages chronologically as user / agent bubbles', () => {
         const el = mount(detailProps);
-        const labels = [...el.shadowRoot.querySelectorAll('.oac-msg .slds-text-title_caps')].map((n) => n.textContent);
-        expect(labels).toEqual(['나', 'Opportunity Agent']);
+        const rows = [...el.shadowRoot.querySelectorAll('.oac-msg')];
+        expect(rows.map((r) => r.classList.contains('oac-msg_user'))).toEqual([true, false]);
+        expect(rows.map((r) => r.classList.contains('oac-msg_agent'))).toEqual([false, true]);
+        // the agent bubble carries an "Opportunity Agent" label; the user bubble has none
+        const roleLabels = [...el.shadowRoot.querySelectorAll('.oac-msg__role')].map((n) => n.textContent);
+        expect(roleLabels).toEqual(['Opportunity Agent']);
         const bubbles = [...el.shadowRoot.querySelectorAll('.oac-msg__bubble lightning-formatted-text')].map((n) => n.value);
         expect(bubbles).toEqual(['그 조건으로 견적서를 만들어줘', '견적서를 구성했습니다.']);
     });
 
-    it('has a "이어서 질문하기" composer and a back control', () => {
+    it('has a follow-up composer with the shared placeholder and a back control', () => {
         const el = mount(detailProps);
-        expect(el.shadowRoot.querySelector('lightning-textarea').placeholder).toBe('이어서 질문하기...');
+        expect(el.shadowRoot.querySelector('lightning-textarea').placeholder).toBe('무엇이든 요청하세요!');
         const back = [...el.shadowRoot.querySelectorAll('lightning-button-icon')].find(
             (b) => b.alternativeText === '이전 대화 목록'
         );
@@ -136,7 +152,7 @@ describe('c-opportunity-agent-chat-modal — detail view', () => {
         const ta = el.shadowRoot.querySelector('lightning-textarea');
         ta.value = '그중 가장 최근 건은?';
         ta.dispatchEvent(new CustomEvent('change'));
-        [...el.shadowRoot.querySelectorAll('lightning-button-icon')].find((b) => b.alternativeText === '전송').click();
+        el.shadowRoot.querySelector('.oac-send').click();
         expect(handler.mock.calls[0][0].detail.text).toBe('그중 가장 최근 건은?');
     });
 

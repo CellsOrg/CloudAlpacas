@@ -47,6 +47,10 @@ export default class OpportunityAgentChat extends LightningElement {
         return this.busy || this.draft.trim().length === 0;
     }
 
+    get sendClass() {
+        return this.sendDisabled ? 'oac-send oac-send_off' : 'oac-send';
+    }
+
     get activeConversation() {
         return this.conversations.find((c) => c.id === this.activeId) || null;
     }

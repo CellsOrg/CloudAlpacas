@@ -8,129 +8,211 @@
         onkeydown={handleKeyDown}
     >
         <div class="slds-modal__container oac-modal__container" onclick={stop}>
-            <!-- header -->
-            <header class="slds-modal__header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-                <div class="slds-grid slds-grid_vertical-align-center">
+            <!-- ============ HEADER ============ -->
+            <header class="oac-modal__header">
+                <div class="oac-modal__identity">
                     <template lwc:if={isDetailView}>
                         <lightning-button-icon
                             icon-name="utility:back"
                             variant="bare"
                             alternative-text="이전 대화 목록"
                             title="이전 대화 목록"
-                            class="slds-var-m-right_x-small"
+                            class="oac-modal__back"
                             onclick={back}
                         ></lightning-button-icon>
                     </template>
-                    <h1 id={headingId} class="slds-text-heading_medium">Opportunity Agent</h1>
+
+                    <span class="oac-mascot oac-mascot_lg" aria-hidden="true">
+                        <svg viewBox="0 0 40 40" focusable="false">
+                            <circle cx="20" cy="20" r="19.5" fill="#f1f6ff" stroke="#e6ecf3"></circle>
+                            <path d="M14.6 12.3c-.9-2.3-.7-4.4.5-4.9 1.1-.4 2.6.9 3.3 3.1z" fill="#0d1b3d"></path>
+                            <path d="M25.4 12.3c.9-2.3.7-4.4-.5-4.9-1.1-.4-2.6.9-3.3 3.1z" fill="#0d1b3d"></path>
+                            <path
+                                d="M20 8.5c-4 0-6.7 2.7-6.7 6.5v2.8c0 2.7.8 4.6 2.1 5.9l-.8 6.2c-.2 1.3.8 2.4 2.1 2.4h6.6c1.3 0 2.3-1.1 2.1-2.4l-.8-6.2c1.3-1.3 2.1-3.2 2.1-5.9V15c0-3.8-2.8-6.5-6.8-6.5z"
+                                fill="#0d1b3d"
+                            ></path>
+                            <path
+                                d="M15.8 11c1-1.7 2.6-2.7 4.2-2.7s3.2 1 4.2 2.7c-1.2-.8-2.7-1.3-4.2-1.3s-3 .5-4.2 1.3z"
+                                fill="#0d1b3d"
+                            ></path>
+                            <ellipse cx="20" cy="22.3" rx="3.1" ry="2.5" fill="#fff4ed"></ellipse>
+                            <circle cx="17.4" cy="17.2" r="1.15" fill="#fff4ed"></circle>
+                            <circle cx="22.6" cy="17.2" r="1.15" fill="#fff4ed"></circle>
+                            <path d="M18.7 21.4h2.6l-1.3 1.5z" fill="#0d1b3d"></path>
+                            <path d="M16.3 28.4h7.4l.5 3c.14 1.1-.7 2-1.8 2h-5.3c-1.1 0-1.95-.9-1.8-2z" fill="#ff6a00"></path>
+                        </svg>
+                    </span>
+
+                    <span class="oac-modal__titles">
+                        <span id={headingId} class="oac-wordmark"
+                            ><span class="oac-wordmark__primary">Opportunity</span>&nbsp;<span
+                                class="oac-wordmark__accent"
+                                >Agent</span
+                            ></span
+                        >
+                        <template lwc:if={opportunityName}>
+                            <span class="oac-modal__oppname">{opportunityName}</span>
+                        </template>
+                    </span>
                 </div>
-                <div class="slds-grid slds-grid_vertical-align-center">
-                    <template lwc:if={isListView}>
-                        <lightning-button
-                            class="oac-initial-focus"
-                            variant="brand"
-                            label="새 대화"
-                            icon-name="utility:add"
-                            onclick={newConversation}
-                        ></lightning-button>
-                    </template>
+
+                <div class="oac-modal__actions">
+                    <lightning-button
+                        class="oac-modal__new"
+                        variant="brand"
+                        label="새 대화"
+                        icon-name="utility:add"
+                        onclick={newConversation}
+                    ></lightning-button>
                     <lightning-button-icon
                         icon-name="utility:close"
                         variant="bare"
                         alternative-text="닫기"
                         title="닫기"
-                        class="slds-var-m-left_x-small"
+                        class="oac-modal__close"
                         onclick={close}
                     ></lightning-button-icon>
                 </div>
             </header>
 
-            <div class="slds-modal__content slds-var-p-around_medium oac-modal__content">
-                <p class="slds-text-title_caps slds-text-color_weak slds-var-m-bottom_medium">
-                    {opportunityName}
-                </p>
-
+            <div class="oac-modal__content">
                 <!-- ============ LIST VIEW ============ -->
                 <template lwc:if={isListView}>
                     <lightning-input
                         type="search"
                         variant="label-hidden"
                         label="대화 기록 검색"
-                        placeholder="견적서 / 할인 / 미팅 내용..."
+                        placeholder="찾고 싶은 내용이 무엇인가요?"
                         value={searchTerm}
                         onchange={handleSearch}
-                        class="slds-var-m-bottom_medium oac-initial-focus"
+                        class="oac-search oac-initial-focus"
                     ></lightning-input>
 
                     <template lwc:if={hasConversations}>
                         <template for:each={groupedConversations} for:item="group">
-                            <div key={group.key} class="slds-var-m-bottom_large">
-                                <p class="slds-text-heading_small slds-var-m-bottom_x-small">{group.label}</p>
+                            <div key={group.key} class="oac-daygroup">
+                                <span class="oac-daygroup__label">{group.label}</span>
                                 <template for:each={group.items} for:item="c">
                                     <button
                                         key={c.id}
                                         type="button"
                                         data-id={c.id}
-                                        class="oac-convo-card slds-box slds-box_x-small slds-var-m-bottom_x-small slds-grid slds-grid_align-spread slds-grid_vertical-align-center"
+                                        class={c.cardClass}
                                         onclick={openConversation}
                                     >
-                                        <span class="oac-convo-card__body">
-                                            <span class="slds-text-body_regular slds-text-color_default oac-convo-card__title">{c.title}</span>
-                                            <span class="slds-text-body_small slds-text-color_weak oac-convo-card__preview">{c.preview}</span>
-                                            <span class="slds-text-body_small slds-text-color_weak">{c.time} · {c.count}</span>
+                                        <span class="oac-convo-card__main">
+                                            <span class="oac-convo-card__title">{c.title}</span>
+                                            <span class="oac-convo-card__preview">{c.preview}</span>
                                         </span>
-                                        <lightning-icon
-                                            icon-name="utility:chevronright"
-                                            size="x-small"
-                                            alternative-text="열기"
-                                        ></lightning-icon>
+                                        <span class="oac-convo-card__time">{c.time}</span>
+                                        <svg class="oac-convo-card__chev" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                            <path
+                                                d="M6 3.5 10.5 8 6 12.5"
+                                                fill="none"
+                                                stroke-width="1.6"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                            ></path>
+                                        </svg>
                                     </button>
                                 </template>
                             </div>
                         </template>
                     </template>
                     <template lwc:else>
-                        <p class="slds-text-color_weak slds-var-p-vertical_large slds-align_absolute-center">
-                            이 Opportunity에 저장된 대화가 없습니다. "새 대화"로 시작하세요.
-                        </p>
+                        <p class="oac-empty">이 Opportunity에 저장된 대화가 없습니다. "새 대화"로 시작해 보세요.</p>
                     </template>
                 </template>
 
                 <!-- ============ DETAIL VIEW ============ -->
                 <template lwc:if={isDetailView}>
-                    <p class="slds-text-heading_small">{detailTitle}</p>
-                    <p class="slds-text-body_small slds-text-color_weak slds-var-m-bottom_medium">{detailDate}</p>
-                    <hr class="slds-var-m-bottom_medium" />
-
                     <div class="oac-transcript">
                         <template lwc:if={hasDetailMessages}>
                             <template for:each={detailMessages} for:item="m">
                                 <div key={m.key} class={m.rowClass}>
                                     <template lwc:if={m.isMeta}>
-                                        <p class={m.metaClass}>
+                                        <p class="oac-meta" data-error={m.isError}>
                                             <lightning-formatted-text value={m.text}></lightning-formatted-text>
                                         </p>
                                     </template>
+                                    <template lwc:elseif={m.isUser}>
+                                        <div class="oac-msg oac-msg_user">
+                                            <div class="oac-msg__bubble oac-msg__bubble_user">
+                                                <lightning-formatted-text value={m.text}></lightning-formatted-text>
+                                            </div>
+                                            <span class="oac-msg__time">{m.time}</span>
+                                        </div>
+                                    </template>
                                     <template lwc:else>
-                                        <p class="slds-text-title_caps slds-text-color_weak slds-var-m-bottom_xx-small">{m.roleLabel}</p>
-                                        <div class="oac-msg__bubble">
-                                            <lightning-formatted-text value={m.text}></lightning-formatted-text>
+                                        <div class="oac-msg oac-msg_agent">
+                                            <span class="oac-mascot oac-mascot_sm oac-msg__avatar" aria-hidden="true">
+                                                <svg viewBox="0 0 40 40" focusable="false">
+                                                    <circle cx="20" cy="20" r="19.5" fill="#f1f6ff" stroke="#e6ecf3"></circle>
+                                                    <path d="M14.6 12.3c-.9-2.3-.7-4.4.5-4.9 1.1-.4 2.6.9 3.3 3.1z" fill="#0d1b3d"></path>
+                                                    <path d="M25.4 12.3c.9-2.3.7-4.4-.5-4.9-1.1-.4-2.6.9-3.3 3.1z" fill="#0d1b3d"></path>
+                                                    <path
+                                                        d="M20 8.5c-4 0-6.7 2.7-6.7 6.5v2.8c0 2.7.8 4.6 2.1 5.9l-.8 6.2c-.2 1.3.8 2.4 2.1 2.4h6.6c1.3 0 2.3-1.1 2.1-2.4l-.8-6.2c1.3-1.3 2.1-3.2 2.1-5.9V15c0-3.8-2.8-6.5-6.8-6.5z"
+                                                        fill="#0d1b3d"
+                                                    ></path>
+                                                    <path
+                                                        d="M15.8 11c1-1.7 2.6-2.7 4.2-2.7s3.2 1 4.2 2.7c-1.2-.8-2.7-1.3-4.2-1.3s-3 .5-4.2 1.3z"
+                                                        fill="#0d1b3d"
+                                                    ></path>
+                                                    <ellipse cx="20" cy="22.3" rx="3.1" ry="2.5" fill="#fff4ed"></ellipse>
+                                                    <circle cx="17.4" cy="17.2" r="1.15" fill="#fff4ed"></circle>
+                                                    <circle cx="22.6" cy="17.2" r="1.15" fill="#fff4ed"></circle>
+                                                    <path d="M18.7 21.4h2.6l-1.3 1.5z" fill="#0d1b3d"></path>
+                                                    <path d="M16.3 28.4h7.4l.5 3c.14 1.1-.7 2-1.8 2h-5.3c-1.1 0-1.95-.9-1.8-2z" fill="#ff6a00"></path>
+                                                </svg>
+                                            </span>
+                                            <div class="oac-msg__col">
+                                                <span class="oac-msg__role">Opportunity Agent</span>
+                                                <div class="oac-msg__bubble oac-msg__bubble_agent">
+                                                    <lightning-formatted-text value={m.text}></lightning-formatted-text>
+                                                </div>
+                                                <span class="oac-msg__time">{m.time}</span>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
                             </template>
                         </template>
                         <template lwc:else>
-                            <p class="slds-text-color_weak slds-var-p-vertical_medium">
-                                이 Opportunity에 대해 질문을 입력하세요.
-                            </p>
+                            <p class="oac-empty">이 Opportunity에 대해 궁금한 점을 입력해 주세요.</p>
                         </template>
 
                         <template lwc:if={busy}>
                             <div class="oac-msg oac-msg_agent">
-                                <p class="slds-text-title_caps slds-text-color_weak slds-var-m-bottom_xx-small">Opportunity Agent</p>
-                                <div class="oac-msg__bubble slds-grid slds-grid_vertical-align-center">
-                                    <lightning-spinner size="x-small" variant="brand" alternative-text="응답 생성 중"></lightning-spinner>
-                                    <span class="slds-var-m-left_x-small slds-text-color_weak">생각 중…</span>
+                                <span class="oac-mascot oac-mascot_sm oac-msg__avatar" aria-hidden="true">
+                                    <svg viewBox="0 0 40 40" focusable="false">
+                                        <circle cx="20" cy="20" r="19.5" fill="#f1f6ff" stroke="#e6ecf3"></circle>
+                                        <path d="M14.6 12.3c-.9-2.3-.7-4.4.5-4.9 1.1-.4 2.6.9 3.3 3.1z" fill="#0d1b3d"></path>
+                                        <path d="M25.4 12.3c.9-2.3.7-4.4-.5-4.9-1.1-.4-2.6.9-3.3 3.1z" fill="#0d1b3d"></path>
+                                        <path
+                                            d="M20 8.5c-4 0-6.7 2.7-6.7 6.5v2.8c0 2.7.8 4.6 2.1 5.9l-.8 6.2c-.2 1.3.8 2.4 2.1 2.4h6.6c1.3 0 2.3-1.1 2.1-2.4l-.8-6.2c1.3-1.3 2.1-3.2 2.1-5.9V15c0-3.8-2.8-6.5-6.8-6.5z"
+                                            fill="#0d1b3d"
+                                        ></path>
+                                        <path
+                                            d="M15.8 11c1-1.7 2.6-2.7 4.2-2.7s3.2 1 4.2 2.7c-1.2-.8-2.7-1.3-4.2-1.3s-3 .5-4.2 1.3z"
+                                            fill="#0d1b3d"
+                                        ></path>
+                                        <ellipse cx="20" cy="22.3" rx="3.1" ry="2.5" fill="#fff4ed"></ellipse>
+                                        <circle cx="17.4" cy="17.2" r="1.15" fill="#fff4ed"></circle>
+                                        <circle cx="22.6" cy="17.2" r="1.15" fill="#fff4ed"></circle>
+                                        <path d="M18.7 21.4h2.6l-1.3 1.5z" fill="#0d1b3d"></path>
+                                        <path d="M16.3 28.4h7.4l.5 3c.14 1.1-.7 2-1.8 2h-5.3c-1.1 0-1.95-.9-1.8-2z" fill="#ff6a00"></path>
+                                    </svg>
+                                </span>
+                                <div class="oac-msg__col">
+                                    <span class="oac-msg__role">Opportunity Agent</span>
+                                    <div class="oac-msg__bubble oac-msg__bubble_agent oac-msg__bubble_thinking">
+                                        <lightning-spinner
+                                            size="x-small"
+                                            variant="brand"
+                                            alternative-text="응답 생성 중"
+                                        ></lightning-spinner>
+                                        <span>답변을 준비하고 있어요…</span>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -138,32 +220,33 @@
                 </template>
             </div>
 
-            <!-- detail composer -->
+            <!-- ============ DETAIL COMPOSER ============ -->
             <template lwc:if={isDetailView}>
-                <footer class="slds-modal__footer">
-                    <div class="slds-grid slds-grid_vertical-align-end">
-                        <lightning-textarea
-                            class="slds-col slds-grow"
-                            name="followUp"
-                            variant="label-hidden"
-                            label="이어서 질문하기"
-                            placeholder="이어서 질문하기..."
-                            value={followUpDraft}
-                            max-length="2000"
-                            disabled={busy}
-                            onchange={handleFollowUpInput}
-                            onkeydown={handleFollowUpKey}
-                        ></lightning-textarea>
-                        <lightning-button-icon
-                            class="slds-col slds-shrink-none slds-var-m-left_x-small"
-                            icon-name="utility:send"
-                            variant="brand"
-                            alternative-text="전송"
-                            title="전송"
-                            onclick={sendFollowUp}
-                            disabled={followUpDisabled}
-                        ></lightning-button-icon>
-                    </div>
+                <footer class="oac-modal__footer">
+                    <lightning-textarea
+                        class="oac-followup oac-initial-focus"
+                        name="followUp"
+                        variant="label-hidden"
+                        label="이어서 질문하기"
+                        placeholder="무엇이든 요청하세요!"
+                        value={followUpDraft}
+                        max-length="2000"
+                        disabled={busy}
+                        onchange={handleFollowUpInput}
+                        onkeydown={handleFollowUpKey}
+                    ></lightning-textarea>
+                    <button
+                        type="button"
+                        class={sendClass}
+                        aria-label="전송"
+                        aria-disabled={followUpDisabled}
+                        title="전송"
+                        onclick={sendFollowUp}
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"></path>
+                        </svg>
+                    </button>
                 </footer>
             </template>
         </div>

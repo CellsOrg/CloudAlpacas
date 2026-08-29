@@ -52,16 +52,14 @@ public with sharing class OpportunityAgentChatController {
             sessionId = startSession();
         }
 
-        String outbound = (firstTurn && opportunityId != null)
-            ? withRecordContext(opportunityId, clean)
-            : clean;
+        String outbound = firstTurn ? firstTurnPreamble(opportunityId, clean) : clean;
 
         HttpResponse res = rawPostMessage(sessionId, outbound);
 
-        // Server-side session idle-expiry: restart once, transparently, keeping record context.
+        // Server-side session idle-expiry: restart once, transparently, keeping record + language context.
         if (res.getStatusCode() == 404 && !firstTurn) {
             sessionId = startSession();
-            outbound = (opportunityId != null) ? withRecordContext(opportunityId, clean) : clean;
+            outbound = firstTurnPreamble(opportunityId, clean);
             res = rawPostMessage(sessionId, outbound);
             turn.sessionRestarted = true;
         }
@@ -94,6 +92,22 @@ public with sharing class OpportunityAgentChatController {
     }
 
     // ------------------------------------------------------------------ transport
+
+    // The Opportunity Agent's .agent default_locale is en_US and its system instructions
+    // are in English, so its LLM framing text ("Here are the open Tasks…") defaults to
+    // English. Localising the agent itself needs a new agent version + publish (out of
+    // scope here), so the app asks for Korean in the request context — the supported
+    // non-agent layer. This is prompt-context text only: it does not touch transport,
+    // auth, session handling, response parsing or the Record Id binding below.
+    private static final String KOREAN_DIRECTIVE =
+        '(모든 답변은 한국어로 작성하세요. 표·목록·안내 문장을 포함해 사용자에게 보이는 모든 문장을 한국어로 씁니다. '
+        + '레코드에 저장된 고유명사는 그대로 두어도 됩니다.)';
+
+    /** First-turn context: Korean-reply directive + (when known) the current Record Id binding. */
+    private static String firstTurnPreamble(Id opportunityId, String message) {
+        String base = (opportunityId != null) ? withRecordContext(opportunityId, message) : message;
+        return KOREAN_DIRECTIVE + '\n\n' + base;
+    }
 
     private static String withRecordContext(Id opportunityId, String message) {
         return '(이 대화는 Opportunity Record Id ' + opportunityId + ' 페이지에서 열렸습니다. '

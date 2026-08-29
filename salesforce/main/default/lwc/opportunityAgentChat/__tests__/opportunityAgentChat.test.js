@@ -28,15 +28,15 @@ function mount(recordId = GOLD) {
     return el;
 }
 
-const composerInput = (el) => el.shadowRoot.querySelector('lightning-input');
-const askButton = (el) => el.shadowRoot.querySelector('lightning-button-icon');
-const historyButton = (el) => el.shadowRoot.querySelector('lightning-button');
+const composerInput = (el) => el.shadowRoot.querySelector('.oac-composer__input');
+const askButton = (el) => el.shadowRoot.querySelector('.oac-send');
+const historyButton = (el) => el.shadowRoot.querySelector('.oac-history');
 const modal = (el) => el.shadowRoot.querySelector('c-opportunity-agent-chat-modal');
 
 function typeCompact(el, text) {
     const inp = composerInput(el);
     inp.value = text;
-    inp.dispatchEvent(new CustomEvent('change'));
+    inp.dispatchEvent(new CustomEvent('input'));
 }
 
 afterEach(() => {
@@ -46,10 +46,15 @@ afterEach(() => {
 });
 
 describe('c-opportunity-agent-chat — compact card', () => {
-    it('renders the compact composer with the short copy and no transcript', () => {
+    it('renders the compact composer as a Navy/Orange wordmark with no intro copy or transcript', () => {
         const el = mount();
-        expect(el.shadowRoot.querySelector('lightning-card').title).toBe('Opportunity Agent');
-        expect(el.shadowRoot.textContent).toContain('무엇이든 도와드립니다');
+        const wordmark = el.shadowRoot.querySelector('.oac-wordmark');
+        expect(wordmark.textContent.replace(/\s+/g, ' ').trim()).toBe('Opportunity Agent');
+        expect(wordmark.querySelector('.oac-wordmark__primary').textContent).toBe('Opportunity');
+        expect(wordmark.querySelector('.oac-wordmark__accent').textContent).toBe('Agent');
+        expect(composerInput(el).placeholder).toBe('무엇이든 요청하세요!');
+        // the two-line intro blurb is gone
+        expect(el.shadowRoot.textContent).not.toContain('무엇이든 도와드립니다');
         expect(el.shadowRoot.textContent).not.toContain('활동 · 제안 · 협상 · 딜 요약을 지원');
         // no large transcript / message list in the compact card
         expect(el.shadowRoot.querySelectorAll('.oac-msg').length).toBe(0);
@@ -58,7 +63,7 @@ describe('c-opportunity-agent-chat — compact card', () => {
 
     it('has an explicit "이전 대화 기록 보기" action and no modal until opened', () => {
         const el = mount();
-        expect(historyButton(el).label).toBe('이전 대화 기록 보기');
+        expect(historyButton(el).textContent).toContain('이전 대화 기록 보기');
         expect(modal(el)).toBeNull();
     });
 
@@ -164,7 +169,7 @@ describe('c-opportunity-agent-chat — history & persistence', () => {
 
         document.body.removeChild(el);
         const el2 = mount();
-        el2.shadowRoot.querySelector('lightning-button').click(); // open history
+        el2.shadowRoot.querySelector('.oac-history').click(); // open history
         await flush();
         expect(el2.shadowRoot.querySelector('c-opportunity-agent-chat-modal').conversations.length).toBe(2);
     });
@@ -196,7 +201,7 @@ describe('c-opportunity-agent-chat — history & persistence', () => {
         document.body.removeChild(elGold);
 
         const elSamsung = mount(SAMSUNG);
-        elSamsung.shadowRoot.querySelector('lightning-button').click();
+        elSamsung.shadowRoot.querySelector('.oac-history').click();
         await flush();
         expect(elSamsung.shadowRoot.querySelector('c-opportunity-agent-chat-modal').conversations.length).toBe(0);
     });
@@ -255,10 +260,12 @@ describe('c-opportunity-agent-chat — detail follow-up', () => {
         expect(msgs[1].text).toContain('접근 권한이 없습니다.');
     });
 
-    it('rejects an empty question (button disabled, no call)', async () => {
+    it('rejects an empty question (send marked disabled, no call)', async () => {
         const el = mount();
         typeCompact(el, '   ');
-        expect(askButton(el).disabled).toBe(true);
+        await flush();
+        expect(askButton(el).getAttribute('aria-disabled')).toBe('true');
+        expect(askButton(el).classList.contains('oac-send_off')).toBe(true);
         askButton(el).click();
         await flush();
         expect(sendMessage).not.toHaveBeenCalled();
