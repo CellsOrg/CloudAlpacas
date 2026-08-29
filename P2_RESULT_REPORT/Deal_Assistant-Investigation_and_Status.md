@@ -1,7 +1,25 @@
 # Deal Assistant — 조사 결과 + 독립 구현 현황
 
-> 브랜치: `feature/opportunity-deal-assistant` (origin/main = `ec12eff` 기준, PR #86과 sibling)
-> 작성: 2026-08-29 / 상태: **DealContext read 계층 + test 독립 완료. Agent integration은 #86 merge 이후.**
+> 브랜치: `feature/opportunity-deal-assistant` (PR #87). #86·#89 merge 후 최신 `origin/main`(`c0e3cea`) 위로 rebase.
+> 작성: 2026-08-29 / **갱신: 2026-08-29 — Deal Assistant sibling subagent Opportunity Agent 통합 완료 (staged publish, activate 안 함).**
+
+## 최종 통합 요약 (2026-08-29 2차)
+
+| 영역 | 결과 |
+|---|---|
+| architecture | **B — sibling analytical subagent** (activity_management / negotiation / proposal / **deal**). meta-agent 아님, subagent 간 호출 없음 |
+| `.agent` | `subagent deal:` 추가 — `find_opportunity` → `resolved_opportunity_id` → `get_deal_context`(`apex://DealContext`) 결정적 바인딩, `available when resolved_opportunity_id != ""`. ambiguous/not-found 시 실행 차단. Proposal/Negotiation/Activity subagent 무변경 |
+| reasoning | **FACT / INTERPRETATION / SUGGESTED ACTION** 3계층 강제. invented deal score·risk score·health grade·AI win probability·`isStalled` 금지. 임의 day-threshold 규칙 금지. `Probability` = "저장된 Salesforce 필드"로만. Task/Event 생성·Quote/proposal mutation 안 함 → 다른 assistant 로 안내 (circular chaining 없음) |
+| router | `go_to_deal` + deal intent 예시 + Activity/Negotiation/Proposal boundary 명시 |
+| permission set | `CA_Opportunity_Agent_Access` additive: `DealContext` class access + `Opportunity.Last_Contact_Type__c` / `Days_Since_Last_Contact__c` / `Next_Activity_Date__c` / `Next_Activity_Subject__c` / `Overdue_Tasks_Count__c` / `Expected_Timing__c` / `Deal_Note__c` / `SDO_Sales_Reason_Lost__c` FLS (전부 readable=true, editable=false). 신규 object permission 0, broad permission 0 |
+| test | `DealContextTest` + `testRunsUnderAgentAccessUser` (Standard User + `CA_Opportunity_Agent_Access` 로 4개 `WITH USER_MODE` SOQL FLS 예외 없음 검증). **13/13 PASS, DealContext 100% cov** |
+| regression | Opportunity 도메인 **141/141 PASS** (기존 128 + DealContext 13) |
+| agent | `sf agent validate` success → **staged publish v16 (Inactive)**. **v6 Active 불변. activate 안 함.** published planner v16 retrieve: `deal` subagent + `get_deal_context`(53 output) + Proposal 5개 action schema 정상 |
+| DealContext contract | 무변경 — stored facts + threshold-free 파생 date/count 만. healthScore·riskLevel·winProbability·isStalled·recommendedAction 없음 (`testNoJudgementFieldsExist` 강제) |
+| business data | 변경 없음 |
+
+---
+_(이하 최초 조사 기록)_
 
 ---
 
