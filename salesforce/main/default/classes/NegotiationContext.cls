@@ -51,6 +51,7 @@ public with sharing class NegotiationContext {
             }
             for (QuoteLineItem qli : [
                 SELECT Id, QuoteId, Quantity, UnitPrice, Discount, Subtotal, TotalPrice,
+                       HasRevenueSchedule,
                        Product2.Name, Product2.Tier__c,
                        PricebookEntry.Max_Discount_Percent__c, PricebookEntry.Max_Discounted_Price__c
                 FROM QuoteLineItem
@@ -178,6 +179,16 @@ public with sharing class NegotiationContext {
                     r.productTier = primary.Product2.Tier__c;
                     r.maxDiscountPercent = primary.PricebookEntry.Max_Discount_Percent__c;
                     r.maxDiscountedPrice = primary.PricebookEntry.Max_Discounted_Price__c;
+
+                    // A revenue-scheduled line item's Discount is locked by the platform.
+                    // Surface it so the agent can tell the user before asking them to
+                    // confirm a discount change that cannot succeed.
+                    r.lineItemDiscountUpdatable = (primary.HasRevenueSchedule != true);
+                    if (primary.HasRevenueSchedule == true) {
+                        r.lineItemDiscountLockReason =
+                            '이 라인 아이템에는 매출 일정(Revenue Schedule)이 설정되어 있어 할인율을 변경할 수 없습니다. '
+                            + '상태·유효기한·조건 메모만 조정할 수 있습니다.';
+                    }
                 }
             } else {
                 r.hasQuote = false;
@@ -299,6 +310,12 @@ public with sharing class NegotiationContext {
 
         @InvocableVariable(label='Quote Discount' description='QuoteLineItem.Discount percentage currently applied on the primary line item.')
         public Decimal quoteDiscount;
+
+        @InvocableVariable(label='Line Item Discount Updatable' description='주 QuoteLineItem의 할인율(Discount)을 바꿀 수 있는지 여부. false면 매출 일정(Revenue Schedule) 때문에 플랫폼이 할인율 변경을 막는다 — 이 경우 사용자에게 먼저 알리고 할인율 변경은 제안/확정하지 말 것. 상태·유효기한·조건 메모는 여전히 변경 가능.')
+        public Boolean lineItemDiscountUpdatable = true;
+
+        @InvocableVariable(label='Line Item Discount Lock Reason' description='lineItemDiscountUpdatable가 false일 때 사용자에게 그대로 전달할 한국어 설명. 값이 없으면 할인율 변경 제한이 없다는 뜻.')
+        public String lineItemDiscountLockReason;
 
         @InvocableVariable(label='Product Tier' description='Product2.Tier__c of the primary line item (Standard/Premium/VIP) - 참고용 신호일 뿐, 등급별 할인 정책은 정의되어 있지 않음.')
         public String productTier;

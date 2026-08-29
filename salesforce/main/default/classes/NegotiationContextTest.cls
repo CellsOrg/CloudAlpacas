@@ -89,6 +89,9 @@ private class NegotiationContextTest {
         System.assertEquals(282000000, r.maxDiscountedPrice, '저장된 최소 판매가(정책 한도)가 반환되어야 한다');
         System.assertEquals('Premium', r.productTier);
         System.assert(r.lineItemsSummary.contains('전광판 광고 패키지'), '라인아이템 요약에 상품명이 있어야 한다');
+        System.assertEquals(true, r.lineItemDiscountUpdatable,
+            '매출 일정이 없는 라인아이템은 할인율 변경이 가능하다고 보고되어야 한다');
+        System.assertEquals(null, r.lineItemDiscountLockReason, '할인율 잠금 사유가 없어야 한다');
     }
 
     @isTest

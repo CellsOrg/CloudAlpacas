@@ -58,6 +58,8 @@ private class NegotiationTermsUpdaterTest {
 
     @isTest
     static void testDiscountUpdateOnLineItem() {
+        // Normal path: a line item WITHOUT a revenue schedule — the pre-flight
+        // HasRevenueSchedule guard must not block it.
         Quote q = quoteFor('Terms Opp A');
         NegotiationTermsUpdater.Request req = new NegotiationTermsUpdater.Request();
         req.quoteId = q.Id;
