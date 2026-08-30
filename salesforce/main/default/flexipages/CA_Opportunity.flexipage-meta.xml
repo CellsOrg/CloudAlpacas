@@ -1914,7 +1914,7 @@
                 </visibilityRule>
             </componentInstance>
         </itemInstances>
-        <name>leftcol</name>
+        <name>main</name>
         <type>Region</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -2110,13 +2110,13 @@
                 <identifier>force_relatedListSingleContainer9</identifier>
             </componentInstance>
         </itemInstances>
-        <name>rightcol</name>
+        <name>sidebar</name>
         <type>Region</type>
     </flexiPageRegions>
     <masterLabel>CA_Opportunity</masterLabel>
     <sobjectType>Opportunity</sobjectType>
     <template>
-        <name>flexipage:recordHomeTwoColEqualHeaderTemplateDesktop</name>
+        <name>flexipage:recordHomeTemplateDesktop</name>
     </template>
     <type>RecordPage</type>
 </FlexiPage>

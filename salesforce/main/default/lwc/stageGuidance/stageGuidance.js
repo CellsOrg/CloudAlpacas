@@ -35,7 +35,30 @@ const SECTION_INFO = {
     '향후 재접촉 조건': '재접촉 전에 확인할 조건과 시점'
 };
 
-const FULL_WIDTH_SECTIONS = new Set(['Qualification 판단', '위험 신호', '계약 결과', 'Deal 결과']);
+const SECTION_PRESENTATION = {
+    'Qualification 판단': { icon: '✓', tone: 'success', keyValue: true },
+    '판단 근거': { icon: '▣', tone: 'blue' },
+    '긍정 신호': { icon: '↑', tone: 'success' },
+    '위험 신호': { icon: '△', tone: 'warning' },
+    '발견된 고객 니즈': { icon: '◎', tone: 'blue' },
+    'AI 해석': { icon: '✦', tone: 'purple' },
+    '추천 패키지': { icon: '▣', tone: 'success', keyValue: true },
+    '추천 구성': { icon: '◇', tone: 'blue' },
+    '추천 견적': { icon: '₩', tone: 'warning', keyValue: true },
+    '추천 이유': { icon: '★', tone: 'purple' },
+    '추천 협상 방향': { icon: '◎', tone: 'blue' },
+    '유지 권장 항목': { icon: '✓', tone: 'success' },
+    '조정 검토 가능 항목': { icon: '↔', tone: 'warning' },
+    '설득 전략 / 협상 시 주의': { icon: '✦', tone: 'purple' },
+    '계약 결과': { icon: '✓', tone: 'success', keyValue: true },
+    '성공 요인': { icon: '↑', tone: 'blue' },
+    '후속 관리': { icon: '◌', tone: 'purple' },
+    'Deal 결과': { icon: '×', tone: 'lost', keyValue: true },
+    '실패 요인': { icon: '△', tone: 'warning' },
+    '향후 재접촉 조건': { icon: '◌', tone: 'blue' }
+};
+
+const FULL_WIDTH_SECTIONS = new Set(['계약 결과', 'Deal 결과']);
 const HIDDEN_SECTIONS = new Set(['확인 필요', '현재 제안', '고객 요구/제약']);
 
 export default class StageGuidance extends LightningElement {
@@ -84,15 +107,22 @@ export default class StageGuidance extends LightningElement {
                     title,
                     lines: [],
                     key: `s-${sections.length}`,
-                    className: `brief-section${FULL_WIDTH_SECTIONS.has(title) ? ' brief-section_emphasis' : ''}`,
+                    className: `brief-section brief-section_${SECTION_PRESENTATION[title]?.tone || 'blue'}${FULL_WIDTH_SECTIONS.has(title) ? ' brief-section_emphasis' : ''}`,
                     infoText: SECTION_INFO[title],
-                    infoLabel: `${title} 안내`
+                    infoLabel: `${title} 안내`,
+                    icon: SECTION_PRESENTATION[title]?.icon || '•',
+                    hasIcon: !!SECTION_PRESENTATION[title]?.icon,
+                    keyValue: !!SECTION_PRESENTATION[title]?.keyValue
                 };
                 sections.push(current);
             } else {
                 if (/(감사드립니다|추가 확인사항|알려주시기 바랍니다)/.test(line)) return;
                 if (!current) return;
-                current.lines.push({ text: this.normalizeBullet(line.replace(/^-\s*/, '')), key: `${current.key}-${current.lines.length}` });
+                current.lines.push({
+                    text: this.normalizeBullet(line.replace(/^-\s*/, '')),
+                    key: `${current.key}-${current.lines.length}`,
+                    className: current.keyValue && current.lines.length === 0 ? 'guidance-list_key' : ''
+                });
             }
         });
         return sections;
@@ -103,9 +133,9 @@ export default class StageGuidance extends LightningElement {
         const hasBudget = c.clientBudget !== null && c.clientBudget !== undefined;
         const hasQuote = c.quoteGrandTotal !== null && c.quoteGrandTotal !== undefined;
         const currency = (key, label, value) => value === null || value === undefined
-            ? { key, label, value: '정보 없음' }
-            : { key, label, value, isCurrency: true };
-        const text = (key, label, value) => ({ key, label, value: value || '—' });
+            ? { key, label, value: '정보 없음', className: 'metric-card' }
+            : { key, label, value, isCurrency: true, className: 'metric-card' };
+        const text = (key, label, value) => ({ key, label, value: value || '—', className: 'metric-card' });
         return [
             text('quote-status', 'Quote 상태', c.quoteStatus || (c.hasQuote ? '—' : '정보 없음')),
             currency('client-budget', '고객 예산', hasBudget ? c.clientBudget : null),
@@ -113,9 +143,9 @@ export default class StageGuidance extends LightningElement {
             currency('budget-gap', '예산 대비 견적 차이', hasBudget && hasQuote ? c.quoteGrandTotal - c.clientBudget : null),
             text('current-discount', '현재 할인율', c.quoteDiscount === null || c.quoteDiscount === undefined ? '—' : `${c.quoteDiscount}%`),
             text('approval-limit', '승인 없이 가능한 최대 할인율', c.maxDiscountPercent === null || c.maxDiscountPercent === undefined ? '—' : `${c.maxDiscountPercent}%`),
-            { key: 'expiration', label: 'Quote 유효기한', value: c.quoteExpirationDate || '—', isDate: !!c.quoteExpirationDate },
-            text('discount-restriction', '할인율 변경 제한', c.lineItemDiscountUpdatable === false ? c.lineItemDiscountLockReason || '할인율 변경이 제한됩니다' : '할인율 변경 제한 없음'),
-            text('recent-interaction', '최근 상호작용', c.hasInteractionIntelligence && c.interactionHistorySummary ? c.interactionHistorySummary.split('\n')[0] : '기록된 상호작용 없음')
+            { key: 'expiration', label: 'Quote 유효기한', value: c.quoteExpirationDate || '—', isDate: !!c.quoteExpirationDate, className: 'metric-card' },
+            { ...text('discount-restriction', '할인율 변경 제한', c.lineItemDiscountUpdatable === false ? c.lineItemDiscountLockReason || '할인율 변경이 제한됩니다' : '할인율 변경 제한 없음'), className: 'metric-card metric-card_wide' },
+            { ...text('recent-interaction', '최근 상호작용', c.hasInteractionIntelligence && c.interactionHistorySummary ? c.interactionHistorySummary.split('\n')[0] : '기록된 상호작용 없음'), className: 'metric-card metric-card_wide' }
         ];
     }
 

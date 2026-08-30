@@ -22,7 +22,7 @@
                         <template lwc:if={hasNegotiationContext}>
                             <dl class="metric-grid">
                                 <template for:each={negotiationMetrics} for:item="metric">
-                                    <div class="metric-card" key={metric.key}>
+                                    <div class={metric.className} key={metric.key}>
                                         <dt>{metric.label}</dt>
                                         <dd>
                                             <lightning-formatted-number lwc:if={metric.isCurrency} value={metric.value} format-style="currency" currency-code="KRW" currency-display-as="symbol"></lightning-formatted-number>
@@ -41,6 +41,7 @@
                     <template for:each={recommendationSections} for:item="section">
                         <section class={section.className} key={section.key}>
                             <div class="section-heading">
+                                <template lwc:if={section.hasIcon}><span class="section-icon" aria-hidden="true">{section.icon}</span></template>
                                 <h3>{section.title}</h3>
                                 <template lwc:if={section.infoText}>
                                     <span class="info-wrap">
@@ -50,7 +51,7 @@
                                 </template>
                             </div>
                             <ul class="guidance-list">
-                                <template for:each={section.lines} for:item="line"><li key={line.key}>{line.text}</li></template>
+                                <template for:each={section.lines} for:item="line"><li class={line.className} key={line.key}>{line.text}</li></template>
                             </ul>
                         </section>
                     </template>
