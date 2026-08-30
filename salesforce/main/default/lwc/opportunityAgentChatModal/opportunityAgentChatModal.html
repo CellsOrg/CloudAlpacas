@@ -88,18 +88,37 @@
                             <div key={group.key} class="oac-daygroup">
                                 <span class="oac-daygroup__label">{group.label}</span>
                                 <template for:each={group.items} for:item="c">
-                                    <button
-                                        key={c.id}
-                                        type="button"
-                                        data-id={c.id}
-                                        class={c.cardClass}
-                                        onclick={openConversation}
-                                    >
-                                        <span class="oac-convo-card__main">
-                                            <span class="oac-convo-card__title">{c.title}</span>
-                                            <span class="oac-convo-card__preview">{c.preview}</span>
-                                        </span>
-                                        <span class="oac-convo-card__time">{c.time}</span>
+                                    <div key={c.id} class={c.rowClass}>
+                                        <button
+                                            type="button"
+                                            data-id={c.id}
+                                            class="oac-convo-card"
+                                            onclick={openConversation}
+                                        >
+                                            <span class="oac-convo-card__main">
+                                                <span class="oac-convo-card__title">{c.title}</span>
+                                                <span class="oac-convo-card__preview">{c.preview}</span>
+                                            </span>
+                                            <span class="oac-convo-card__time">{c.time}</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            data-id={c.id}
+                                            class="oac-convo-card__delete"
+                                            aria-label="대화 기록 삭제"
+                                            title="대화 기록 삭제"
+                                            onclick={requestDelete}
+                                        >
+                                            <svg class="oac-convo-card__trash" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                                <path
+                                                    d="M2.7 4h10.6M6.4 4V2.9c0-.4.3-.8.8-.8h1.6c.5 0 .8.4.8.8V4M4.2 4l.5 8.5c0 .6.5 1 1 1h4.6c.5 0 1-.4 1-1l.5-8.5M6.7 6.4v5M9.3 6.4v5"
+                                                    fill="none"
+                                                    stroke-width="1.2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                ></path>
+                                            </svg>
+                                        </button>
                                         <svg class="oac-convo-card__chev" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
                                             <path
                                                 d="M6 3.5 10.5 8 6 12.5"
@@ -109,7 +128,7 @@
                                                 stroke-linejoin="round"
                                             ></path>
                                         </svg>
-                                    </button>
+                                    </div>
                                 </template>
                             </div>
                         </template>
@@ -209,6 +228,25 @@
                         </svg>
                     </button>
                 </footer>
+            </template>
+
+            <template lwc:if={pendingDeleteId}>
+                <div
+                    class="oac-confirm"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="oac-confirm-heading"
+                    onkeydown={handleConfirmKeydown}
+                >
+                    <div class="oac-confirm__box">
+                        <p id="oac-confirm-heading" class="oac-confirm__title">대화 기록을 삭제할까요?</p>
+                        <p class="oac-confirm__body">삭제한 대화 기록은 복구할 수 없습니다.</p>
+                        <div class="oac-confirm__actions">
+                            <button type="button" class="oac-confirm__cancel" onclick={cancelDelete}>취소</button>
+                            <button type="button" class="oac-confirm__delete" onclick={confirmDelete}>삭제</button>
+                        </div>
+                    </div>
+                </div>
             </template>
         </div>
     </section>

@@ -188,3 +188,60 @@ describe('c-opportunity-agent-chat-modal — detail view', () => {
         expect(handler).toHaveBeenCalledTimes(2);
     });
 });
+
+describe('c-opportunity-agent-chat-modal — delete a saved conversation', () => {
+    const deleteButtons = (el) => [...el.shadowRoot.querySelectorAll('.oac-convo-card__delete')];
+
+    it('renders a labelled trash control on every conversation row', () => {
+        const el = mount();
+        const btns = deleteButtons(el);
+        expect(btns.length).toBe(2);
+        expect(btns[0].getAttribute('aria-label')).toBe('대화 기록 삭제');
+    });
+
+    it('clicking trash opens a confirm dialog and does NOT delete or open the conversation', async () => {
+        const el = mount();
+        const del = jest.fn();
+        const open = jest.fn();
+        el.addEventListener('deleteconversation', del);
+        el.addEventListener('openconversation', open);
+
+        deleteButtons(el)[0].click();
+        await flush();
+
+        expect(del).not.toHaveBeenCalled();
+        expect(open).not.toHaveBeenCalled();
+        expect(el.shadowRoot.querySelector('.oac-confirm')).not.toBeNull();
+        expect(el.shadowRoot.textContent).toContain('대화 기록을 삭제할까요?');
+        expect(el.shadowRoot.textContent).toContain('삭제한 대화 기록은 복구할 수 없습니다.');
+    });
+
+    it('취소 closes the dialog and emits nothing', async () => {
+        const el = mount();
+        const del = jest.fn();
+        el.addEventListener('deleteconversation', del);
+
+        deleteButtons(el)[0].click();
+        await flush();
+        el.shadowRoot.querySelector('.oac-confirm__cancel').click();
+        await flush();
+
+        expect(del).not.toHaveBeenCalled();
+        expect(el.shadowRoot.querySelector('.oac-confirm')).toBeNull();
+    });
+
+    it('삭제 emits deleteconversation for exactly the chosen conversation id', async () => {
+        const el = mount();
+        const del = jest.fn();
+        el.addEventListener('deleteconversation', del);
+
+        deleteButtons(el)[0].click(); // first row → c-old
+        await flush();
+        el.shadowRoot.querySelector('.oac-confirm__delete').click();
+        await flush();
+
+        expect(del).toHaveBeenCalledTimes(1);
+        expect(del.mock.calls[0][0].detail.id).toBe('c-old');
+        expect(el.shadowRoot.querySelector('.oac-confirm')).toBeNull();
+    });
+});

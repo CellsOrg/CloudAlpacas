@@ -30,6 +30,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
     font-family: var(--oac-font);
     background: #fff;
     border-radius: 16px;
@@ -220,25 +221,40 @@
 
 /* ---- list view : conversation cards ----------------------- */
 
-.oac-convo-card {
+.oac-convo-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    width: 100%;
-    text-align: left;
-    font-family: inherit;
+    gap: 2px;
+    margin-bottom: 8px;
     background: #fff;
     border: 1px solid var(--oac-border);
     border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 8px;
-    cursor: pointer;
+    padding: 4px 10px 4px 6px;
     transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 
-.oac-convo-card:hover {
+.oac-convo-row:hover {
     border-color: var(--oac-border-strong);
     background: var(--oac-light-blue);
+}
+
+.oac-convo-row_featured {
+    border-color: rgba(255, 106, 0, 0.4);
+}
+
+.oac-convo-card {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    font-family: inherit;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 4px;
+    cursor: pointer;
 }
 
 .oac-convo-card:focus-visible {
@@ -246,8 +262,38 @@
     outline-offset: 2px;
 }
 
-.oac-convo-card_featured {
-    border-color: rgba(255, 106, 0, 0.4);
+.oac-convo-card__delete {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+}
+
+.oac-convo-card__delete:hover {
+    background: var(--oac-soft-orange);
+}
+
+.oac-convo-card__delete:focus-visible {
+    outline: 2px solid var(--oac-navy);
+    outline-offset: 2px;
+}
+
+.oac-convo-card__trash {
+    width: 15px;
+    height: 15px;
+    stroke: var(--oac-text-secondary);
+}
+
+.oac-convo-card__delete:hover .oac-convo-card__trash {
+    stroke: var(--oac-orange);
 }
 
 .oac-convo-card__main {
@@ -457,4 +503,82 @@
     .oac-modal__new .slds-truncate {
         display: none;
     }
+}
+
+/* ---- delete-conversation confirm ------------------------- */
+
+.oac-confirm {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 27, 61, 0.28);
+    border-radius: 16px;
+}
+
+.oac-confirm__box {
+    width: min(320px, 86%);
+    background: #fff;
+    border: 1px solid var(--oac-border);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 8px 28px rgba(13, 27, 61, 0.18);
+}
+
+.oac-confirm__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--oac-navy);
+    margin-bottom: 6px;
+}
+
+.oac-confirm__body {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--oac-text-secondary);
+    margin-bottom: 16px;
+}
+
+.oac-confirm__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.oac-confirm__cancel,
+.oac-confirm__delete {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.oac-confirm__cancel {
+    background: #fff;
+    border: 1px solid var(--oac-border);
+    color: var(--oac-navy);
+}
+
+.oac-confirm__cancel:hover {
+    background: var(--oac-light-blue);
+}
+
+.oac-confirm__delete {
+    background: #c0392b;
+    border: 1px solid #c0392b;
+    color: #fff;
+}
+
+.oac-confirm__delete:hover {
+    background: #a93226;
+}
+
+.oac-confirm__cancel:focus-visible,
+.oac-confirm__delete:focus-visible {
+    outline: 2px solid var(--oac-navy);
+    outline-offset: 2px;
 }
