@@ -1,0 +1,82 @@
+<template>
+    <main class="partner-page">
+        <header class="site-header">
+            <div class="site-header__inner">
+                <div class="brand" aria-label="Cloud Alpacas">
+                    <img class="brand__mascot" src={alpacaMascotUrl} alt="Cloud Alpacas alpaca mascot" />
+                    <span class="brand__wordmark">Cloud Alpacas</span>
+                </div>
+                <nav class="site-nav" aria-label="주 메뉴">
+                    <template if:true={homeUrl}><a href={homeUrl}>홈</a></template><template if:false={homeUrl}><span>홈</span></template>
+                    <template if:true={aboutUrl}><a href={aboutUrl}>Cloud Alpacas 소개</a></template><template if:false={aboutUrl}><span>Cloud Alpacas 소개</span></template>
+                    <template if:true={partnershipUrl}><a href={partnershipUrl}>파트너십</a></template><template if:false={partnershipUrl}><span>파트너십</span></template>
+                    <span class="site-nav__active" aria-current="page">제휴 문의</span>
+                    <template if:true={loginUrl}><a href={loginUrl}>로그인</a></template><template if:false={loginUrl}><span>로그인</span></template>
+                </nav>
+            </div>
+        </header>
+
+        <section class="hero" aria-labelledby="partner-heading">
+            <div class="hero__graphic" aria-hidden="true"><lightning-icon icon-name="utility:people" size="large"></lightning-icon></div>
+            <div class="hero__copy">
+                <h1 id="partner-heading">환영합니다!<br /><strong>Cloud Alpacas</strong>와 함께하세요!</h1>
+                <p>Cloud Alpacas는 혁신적인 파트너십을 통해<br />더 큰 가치를 만들어갑니다.<br />제휴 및 협업에 관심 있는 기업의 많은 문의 바랍니다.</p>
+            </div>
+            <div class="hero__ball" aria-hidden="true"></div>
+        </section>
+
+        <section class="inquiry-panel" aria-labelledby="inquiry-title">
+            <aside class="response-guide">
+                <div class="response-guide__icon"><lightning-icon icon-name="utility:clock" size="large"></lightning-icon></div>
+                <h2>답변 안내</h2>
+                <p>평일 기준 1~2일 이내<br />담당자가 연락드리겠습니다.</p>
+            </aside>
+
+            <div class="form-area">
+                <h2 id="inquiry-title">제휴 문의하기</h2>
+                <template if:true={isSuccess}>
+                    <div class="submission-result" role="status">
+                        <lightning-icon icon-name="utility:success" size="small"></lightning-icon>
+                        <div><strong>문의가 접수되었습니다</strong><p>담당자가 확인 후 연락드리겠습니다.</p></div>
+                    </div>
+                </template>
+                <template if:false={isSuccess}>
+                    <form onsubmit={handleSubmit} novalidate>
+                        <div class="form-grid">
+                            <lightning-input class="form-field" data-field="companyName" label="문의 회사명" required value={form.companyName} placeholder="회사를 입력해주세요." onchange={handleFieldChange} disabled={isSubmitting}></lightning-input>
+                            <lightning-input class="form-field" data-field="contactName" label="문의 담당자명" required value={form.contactName} placeholder="담당자명을 입력해주세요." onchange={handleFieldChange} disabled={isSubmitting}></lightning-input>
+                            <lightning-input class="form-field" data-field="email" type="email" label="이메일" required value={form.email} placeholder="이메일을 입력해주세요." onchange={handleFieldChange} disabled={isSubmitting}></lightning-input>
+                            <lightning-input class="form-field" data-field="phone" type="tel" label="연락처" required value={form.phone} placeholder="연락처를 입력해주세요. (예: 010-1234-5678)" onchange={handleFieldChange} disabled={isSubmitting}></lightning-input>
+                        </div>
+                        <lightning-textarea class="inquiry-text" data-field="inquiry" label="문의 내용" required maxlength="1000" value={form.inquiry} placeholder="제휴 및 협업에 대한 문의 내용을 자세히 입력해주세요." onchange={handleFieldChange} disabled={isSubmitting}></lightning-textarea>
+                        <p class="character-count">{inquiryLength} / 1000</p>
+
+                        <div class="upload-section">
+                            <p class="upload-label">첨부파일</p>
+                            <lightning-file-upload
+                                label="파일을 선택하거나 끌어다 놓아주세요"
+                                name="partnershipInquiryFile"
+                                accept={acceptedFileTypes}
+                                file-field-name="PartnerInquiryToken_fileupload__c"
+                                file-field-value={uploadToken}
+                                onuploadfinished={handleUploadFinished}
+                                disabled={isSubmitting}>
+                            </lightning-file-upload>
+                            <p class="upload-help">지원 형식: PDF, PPT, DOC, DOCX, XLS, XLSX, PNG, JPG</p>
+                            <template if:true={uploadedFileName}><p class="upload-complete">첨부 완료: {uploadedFileName}</p></template>
+                        </div>
+                        <template if:true={errorMessage}><p class="form-error" role="alert">{errorMessage}</p></template>
+                        <button class="submit-button" type="submit" disabled={isSubmitting}>{submitLabel}</button>
+                    </form>
+                </template>
+            </div>
+        </section>
+
+        <footer class="site-footer">
+            <div class="site-footer__brand"><img src={alpacaMascotUrl} alt="" /><span>Cloud Alpacas</span></div>
+            <p>© 2026 Cloud Alpacas. All rights reserved.</p>
+            <div class="site-footer__links"><span>개인정보처리방침</span><span aria-hidden="true">|</span><span>이용약관</span></div>
+            <div class="site-footer__social" aria-label="소셜 채널"><span>◎</span><span>▶</span><span>✉</span></div>
+        </footer>
+    </main>
+</template>
