@@ -67,6 +67,15 @@
         <apexClass>ConversationHistoryAgentAction</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <!-- Activity Assistant: find_activity_attendee. FindActivityAttendee is a read-only
+         person-name resolver (@InvocableMethod, with sharing, SOQL WITH USER_MODE, zero
+         DML) — resolves a named meeting attendee / task contact to a Contact on the
+         Opportunity or its Account, or an active User; its Id binds into create_activity
+         whoId so the agent never asks the user for a record Id. -->
+    <classAccesses>
+        <apexClass>FindActivityAttendee</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <classAccesses>
         <apexClass>NegotiationContext</apexClass>
         <enabled>true</enabled>

@@ -41,6 +41,8 @@ variables:
         description: "save_proposal이 생성했거나 업데이트한 실제 Quote의 Id. 같은 대화 안에서 중복 저장을 막는다."
     activity_confirmed: mutable boolean = False
         description: "사용자가 이미 미리 보여준 Task/Event의 생성 또는 수정을 명확하게 확정했는지 여부. create_activity / update_activity의 available when 게이트가 소비한다. 실행 성공 후 다시 False로 초기화되어 다음 생성/수정 시 재확인을 요구한다. '알겠어'·'그래'·'좋아' 같은 모호한 반응이나 Opportunity 후보 선택은 확정으로 취급하지 않는다."
+    activity_attendee_id: mutable string = ""
+        description: "find_activity_attendee가 사용자가 말한 참석자/연락 대상 이름을 결정적으로 찾아낸 Contact 또는 User의 Id — 정확히 1명 매칭(isUnique)일 때만 채워진다. create_activity의 whoId에 그대로 전달되는 신뢰 값이며, LLM이 사람 이름을 whoId에 직접 넣는 경로를 없앤다. 참석자가 없는 활동이면 빈 문자열이고 Flow가 무시한다. 다른 사람을 새로 지정하면 덮어쓴다."
 
 language:
     default_locale: "en_US"
@@ -156,7 +158,7 @@ subagent activity_management:
                 recordDetailOutput: object
                     complex_data_type_name: "lightning__recordInfoType"
         create_activity:
-            description: "Create one new Task or Event activity record linked to an Opportunity. Set activityType to 'Task' or 'Event'. whatId is the Opportunity Id. whoId is an optional Contact or Lead Id. For a Task, provide subject, activityDate, and status (priority and description are optional). For an Event, provide subject, startDateTime, and endDateTime (meetingType and description are optional). Gated by activity_confirmed — only runs after the user has explicitly confirmed the activity details you already previewed."
+            description: "Create one new Task or Event activity record linked to an Opportunity. Set activityType to 'Task' or 'Event'. whatId is the Opportunity Id (from the page context or the resolved deal). whoId is bound to activity_attendee_id (a Contact or User Id resolved by find_activity_attendee) — never put a person NAME in whoId. For a Task, provide subject, activityDate, and status (priority and description are optional). For an Event, provide subject, startDateTime, and endDateTime (meetingType and description are optional). Gated by activity_confirmed — only runs after the user has explicitly confirmed the previewed activity."
             target: "flow://CA_Create_Opportunity_Activity"
             inputs:
                 activityType: string
@@ -175,6 +177,38 @@ subagent activity_management:
                 recordType: string
                 success: boolean
                 errorMessage: string
+        find_activity_attendee:
+            description: "Read-only. Resolves a person NAME the user named as a meeting attendee / task contact to a Salesforce Id — a Contact on this Opportunity or its Account (external customer / partner) first, then an active internal User. Returns isUnique = true with resolvedId / resolvedType only on exactly one match; otherwise a candidate list (matchesSummary) or a not-found message. Never asks for a record Id. No DML."
+            label: "Find Activity Attendee"
+            target: "apex://FindActivityAttendee"
+            include_in_progress_indicator: True
+            progress_indicator_message: "참석자 연락처를 확인하는 중..."
+            inputs:
+                personName: string
+                    description: "The attendee / contact name the user said, verbatim (a trailing honorific like '님' is fine)."
+                    is_required: True
+                opportunityId: string
+                    description: "The resolved Opportunity Id — scopes the Contact search to its Account and contact roles."
+            outputs:
+                found: boolean
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                isUnique: boolean
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                matchCount: object
+                    complex_data_type_name: "lightning__integerType"
+                    filter_from_agent: True
+                resolvedId: string
+                    description: "Contact or User Id when isUnique is true, otherwise empty. Captured into activity_attendee_id."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                resolvedType: string
+                resolvedName: string
+                matchesSummary: string
+                    description: "Name / company / title list — show this to the user to disambiguate when more than one matched."
+                message: string
+                    description: "Human-readable Korean result, safe to show the user. Never contains a request for a Salesforce Id."
         get_interaction_intelligence:
             description: "Return the interaction intelligence already stored for an Opportunity — per-interaction summary, customer reaction, key decision, concerns/objections, agreed follow-up, and interaction signals (Category · Direction · Confidence — Evidence), newest first. Read-only, no confirmation needed. Use for questions about what a customer said or how they reacted in recent calls, meetings, or emails on an Opportunity. Returns found = false with a plain 'no intelligence stored' message when there is none."
             target: "apex://ActivityIntelligenceAgentAction"
@@ -253,7 +287,8 @@ subagent activity_management:
               1. Show the user, in Korean, the exact activity you will create or the exact change you will make — for a new activity list every field value; for an update name the record and each old → new value. End with a plain question like "이대로 생성할까요?" / "이대로 변경할까요?" and tell them to reply e.g. "네, 생성해줘" / "네, 변경해줘".
               2. Only when the user replies with an explicit, unambiguous confirmation of THAT activity ("네, 생성해줘", "그대로 만들어줘", "네 변경해줘", "확정") call confirm_activity, then immediately call create_activity or update_activity. A vague reply ("알겠어", "그래", "좋아"), a question, or an Opportunity-selection reply is NOT a confirmation — do not call confirm_activity for those.
               3. Never call create_activity or update_activity before activity_confirmed is True. Do not ask for confirmation twice — one clear Korean preview + one confirmation is the whole flow.
-              When creating an activity: decide whether the user wants a Task or an Event, collect the required fields, ask for anything missing, and never invent field values. Treat the activity as created only when create_activity returns success = true with a recordId; if success = false, tell the user what errorMessage says and do not claim the activity was created.
+              When creating an activity: decide whether the user wants a Task or an Event, collect the required fields, ask for anything missing, and never invent field values. Leave meetingType EMPTY unless the user explicitly names a meeting type — it is a restricted picklist and a guessed value (e.g. "미팅") makes the create fail. Treat the activity as created only when create_activity returns success = true with a recordId; if success = false, tell the user what errorMessage says and do not claim the activity was created.
+              Resolving an attendee / contact person — when the user names a person for the activity ("김하나님과 미팅 잡아줘", "박대리한테 전화하는 Task 만들어줘", "이 담당자랑 미팅"): you MUST resolve that name with find_activity_attendee BEFORE create_activity — never put a person's NAME into whoId and NEVER ask the user for a Salesforce Id / record Id / Contact Id. Steps: (1) make sure the Opportunity is resolved (find_opportunity first, so resolved_opportunity_id is set); (2) call find_activity_attendee with personName = the name the user said (honorific like "님" is fine) — opportunityId is bound automatically; (3) if isUnique = true, that Contact/User is captured into activity_attendee_id and flows into whoId — mention who it resolved to in your preview ("참석자: 김하나 (d'Alba, Partnership Manager)"); (4) if isUnique = false, show matchesSummary (이름·회사·직책) and ask the user which person — do not guess, do not call confirm_activity yet; (5) if found = false, relay the action's message (연락처 미등록 안내) and offer to create the activity WITHOUT an attendee or to note the contact detail in the description — still never ask for an Id. Only proceed to the confirmation step once the attendee is resolved or the user chose to proceed without one. If the user did not name any person, leave activity_attendee_id empty — whoId is simply omitted.
               Resolving which Opportunity a read request (interaction intelligence OR conversation history) is about — you MUST call find_opportunity first, every time, before get_interaction_intelligence or get_conversation_history. Those two actions only run off resolved_opportunity_id, which find_opportunity sets when (and only when) it finds exactly one match; they are unavailable until then. Choose the searchTerm you pass to find_opportunity in this order and never skip ahead:
               1. If the user's message names a specific Opportunity — a deal name, an account/company name, or a Record Id — pass it to find_opportunity EXACTLY as the user wrote it: the complete phrase, every word, verbatim. Do not shorten it, drop trailing words, or paraphrase (pass "d'Alba - 다년 다이아몬드 파트너십 업셀" whole, not "d'Alba" or "d'Alba 다이아몬드"). This applies even if you were already working on a different Opportunity. (find_opportunity handles a raw Record Id too: it validates it and returns it as the unique match.)
               2. Otherwise, if you are operating in the context of one specific Opportunity record (the user opened this assistant from that Opportunity), pass that Opportunity's Record Id to find_opportunity.
@@ -277,8 +312,10 @@ subagent activity_management:
                 set @variables.activity_confirmed = True
 
             create_activity: @actions.create_activity
+                with whoId = @variables.activity_attendee_id
                 available when @variables.activity_confirmed == True
                 set @variables.activity_confirmed = False
+                set @variables.activity_attendee_id = ""
 
             update_activity: @actions.update_activity
                 available when @variables.activity_confirmed == True
@@ -287,6 +324,12 @@ subagent activity_management:
             find_opportunity: @actions.find_opportunity
                 with searchTerm = ...
                 set @variables.resolved_opportunity_id = @outputs.resolvedId
+
+            find_activity_attendee: @actions.find_activity_attendee
+                with personName = ...
+                with opportunityId = @variables.resolved_opportunity_id
+                available when @variables.resolved_opportunity_id != ""
+                set @variables.activity_attendee_id = @outputs.resolvedId
             get_interaction_intelligence: @actions.get_interaction_intelligence
                 with opportunityId = @variables.resolved_opportunity_id
                 available when @variables.resolved_opportunity_id != ""
