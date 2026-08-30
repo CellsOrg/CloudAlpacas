@@ -144,24 +144,30 @@
 
 .oac-mascot {
     display: inline-block;
-    line-height: 0;
     flex: 0 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #fff;
 }
 
-.oac-mascot svg {
+.oac-mascot img {
     display: block;
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    object-position: center 42%;
 }
 
 .oac-mascot_lg {
     width: 40px;
     height: 40px;
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
 }
 
 .oac-mascot_sm {
     width: 28px;
     height: 28px;
+    box-shadow: inset 0 0 0 1px var(--oac-border);
 }
 
 /* ---- content region --------------------------------------- */

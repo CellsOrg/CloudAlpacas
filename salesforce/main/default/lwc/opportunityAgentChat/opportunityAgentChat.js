@@ -4,6 +4,7 @@ import NAME_FIELD from '@salesforce/schema/Opportunity.Name';
 import sendMessageApex from '@salesforce/apex/OpportunityAgentChatController.sendMessage';
 import endConversationApex from '@salesforce/apex/OpportunityAgentChatController.endConversation';
 import USER_ID from '@salesforce/user/Id';
+import MASCOT_URL from '@salesforce/resourceUrl/CA_Alpaca_Mascot';
 
 const STORE_PREFIX = 'caOppAgentHist';
 const MAX_CONVERSATIONS = 25;
@@ -18,6 +19,7 @@ const TITLE_MAX = 40;
 export default class OpportunityAgentChat extends LightningElement {
     @api recordId;
 
+    mascotUrl = MASCOT_URL;
     opportunityName;
     draft = '';
     busy = false;

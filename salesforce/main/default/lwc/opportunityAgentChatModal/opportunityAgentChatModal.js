@@ -1,4 +1,5 @@
 import { LightningElement, api } from 'lwc';
+import MASCOT_URL from '@salesforce/resourceUrl/CA_Alpaca_Mascot';
 
 const DAY_FMT = { month: 'long', day: 'numeric' };
 const TIME_FMT = { hour: 'numeric', minute: '2-digit', hour12: true };
@@ -19,6 +20,7 @@ export default class OpportunityAgentChatModal extends LightningElement {
     @api searchTerm = '';
     @api busy = false;
 
+    mascotUrl = MASCOT_URL;
     followUpDraft = '';
     _focused = false;
 

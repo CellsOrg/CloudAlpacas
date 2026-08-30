@@ -53,6 +53,11 @@ describe('c-opportunity-agent-chat — compact card', () => {
         expect(wordmark.querySelector('.oac-wordmark__primary').textContent).toBe('Opportunity');
         expect(wordmark.querySelector('.oac-wordmark__accent').textContent).toBe('Agent');
         expect(composerInput(el).placeholder).toBe('무엇이든 요청하세요!');
+        // official Cloud Alpacas mascot static resource, not an inline drawing
+        const mascot = el.shadowRoot.querySelector('.oac-mascot img');
+        expect(mascot).not.toBeNull();
+        expect(mascot.getAttribute('src')).toContain('CA_Alpaca_Mascot');
+        expect(el.shadowRoot.querySelector('.oac-mascot svg')).toBeNull();
         // the two-line intro blurb is gone
         expect(el.shadowRoot.textContent).not.toContain('무엇이든 도와드립니다');
         expect(el.shadowRoot.textContent).not.toContain('활동 · 제안 · 협상 · 딜 요약을 지원');

@@ -57,6 +57,14 @@ describe('c-opportunity-agent-chat-modal — list view', () => {
         expect(newBtn).toBeDefined();
     });
 
+    it('uses the official Cloud Alpacas mascot static resource in the header', () => {
+        const el = mount();
+        const mascot = el.shadowRoot.querySelector('.oac-modal__header .oac-mascot img');
+        expect(mascot).not.toBeNull();
+        expect(mascot.getAttribute('src')).toContain('CA_Alpaca_Mascot');
+        expect(el.shadowRoot.querySelector('.oac-mascot svg')).toBeNull();
+    });
+
     it('groups conversations by date', () => {
         const el = mount();
         const groupLabels = [...el.shadowRoot.querySelectorAll('.oac-daygroup__label')].map((n) => n.textContent);
