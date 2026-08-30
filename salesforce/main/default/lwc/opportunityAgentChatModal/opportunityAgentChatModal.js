@@ -22,6 +22,7 @@ export default class OpportunityAgentChatModal extends LightningElement {
 
     mascotUrl = MASCOT_URL;
     followUpDraft = '';
+    pendingDeleteId;
     _focused = false;
 
     renderedCallback() {
@@ -98,7 +99,7 @@ export default class OpportunityAgentChatModal extends LightningElement {
         if (groups.length && groups[0].items.length) {
             groups[0].items[0] = {
                 ...groups[0].items[0],
-                cardClass: 'oac-convo-card oac-convo-card_featured'
+                rowClass: 'oac-convo-row oac-convo-row_featured'
             };
         }
         return groups;
@@ -116,7 +117,7 @@ export default class OpportunityAgentChatModal extends LightningElement {
             title: c.title || '새 대화',
             preview: last ? `마지막 대화: "${preview}"` : '',
             time: this.formatTime(c.updatedAt),
-            cardClass: 'oac-convo-card'
+            rowClass: 'oac-convo-row'
         };
     }
 
@@ -165,6 +166,32 @@ export default class OpportunityAgentChatModal extends LightningElement {
     openConversation(event) {
         const id = event.currentTarget.dataset.id;
         this.dispatchEvent(new CustomEvent('openconversation', { detail: { id } }));
+    }
+
+    // --- delete one saved conversation (localStorage only) ------
+
+    requestDelete(event) {
+        event.stopPropagation();
+        this.pendingDeleteId = event.currentTarget.dataset.id;
+    }
+
+    cancelDelete() {
+        this.pendingDeleteId = undefined;
+    }
+
+    confirmDelete() {
+        const id = this.pendingDeleteId;
+        this.pendingDeleteId = undefined;
+        if (id) {
+            this.dispatchEvent(new CustomEvent('deleteconversation', { detail: { id } }));
+        }
+    }
+
+    handleConfirmKeydown(event) {
+        if (event.key === 'Escape') {
+            event.stopPropagation();
+            this.cancelDelete();
+        }
     }
 
     handleSearch(event) {

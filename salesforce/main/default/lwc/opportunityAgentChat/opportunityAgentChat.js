@@ -115,6 +115,35 @@ export default class OpportunityAgentChat extends LightningElement {
         this.modalView = 'detail';
     }
 
+    /**
+     * Delete ONE saved conversation from the browser-side history. localStorage
+     * only — never any Salesforce record. Other conversations, search and date
+     * grouping are untouched.
+     */
+    handleModalDeleteConversation(event) {
+        const id = event.detail && event.detail.id;
+        if (!id) {
+            return;
+        }
+        const removed = this.conversations.find((c) => c.id === id);
+        const wasActive = this.activeId === id;
+
+        this.conversations = this.conversations.filter((c) => c.id !== id);
+
+        // Best-effort close the deleted conversation's Agent session so it can
+        // never be picked up again; its transcript is gone regardless.
+        if (removed && removed.sessionId) {
+            Promise.resolve(endConversationApex({ sessionId: removed.sessionId })).catch(() => {});
+        }
+
+        if (wasActive) {
+            this.activeId = undefined;
+            this.modalView = 'list';
+        }
+
+        this.persist();
+    }
+
     /** Server-side close the previous conversation's session; its transcript stays in history. */
     detachActiveSession() {
         const convo = this.activeConversation;

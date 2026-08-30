@@ -276,3 +276,71 @@ describe('c-opportunity-agent-chat — detail follow-up', () => {
         expect(sendMessage).not.toHaveBeenCalled();
     });
 });
+
+describe('c-opportunity-agent-chat — delete one saved conversation', () => {
+    const KEY = 'caOppAgentHist:005TEST:' + GOLD;
+
+    function seedThree() {
+        window.localStorage.setItem(
+            KEY,
+            JSON.stringify({
+                conversations: [
+                    { id: 'd1', title: '루나 뷰티 스폰서십', sessionId: 'sess-d1', createdAt: 10, updatedAt: 30, messages: [{ role: 'user', text: '루나 뷰티 보여줘' }, { role: 'agent', text: '루나 뷰티...' }] },
+                    { id: 'd2', title: '골드 견적 협상', sessionId: 'sess-d2', createdAt: 9, updatedAt: 20, messages: [{ role: 'user', text: '골드 견적' }, { role: 'agent', text: '견적입니다' }] },
+                    { id: 'd3', title: '예산 관련 질문', sessionId: null, createdAt: 8, updatedAt: 10, messages: [{ role: 'user', text: '예산 얘기' }, { role: 'agent', text: '예산 우려 기록' }] }
+                ]
+            })
+        );
+    }
+
+    async function openHistory() {
+        seedThree();
+        const el = mount();
+        historyButton(el).click();
+        await flush();
+        return el;
+    }
+
+    it('removes only the chosen conversation, keeps the rest, and rewrites localStorage — no Apex sendMessage', async () => {
+        const el = await openHistory();
+        modal(el).dispatchEvent(new CustomEvent('deleteconversation', { detail: { id: 'd2' } }));
+        await flush();
+
+        const ids = modal(el).conversations.map((c) => c.id);
+        expect(ids).toEqual(['d1', 'd3']);
+
+        const stored = JSON.parse(window.localStorage.getItem(KEY)).conversations.map((c) => c.id);
+        expect(stored).toEqual(['d1', 'd3']);
+
+        expect(sendMessage).not.toHaveBeenCalled();
+        expect(endConversation).toHaveBeenCalledWith({ sessionId: 'sess-d2' });
+    });
+
+    it('a delete while a search filter is active updates the filtered list', async () => {
+        const el = await openHistory();
+        modal(el).dispatchEvent(new CustomEvent('search', { detail: { value: '견적' } }));
+        await flush();
+        // filtered view shows only d2 ("골드 견적 협상")
+        expect(modal(el).conversations.filter((c) => c.title.includes('견적')).length).toBe(1);
+
+        modal(el).dispatchEvent(new CustomEvent('deleteconversation', { detail: { id: 'd2' } }));
+        await flush();
+
+        expect(modal(el).conversations.map((c) => c.id)).toEqual(['d1', 'd3']);
+        expect(modal(el).searchTerm).toBe('견적'); // search term preserved
+    });
+
+    it('deleting the currently-open conversation resets local UI to a fresh list view', async () => {
+        const el = await openHistory();
+        modal(el).dispatchEvent(new CustomEvent('openconversation', { detail: { id: 'd1' } }));
+        await flush();
+        expect(modal(el).view).toBe('detail');
+
+        modal(el).dispatchEvent(new CustomEvent('deleteconversation', { detail: { id: 'd1' } }));
+        await flush();
+
+        expect(modal(el).view).toBe('list');
+        expect(modal(el).activeConversation).toBeFalsy();
+        expect(modal(el).conversations.map((c) => c.id)).toEqual(['d2', 'd3']);
+    });
+});
