@@ -9,34 +9,14 @@
         </header>
 
         <template lwc:if={hasContext}>
-            <template lwc:if={hasFacts}>
-                <section class="guidance-section">
-                    <h3>현재 확인된 정보</h3>
-                    <ul>
-                        <template for:each={facts} for:item="fact">
-                            <li key={fact.label}>
-                                <span>{fact.label}</span>
-                                <lightning-formatted-number lwc:if={fact.isCurrency} value={fact.value} format-style="currency" currency-code="KRW"></lightning-formatted-number>
-                                <lightning-formatted-date-time lwc:elseif={fact.isDate} value={fact.value} year="numeric" month="short" day="2-digit"></lightning-formatted-date-time>
-                                <strong lwc:else>{fact.value}</strong>
-                            </li>
-                        </template>
-                    </ul>
-                </section>
+            <template lwc:if={loading}><p class="guidance-empty">Opportunity Agent가 현재 딜을 분석하고 있습니다.</p></template>
+            <template lwc:elseif={hasRecommendation}><section class="guidance-ai"><h3>AI Sales Brief</h3><lightning-formatted-rich-text value={recommendationHtml}></lightning-formatted-rich-text></section></template>
+            <template lwc:if={error}><p class="guidance-error">{errorMessage}<lightning-button variant="base" label="다시 시도" onclick={retry}></lightning-button></p></template>
+            <template lwc:if={showFallbackFacts}>
+                <section class="guidance-section"><h3>현재 확인된 정보</h3><ul><template for:each={facts} for:item="fact"><li key={fact.label}><span>{fact.label}</span><lightning-formatted-number lwc:if={fact.isCurrency} value={fact.value} format-style="currency" currency-code="KRW"></lightning-formatted-number><lightning-formatted-date-time lwc:elseif={fact.isDate} value={fact.value} year="numeric" month="short" day="2-digit"></lightning-formatted-date-time><strong lwc:else>{fact.value}</strong></li></template></ul></section>
+                <template lwc:if={hasNeeds}><section class="guidance-section guidance-section_soft"><h3>확인 필요</h3><ul class="guidance-list"><template for:each={needs} for:item="need"><li key={need}>{need}</li></template></ul></section></template>
+                <section class="guidance-next"><h3>Recommended Next Action</h3><p>{action}</p></section>
             </template>
-            <template lwc:else><p class="guidance-empty">{emptyMessage}</p></template>
-            <template lwc:if={hasNeeds}>
-                <section class="guidance-section guidance-section_soft">
-                    <h3>확인 필요</h3>
-                    <ul class="guidance-list">
-                        <template for:each={needs} for:item="need"><li key={need}>{need}</li></template>
-                    </ul>
-                </section>
-            </template>
-            <section class="guidance-next">
-                <h3>Recommended Next Action</h3>
-                <p>{action}</p>
-            </section>
         </template>
         <template lwc:else><p class="guidance-empty">Stage Guidance를 불러올 수 없습니다. 페이지를 새로고침한 뒤 다시 확인하세요.</p></template>
     </article>

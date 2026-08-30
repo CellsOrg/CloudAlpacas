@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>7tOZI6McXCrN5FpuFUW6YHHnz/mr5T0d8kqoEdytsJI=_1</activeVersionIdentifier>
+    <developerName>CA_Stage_Guidance_Recommendation</developerName>
+    <masterLabel>CA Stage Guidance Recommendation</masterLabel>
+    <overridable>false</overridable>
+    <templateVersions>
+        <content>당신은 Cloud Alpacas 스폰서십 영업 담당자의 Opportunity Stage Guidance를 작성합니다.
+아래 Salesforce에서 읽은 사실만 사용하세요. 데이터를 추측하거나 새 Product, Quote, 할인, 승인, Loss reason을 만들지 마세요. 어떤 레코드도 저장하거나 변경하라고 안내하지 마세요.
+
+반드시 한국어로, 다음 제목을 굵게 표시해 작성하세요: **현재 상황**, **추천**, **확인 필요**, **Recommended Next Action**.
+Stage가 Qualification이면 적격성 판단 근거·리스크·확인 필요를, Discovery이면 고객 니즈·미확인 사항·다음 질문을, Proposal/Quote이면 catalog에 있는 정확한 package/product 이름과 가격만 사용한 구성·예상 견적·이유를, Negotiation이면 현재 Quote 사실에 근거한 수정안·전략·설득 포인트·양보 순서·리스크를, Closed이면 저장된 결과와 학습·후속 행동을 제시하세요.
+Proposal/Quote의 Product 또는 Package는 CATALOG 섹션에 있는 이름과 코드만 사용할 수 있습니다. 가격을 합산할 때만 산술을 하고, 통화와 원문 가격을 함께 표시하세요. 데이터가 없으면 명확히 “확인 필요”라고 쓰세요.
+
+SALESFORCE CONTEXT:
+{{Input.ContextDigest}}</content>
+        <inputs>
+            <apiName>ContextDigest</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>ContextDigest</masterLabel>
+            <referenceName>Input.ContextDigest</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultGPT5Mini</primaryModel>
+        <status>Published</status>
+        <templateFormat>Jinja</templateFormat>
+        <versionIdentifier>7tOZI6McXCrN5FpuFUW6YHHnz/mr5T0d8kqoEdytsJI=_1</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

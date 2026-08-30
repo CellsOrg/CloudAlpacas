@@ -1,5 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import getContext from '@salesforce/apex/StageGuidanceController.getContext';
+import getRecommendation from '@salesforce/apex/StageGuidanceController.getRecommendation';
 
 const STAGES = {
     Qualification: { title: 'Qualification Brief', subtitle: '초기 검토 가이드' },
@@ -14,17 +15,35 @@ export default class StageGuidance extends LightningElement {
     @api recordId;
     context;
     error;
+    recommendation;
+    loading = false;
+    requestedFor;
 
     @wire(getContext, { opportunityId: '$recordId' })
     wiredContext({ data, error }) {
         this.context = data;
         this.error = error;
+        if (data && data.stageName && this.requestedFor !== `${this.recordId}:${data.stageName}`) this.loadRecommendation();
     }
 
     get hasContext() {
         return !!this.context;
     }
-
+    get hasRecommendation() { return !!this.recommendation; }
+    get showFallbackFacts() { return !this.loading && !this.hasRecommendation; }
+    get recommendationHtml() { return (this.recommendation || '').replace(/\n/g, '<br/>'); }
+    get errorMessage() { return this.error?.body?.message || 'AI recommendation을 생성하지 못했습니다.'; }
+    async loadRecommendation() {
+        this.loading = true;
+        this.error = undefined;
+        this.requestedFor = `${this.recordId}:${this.context.stageName}`;
+        try {
+            const result = await getRecommendation({ opportunityId: this.recordId });
+            this.recommendation = result.recommendation;
+            if (result.errorMessage) this.error = { body: { message: result.errorMessage } };
+        } catch (error) { this.error = error; } finally { this.loading = false; }
+    }
+    retry() { this.requestedFor = undefined; this.loadRecommendation(); }
     get stageConfig() {
         return STAGES[this.context?.stageName] || { title: 'Stage Guidance', subtitle: '단계 가이드' };
     }

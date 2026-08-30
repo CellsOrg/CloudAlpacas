@@ -23,6 +23,104 @@ public with sharing class StageGuidanceController {
         return new GuidanceContext(results[0]);
     }
 
+    @AuraEnabled
+    public static RecommendationResponse getRecommendation(Id opportunityId) {
+        RecommendationResponse response = new RecommendationResponse();
+        if (opportunityId == null) {
+            response.errorMessage = 'Opportunity를 찾을 수 없습니다.';
+            return response;
+        }
+
+        DealContext.Result deal = first(DealContext.execute(new List<DealContext.Request>{ dealRequest(opportunityId) }));
+        if (deal == null || !deal.found) {
+            response.errorMessage = 'Opportunity를 읽을 수 없습니다.';
+            return response;
+        }
+        Map<String, Object> context = new Map<String, Object>{
+            'stage' => deal.stageName,
+            'deal' => deal
+        };
+        if (deal.stageName == 'Proposal/Quote') {
+            context.put('proposal', first(OpportunityProposalContext.execute(
+                new List<OpportunityProposalContext.Request>{ proposalRequest(opportunityId) }
+            )));
+            context.put('catalogue', first(SponsorshipPackageLookup.execute(
+                new List<SponsorshipPackageLookup.Request>{ catalogueRequest(opportunityId) }
+            )));
+            context.put('interactionIntelligence', getIntelligence(opportunityId));
+        } else if (deal.stageName == 'Negotiation') {
+            context.put('negotiation', first(NegotiationContext.execute(
+                new List<NegotiationContext.Request>{ negotiationRequest(opportunityId) }
+            )));
+            context.put('interactionIntelligence', getIntelligence(opportunityId));
+        } else if (deal.stageName == 'Discovery') {
+            context.put('interactionIntelligence', getIntelligence(opportunityId));
+        }
+
+        if (Test.isRunningTest() && recommendationForTest != null) {
+            response.recommendation = recommendationForTest;
+            return response;
+        }
+
+        try {
+            ConnectApi.EinsteinPromptTemplateGenerationsInput input =
+                new ConnectApi.EinsteinPromptTemplateGenerationsInput();
+            input.isPreview = false;
+            input.additionalConfig = new ConnectApi.EinsteinLlmAdditionalConfigInput();
+            input.additionalConfig.applicationName = 'PromptBuilderPreview';
+            input.inputParams = new Map<String, ConnectApi.WrappedValue>();
+            ConnectApi.WrappedValue wrappedDigest = new ConnectApi.WrappedValue();
+            wrappedDigest.value = JSON.serialize(context);
+            input.inputParams.put('Input:ContextDigest', wrappedDigest);
+            ConnectApi.EinsteinPromptTemplateGenerationsRepresentation generation =
+                ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(
+                    'CA_Stage_Guidance_Recommendation', input
+                );
+            if (generation == null || generation.generations == null || generation.generations.isEmpty()
+                || String.isBlank(generation.generations[0].text)) {
+                response.errorMessage = 'AI recommendation을 생성하지 못했습니다.';
+            } else {
+                response.recommendation = generation.generations[0].text;
+            }
+        } catch (Exception e) {
+            response.errorMessage = 'AI recommendation을 생성하지 못했습니다.';
+        }
+        return response;
+    }
+
+    @TestVisible private static String recommendationForTest;
+
+    private static DealContext.Request dealRequest(Id opportunityId) {
+        DealContext.Request request = new DealContext.Request(); request.opportunityId = opportunityId; return request;
+    }
+    private static OpportunityProposalContext.Request proposalRequest(Id opportunityId) {
+        OpportunityProposalContext.Request request = new OpportunityProposalContext.Request(); request.opportunityId = opportunityId; return request;
+    }
+    private static SponsorshipPackageLookup.Request catalogueRequest(Id opportunityId) {
+        SponsorshipPackageLookup.Request request = new SponsorshipPackageLookup.Request(); request.opportunityId = opportunityId; return request;
+    }
+    private static NegotiationContext.Request negotiationRequest(Id opportunityId) {
+        NegotiationContext.Request request = new NegotiationContext.Request(); request.opportunityId = opportunityId; return request;
+    }
+    private static ActivityIntelligenceAgentAction.Request intelligenceRequest(Id opportunityId) {
+        ActivityIntelligenceAgentAction.Request request = new ActivityIntelligenceAgentAction.Request(); request.opportunityId = String.valueOf(opportunityId); return request;
+    }
+    private static ActivityIntelligenceAgentAction.Response getIntelligence(Id opportunityId) {
+        return first(ActivityIntelligenceAgentAction.getInteractionIntelligence(
+            new List<ActivityIntelligenceAgentAction.Request>{ intelligenceRequest(opportunityId) }
+        ));
+    }
+    private static DealContext.Result first(List<DealContext.Result> results) { return results == null || results.isEmpty() ? null : results[0]; }
+    private static OpportunityProposalContext.Result first(List<OpportunityProposalContext.Result> results) { return results == null || results.isEmpty() ? null : results[0]; }
+    private static SponsorshipPackageLookup.Result first(List<SponsorshipPackageLookup.Result> results) { return results == null || results.isEmpty() ? null : results[0]; }
+    private static NegotiationContext.Result first(List<NegotiationContext.Result> results) { return results == null || results.isEmpty() ? null : results[0]; }
+    private static ActivityIntelligenceAgentAction.Response first(List<ActivityIntelligenceAgentAction.Response> results) { return results == null || results.isEmpty() ? null : results[0]; }
+
+    public class RecommendationResponse {
+        @AuraEnabled public String recommendation;
+        @AuraEnabled public String errorMessage;
+    }
+
     public class GuidanceContext {
         @AuraEnabled public String opportunityName;
         @AuraEnabled public String accountName;

@@ -34,4 +34,30 @@ private class StageGuidanceControllerTest {
         System.assertEquals(null, StageGuidanceController.getContext(null));
         System.assertEquals(null, StageGuidanceController.getContext('006000000000000AAA'));
     }
+
+    @IsTest
+    static void returnsReadOnlyRecommendationFromStructuredContext() {
+        Account account = new Account(Name = 'TEST - Stage Guidance Recommendation Account');
+        insert account;
+        Opportunity opportunity = new Opportunity(
+            Name = 'TEST - Stage Guidance Recommendation',
+            AccountId = account.Id,
+            StageName = 'Negotiation',
+            CloseDate = Date.today().addDays(14),
+            Amount = 200000000
+        );
+        insert opportunity;
+
+        StageGuidanceController.recommendationForTest = '**현재 상황**\n테스트 recommendation';
+        Test.startTest();
+        StageGuidanceController.RecommendationResponse result =
+            StageGuidanceController.getRecommendation(opportunity.Id);
+        Test.stopTest();
+
+        System.assertEquals('**현재 상황**\n테스트 recommendation', result.recommendation);
+        System.assertEquals(null, result.errorMessage);
+        Opportunity unchanged = [SELECT Amount, StageName FROM Opportunity WHERE Id = :opportunity.Id];
+        System.assertEquals(200000000, unchanged.Amount);
+        System.assertEquals('Negotiation', unchanged.StageName);
+    }
 }
