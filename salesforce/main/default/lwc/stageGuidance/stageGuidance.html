@@ -26,9 +26,16 @@
                                     <div class={metric.className} key={metric.key}>
                                         <dt>{metric.label}</dt>
                                         <dd>
-                                            <lightning-formatted-number lwc:if={metric.isCurrency} value={metric.value} format-style="currency" currency-code="KRW" currency-display-as="symbol"></lightning-formatted-number>
-                                            <lightning-formatted-date-time lwc:elseif={metric.isDate} value={metric.value} year="numeric" month="2-digit" day="2-digit"></lightning-formatted-date-time>
-                                            <span lwc:else>{metric.value}</span>
+                                            <template lwc:if={metric.isList}>
+                                                <ul class="metric-list">
+                                                    <template for:each={metric.items} for:item="item"><li key={item.key}>{item.text}</li></template>
+                                                </ul>
+                                            </template>
+                                            <template lwc:else>
+                                                <lightning-formatted-number lwc:if={metric.isCurrency} value={metric.value} format-style="currency" currency-code="KRW" currency-display-as="symbol"></lightning-formatted-number>
+                                                <lightning-formatted-date-time lwc:elseif={metric.isDate} value={metric.value} year="numeric" month="2-digit" day="2-digit"></lightning-formatted-date-time>
+                                                <span lwc:else>{metric.value}</span>
+                                            </template>
                                         </dd>
                                     </div>
                                 </template>

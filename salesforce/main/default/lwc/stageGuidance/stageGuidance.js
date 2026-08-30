@@ -149,9 +149,29 @@ export default class StageGuidance extends LightningElement {
             text('current-discount', '현재 할인율', c.quoteDiscount === null || c.quoteDiscount === undefined ? '—' : `${c.quoteDiscount}%`),
             text('approval-limit', '승인 없이 가능한 최대 할인율', c.maxDiscountPercent === null || c.maxDiscountPercent === undefined ? '—' : `${c.maxDiscountPercent}%`),
             { key: 'expiration', label: 'Quote 유효기한', value: c.quoteExpirationDate || '—', isDate: !!c.quoteExpirationDate, className: 'metric-card metric-card_scalar' },
-            { ...text('discount-restriction', '할인율 변경 제한', c.lineItemDiscountUpdatable === false ? c.lineItemDiscountLockReason || '할인율 변경이 제한됩니다' : '할인율 변경 제한 없음'), className: 'metric-card metric-card_wide metric-card_text' },
-            { ...text('recent-interaction', '최근 상호작용', c.hasInteractionIntelligence && c.interactionHistorySummary ? c.interactionHistorySummary.split('\n')[0] : '기록된 상호작용 없음'), className: 'metric-card metric-card_wide metric-card_text' }
+            {
+                key: 'discount-restriction',
+                label: '할인율 변경 제한',
+                isList: true,
+                items: this.metricItems(c.lineItemDiscountUpdatable === false ? c.lineItemDiscountLockReason : '할인율 변경 제한 없음'),
+                className: 'metric-card metric-card_wide metric-card_discount'
+            },
+            {
+                key: 'recent-interaction',
+                label: '최근 상호작용',
+                isList: true,
+                items: this.metricItems(c.hasInteractionIntelligence && c.interactionHistorySummary ? c.interactionHistorySummary.split('\n')[0] : null, '기록된 상호작용 없음', true),
+                className: 'metric-card metric-card_full metric-card_recent'
+            }
         ];
+    }
+
+    metricItems(value, fallback = '—', splitPipes = false) {
+        const raw = (value || fallback).trim();
+        const items = (splitPipes ? raw.split(/\s*\|\s*|\n/) : raw.split('\n'))
+            .map((item) => this.normalizeBullet(item.trim()))
+            .filter(Boolean);
+        return items.length ? items.map((text, index) => ({ text, key: `metric-${index}` })) : [{ text: fallback, key: 'metric-0' }];
     }
 
     normalizeBullet(value) {
