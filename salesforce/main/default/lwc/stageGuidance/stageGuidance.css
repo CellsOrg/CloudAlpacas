@@ -1,0 +1,8 @@
+:host { display: block; }
+.guidance-card { background: #fff; border: 1px solid #E6ECF3; border-radius: .5rem; color: #0D1B3D; padding: 1rem 1.125rem; }
+.guidance-head { align-items: center; display: flex; gap: .625rem; margin-bottom: .875rem; }
+.guidance-mark { align-items: center; background: #FFF4ED; border-radius: 50%; color: #FF6A00; display: inline-flex; font-size: .9rem; height: 1.75rem; justify-content: center; width: 1.75rem; }
+h2, h3, p { margin: 0; } h2 { font-size: 1rem; font-weight: 700; } .guidance-head p { color: #6B7280; font-size: .75rem; margin-top: .125rem; }
+.guidance-section { border-top: 1px solid #E6ECF3; padding-top: .75rem; margin-top: .75rem; } .guidance-section_soft { background: #F1F6FF; border: 0; border-radius: .25rem; padding: .625rem .75rem; }
+h3 { font-size: .75rem; font-weight: 700; margin-bottom: .375rem; } ul { list-style: none; margin: 0; padding: 0; } li { align-items: baseline; display: flex; font-size: .8125rem; gap: .5rem; justify-content: space-between; padding: .16rem 0; } li span { color: #6B7280; } li strong { font-weight: 600; text-align: right; } .guidance-list li { display: list-item; margin-left: 1rem; padding-left: .1rem; }
+.guidance-next { border-top: 1px solid #E6ECF3; margin-top: .75rem; padding-top: .75rem; } .guidance-next p, .guidance-empty { color: #374151; font-size: .8125rem; line-height: 1.45; } .guidance-empty { background: #F1F6FF; border-radius: .25rem; padding: .75rem; }
