@@ -1,40 +1,47 @@
 <template>
-    <lightning-card title="Opportunity Agent" icon-name="utility:agent_astro">
-        <div class="slds-var-p-horizontal_medium slds-var-p-bottom_medium">
-            <p class="slds-text-body_regular slds-var-m-bottom_x-small">무엇이든 도와드립니다!</p>
-
-            <div class="composer slds-grid slds-grid_vertical-align-end">
-                <lightning-input
-                    class="slds-col slds-grow"
-                    type="text"
-                    variant="label-hidden"
-                    label="Opportunity Agent에게 질문하기"
-                    placeholder="Opportunity Agent에게 질문하기..."
-                    value={draft}
-                    onchange={handleDraft}
-                    onkeydown={handleComposerKey}
-                ></lightning-input>
-                <lightning-button-icon
-                    class="slds-col slds-shrink-none slds-var-m-left_xx-small"
-                    icon-name="utility:send"
-                    variant="brand"
-                    alternative-text="질문 전송"
-                    title="질문 전송"
-                    onclick={handleAsk}
-                    disabled={sendDisabled}
-                ></lightning-button-icon>
-            </div>
-
-            <div class="slds-var-m-top_small">
-                <lightning-button
-                    variant="base"
-                    label="이전 대화 기록 보기"
-                    icon-name="utility:comments"
-                    onclick={handleOpenHistory}
-                ></lightning-button>
-            </div>
+    <div class="oac-widget">
+        <div class="oac-widget__head">
+            <span class="oac-mascot">
+                <img src={mascotUrl} alt="" />
+            </span>
+            <span class="oac-wordmark"
+                ><span class="oac-wordmark__primary">Opportunity</span>&nbsp;<span class="oac-wordmark__accent">Agent</span></span
+            >
         </div>
-    </lightning-card>
+
+        <div class="oac-composer">
+            <input
+                type="text"
+                class="oac-composer__input"
+                aria-label="Opportunity Agent에게 질문하기"
+                placeholder="무엇이든 요청하세요!"
+                value={draft}
+                autocomplete="off"
+                oninput={handleDraft}
+                onchange={handleDraft}
+                onkeydown={handleComposerKey}
+            />
+            <button
+                type="button"
+                class={sendClass}
+                aria-label="질문 전송"
+                aria-disabled={sendDisabled}
+                title="질문 전송"
+                onclick={handleAsk}
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <button type="button" class="oac-history" onclick={handleOpenHistory}>
+            <span>이전 대화 기록 보기</span>
+            <svg class="oac-history__chev" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </button>
+    </div>
 
     <template lwc:if={modalOpen}>
         <c-opportunity-agent-chat-modal

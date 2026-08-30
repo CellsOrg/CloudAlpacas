@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Public</cacheControl>
+    <contentType>image/png</contentType>
+    <description>Official Cloud Alpacas mascot (alpaca head), cropped from the team logo. Used as the Opportunity Agent chat avatar in the compact widget header, the conversation modal header, and agent message bubbles.</description>
+</StaticResource>
