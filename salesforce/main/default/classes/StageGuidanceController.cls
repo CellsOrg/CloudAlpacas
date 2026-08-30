@@ -44,10 +44,13 @@ public with sharing class StageGuidanceController {
             context.put('proposal', first(OpportunityProposalContext.execute(
                 new List<OpportunityProposalContext.Request>{ proposalRequest(opportunityId) }
             )));
+            // Keep the actual customer quote separate from the catalog menu. This is
+            // read-only evidence only; it does not infer requirement fulfillment.
+            context.put('currentQuote', getCurrentQuoteContext(opportunityId));
+            context.put('proposalEvidence', getProposalEvidence(opportunityId));
             context.put('catalogue', first(SponsorshipPackageLookup.execute(
                 new List<SponsorshipPackageLookup.Request>{ catalogueRequest(opportunityId) }
             )));
-            context.put('interactionIntelligence', getIntelligence(opportunityId));
         } else if (deal.stageName == 'Negotiation') {
             context.put('negotiation', first(NegotiationContext.execute(
                 new List<NegotiationContext.Request>{ negotiationRequest(opportunityId) }
@@ -110,6 +113,79 @@ public with sharing class StageGuidanceController {
             new List<ActivityIntelligenceAgentAction.Request>{ intelligenceRequest(opportunityId) }
         ));
     }
+
+    @TestVisible
+    private static CurrentQuoteContext getCurrentQuoteContext(Id opportunityId) {
+        CurrentQuoteContext result = new CurrentQuoteContext();
+        result.selectionBasis = 'Latest Quote by CreatedDate';
+        List<Quote> quotes = [
+            SELECT Id, Name, Status, GrandTotal, CurrencyIsoCode,
+                   (SELECT Quantity, UnitPrice, Discount, TotalPrice,
+                           Product2.Name, Product2.ProductCode
+                    FROM QuoteLineItems)
+            FROM Quote
+            WHERE OpportunityId = :opportunityId
+            WITH USER_MODE
+            ORDER BY CreatedDate DESC
+            LIMIT 1
+        ];
+        if (quotes.isEmpty()) {
+            return result;
+        }
+
+        Quote quote = quotes[0];
+        result.found = true;
+        result.quoteId = quote.Id;
+        result.quoteName = quote.Name;
+        result.quoteStatus = quote.Status;
+        result.quoteGrandTotal = quote.GrandTotal;
+        result.currencyIsoCode = quote.CurrencyIsoCode;
+        for (QuoteLineItem item : quote.QuoteLineItems) {
+            CurrentQuoteLineItem line = new CurrentQuoteLineItem();
+            line.productName = item.Product2 == null ? null : item.Product2.Name;
+            line.productCode = item.Product2 == null ? null : item.Product2.ProductCode;
+            line.quantity = item.Quantity;
+            line.unitPrice = item.UnitPrice;
+            line.discount = item.Discount;
+            line.totalPrice = item.TotalPrice;
+            result.lineItems.add(line);
+        }
+        return result;
+    }
+
+    @TestVisible
+    private static ProposalEvidence getProposalEvidence(Id opportunityId) {
+        ProposalEvidence result = new ProposalEvidence();
+        Opportunity opportunity = [
+            SELECT Key_Requirements__c
+            FROM Opportunity
+            WHERE Id = :opportunityId
+            WITH USER_MODE
+            LIMIT 1
+        ];
+        if (String.isNotBlank(opportunity.Key_Requirements__c)) {
+            for (String sentence : opportunity.Key_Requirements__c.split('\\.')) {
+                String requirement = sentence == null ? null : sentence.trim();
+                if (String.isNotBlank(requirement)) {
+                    result.requiredRequirements.add(requirement);
+                }
+            }
+        }
+        for (Interaction_Intelligence__c record : [
+            SELECT Key_Decision__c, Follow_Up__c, Concerns_Objections__c
+            FROM Interaction_Intelligence__c
+            WHERE Opportunity__c = :opportunityId
+            WITH USER_MODE
+            ORDER BY CreatedDate DESC
+        ]) {
+            ProposalInteractionFact fact = new ProposalInteractionFact();
+            fact.keyDecision = record.Key_Decision__c;
+            fact.followUp = record.Follow_Up__c;
+            fact.concerns = record.Concerns_Objections__c;
+            result.interactionFacts.add(fact);
+        }
+        return result;
+    }
     private static DealContext.Result first(List<DealContext.Result> results) { return results == null || results.isEmpty() ? null : results[0]; }
     private static OpportunityProposalContext.Result first(List<OpportunityProposalContext.Result> results) { return results == null || results.isEmpty() ? null : results[0]; }
     private static SponsorshipPackageLookup.Result first(List<SponsorshipPackageLookup.Result> results) { return results == null || results.isEmpty() ? null : results[0]; }
@@ -119,6 +195,37 @@ public with sharing class StageGuidanceController {
     public class RecommendationResponse {
         @AuraEnabled public String recommendation;
         @AuraEnabled public String errorMessage;
+    }
+
+    public class CurrentQuoteContext {
+        public Boolean found = false;
+        public String selectionBasis;
+        public Id quoteId;
+        public String quoteName;
+        public String quoteStatus;
+        public Decimal quoteGrandTotal;
+        public String currencyIsoCode;
+        public List<CurrentQuoteLineItem> lineItems = new List<CurrentQuoteLineItem>();
+    }
+
+    public class CurrentQuoteLineItem {
+        public String productName;
+        public String productCode;
+        public Decimal quantity;
+        public Decimal unitPrice;
+        public Decimal discount;
+        public Decimal totalPrice;
+    }
+
+    public class ProposalEvidence {
+        public List<String> requiredRequirements = new List<String>();
+        public List<ProposalInteractionFact> interactionFacts = new List<ProposalInteractionFact>();
+    }
+
+    public class ProposalInteractionFact {
+        public String keyDecision;
+        public String followUp;
+        public String concerns;
     }
 
     public class GuidanceContext {
