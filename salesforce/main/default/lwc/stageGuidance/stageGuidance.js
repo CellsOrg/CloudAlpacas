@@ -1,21 +1,76 @@
 import { LightningElement, api, wire } from 'lwc';
 import getContext from '@salesforce/apex/StageGuidanceController.getContext';
 import getRecommendation from '@salesforce/apex/StageGuidanceController.getRecommendation';
+import getNegotiationContext from '@salesforce/apex/NegotiationContextController.getContext';
 
 const STAGES = {
-    Qualification: { title: 'Qualification Brief', subtitle: '초기 검토 가이드' },
-    Discovery: { title: 'Discovery Brief', subtitle: '발견 가이드' },
-    'Proposal/Quote': { title: 'Recommended Proposal', subtitle: '제안 가이드' },
-    Negotiation: { title: 'Negotiation Brief', subtitle: '협상 가이드' },
-    'Closed Won': { title: 'Deal Summary', subtitle: '수주 요약' },
-    'Closed Lost': { title: 'Deal Summary', subtitle: '실주 요약' }
+    Qualification: { title: 'Qualification Brief' },
+    Discovery: { title: 'Discovery Brief' },
+    'Proposal/Quote': { title: 'Proposal Brief' },
+    Negotiation: { title: 'Negotiation Brief' },
+    'Closed Won': { title: 'Closed Won Brief' },
+    'Closed Lost': { title: 'Closed Lost Brief' }
 };
+
+const SECTION_INFO = {
+    'Qualification 판단': '현재 Opportunity 사실을 기준으로 한 Qualification 판단',
+    '판단 근거': '판단에 사용한 저장된 Opportunity 및 활동 근거',
+    '긍정 신호': '현재 기록에서 확인된 진행 가능성 신호',
+    '위험 신호': '추가 확인 또는 관리가 필요한 위험 신호',
+    '발견된 고객 니즈': '고객 기록에서 확인된 니즈와 제약',
+    'AI 해석': '확인된 고객 니즈를 바탕으로 한 AI 해석',
+    '추천 패키지': '현재 Quote 및 고객 요구사항을 바탕으로 한 제안 방향',
+    '추천 구성': '현재 제안에 포함하거나 확인할 구성',
+    '추천 견적': '현재 Quote 사실에 기반한 견적 검토 방향',
+    '추천 이유': '추천의 근거와 확인할 사항',
+    '추천 협상 방향': '현재 협상 사실을 기반으로 생성한 추천 전략',
+    '유지 권장 항목': '협상에서 유지하는 것이 권장되는 현재 조건',
+    '조정 검토 가능 항목': '근거 확인 후 조정을 검토할 수 있는 항목',
+    '설득 전략': '현재 협상 사실에 기반한 설득 방향',
+    '협상 시 주의': '협상 과정에서 확인하거나 피해야 할 사항',
+    '설득 전략 / 협상 시 주의': '협상 시 사용할 설득 방향과 주의할 점',
+    '계약 결과': '저장된 계약 및 Quote 사실 요약',
+    '성공 요인': '기록에서 확인된 수주 요인',
+    '후속 관리': '계약 이후 확인하거나 진행할 후속 관리',
+    'Deal 결과': '저장된 실주 결과 요약',
+    '실패 요인': '기록에서 확인된 실주 요인',
+    '향후 재접촉 조건': '재접촉 전에 확인할 조건과 시점'
+};
+
+const SECTION_PRESENTATION = {
+    'Qualification 판단': { icon: '✓', tone: 'success', keyValue: true },
+    '판단 근거': { icon: '▣', tone: 'blue' },
+    '긍정 신호': { icon: '↑', tone: 'success' },
+    '위험 신호': { icon: '△', tone: 'warning' },
+    '발견된 고객 니즈': { icon: '◎', tone: 'blue' },
+    'AI 해석': { icon: '✦', tone: 'purple' },
+    '추천 패키지': { icon: '▣', tone: 'success', keyValue: true },
+    '추천 구성': { icon: '◇', tone: 'blue' },
+    '추천 견적': { icon: '₩', tone: 'warning', keyValue: true },
+    '추천 이유': { icon: '★', tone: 'purple' },
+    '추천 협상 방향': { icon: '◎', tone: 'blue' },
+    '유지 권장 항목': { icon: '✓', tone: 'success' },
+    '조정 검토 가능 항목': { icon: '↔', tone: 'warning' },
+    '설득 전략': { icon: '✦', tone: 'purple' },
+    '협상 시 주의': { icon: '△', tone: 'warning' },
+    '설득 전략 / 협상 시 주의': { icon: '✦', tone: 'purple' },
+    '계약 결과': { icon: '✓', tone: 'success', keyValue: true },
+    '성공 요인': { icon: '↑', tone: 'blue' },
+    '후속 관리': { icon: '◌', tone: 'purple' },
+    'Deal 결과': { icon: '×', tone: 'lost', keyValue: true },
+    '실패 요인': { icon: '△', tone: 'warning' },
+    '향후 재접촉 조건': { icon: '◌', tone: 'blue' }
+};
+
+const FULL_WIDTH_SECTIONS = new Set(['계약 결과', 'Deal 결과', '협상 시 주의']);
+const HIDDEN_SECTIONS = new Set(['확인 필요', '현재 제안', '고객 요구/제약']);
 
 export default class StageGuidance extends LightningElement {
     @api recordId;
     context;
     error;
     recommendation;
+    negotiationContext;
     loading = false;
     requestedFor;
 
@@ -26,11 +81,21 @@ export default class StageGuidance extends LightningElement {
         if (data && data.stageName && this.requestedFor !== `${this.recordId}:${data.stageName}`) this.loadRecommendation();
     }
 
+    @wire(getNegotiationContext, { opportunityId: '$negotiationRecordId' })
+    wiredNegotiationContext({ data }) {
+        this.negotiationContext = data;
+    }
+
     get hasContext() {
         return !!this.context;
     }
+    get showBrief() { return !!this.context && this.context.stageName !== 'Qualification'; }
     get hasRecommendation() { return !!this.recommendation; }
     get showFallbackFacts() { return !this.loading && !this.hasRecommendation; }
+    get isNegotiation() { return this.context?.stageName === 'Negotiation'; }
+    get negotiationRecordId() { return this.isNegotiation ? this.recordId : undefined; }
+    get hasNegotiationContext() { return !!this.negotiationContext; }
+
     get recommendationSections() {
         const sections = [];
         let current;
@@ -38,15 +103,82 @@ export default class StageGuidance extends LightningElement {
             const line = raw.trim().replace(/^\*\*(.+?)\*\*\.?$/, '$1');
             if (!line) return;
             if (/^[^:]{1,40}:$/.test(line) || /^(현재 상황|추천|확인 필요|Recommended Next Action)$/.test(line)) {
-                current = { title: line.replace(/:$/, ''), lines: [], key: `s-${sections.length}` };
+                const title = line.replace(/:$/, '');
+                if (HIDDEN_SECTIONS.has(title)) {
+                    current = undefined;
+                    return;
+                }
+                current = {
+                    title,
+                    lines: [],
+                    key: `s-${sections.length}`,
+                    className: `brief-section brief-section_${SECTION_PRESENTATION[title]?.tone || 'blue'}${FULL_WIDTH_SECTIONS.has(title) ? ' brief-section_emphasis' : ''}`,
+                    infoText: SECTION_INFO[title],
+                    infoLabel: `${title} 안내`,
+                    icon: SECTION_PRESENTATION[title]?.icon || '•',
+                    hasIcon: !!SECTION_PRESENTATION[title]?.icon,
+                    keyValue: !!SECTION_PRESENTATION[title]?.keyValue
+                };
                 sections.push(current);
             } else {
                 if (/(감사드립니다|추가 확인사항|알려주시기 바랍니다)/.test(line)) return;
-                if (!current) { current = { title: '핵심 현황', lines: [], key: 's-0' }; sections.push(current); }
-                current.lines.push({ text: line.replace(/^-\s*/, ''), key: `${current.key}-${current.lines.length}` });
+                if (!current) return;
+                current.lines.push({
+                    text: this.normalizeBullet(line.replace(/^(?:[-•]\s*)/, '')),
+                    key: `${current.key}-${current.lines.length}`,
+                    className: current.keyValue && current.lines.length === 0 ? 'guidance-list_key' : ''
+                });
             }
         });
         return sections;
+    }
+
+    get negotiationMetrics() {
+        const c = this.negotiationContext || {};
+        const hasBudget = c.clientBudget !== null && c.clientBudget !== undefined;
+        const hasQuote = c.quoteGrandTotal !== null && c.quoteGrandTotal !== undefined;
+        const currency = (key, label, value) => value === null || value === undefined
+            ? { key, label, value: '정보 없음', className: 'metric-card metric-card_scalar' }
+            : { key, label, value, isCurrency: true, className: 'metric-card metric-card_scalar' };
+        const text = (key, label, value) => ({ key, label, value: value || '—', className: 'metric-card metric-card_scalar' });
+        return [
+            text('quote-status', 'Quote 상태', c.quoteStatus || (c.hasQuote ? '—' : '정보 없음')),
+            currency('client-budget', '고객 예산', hasBudget ? c.clientBudget : null),
+            currency('quote-total', 'Quote 총액', hasQuote ? c.quoteGrandTotal : null),
+            currency('budget-gap', '예산 대비 견적 차이', hasBudget && hasQuote ? c.quoteGrandTotal - c.clientBudget : null),
+            text('current-discount', '현재 할인율', c.quoteDiscount === null || c.quoteDiscount === undefined ? '—' : `${c.quoteDiscount}%`),
+            text('approval-limit', '승인 없이 가능한 최대 할인율', c.maxDiscountPercent === null || c.maxDiscountPercent === undefined ? '—' : `${c.maxDiscountPercent}%`),
+            { key: 'expiration', label: 'Quote 유효기한', value: c.quoteExpirationDate || '—', isDate: !!c.quoteExpirationDate, className: 'metric-card metric-card_scalar' },
+            {
+                key: 'discount-restriction',
+                label: '할인율 변경 제한',
+                isList: true,
+                items: this.metricItems(c.lineItemDiscountUpdatable === false ? c.lineItemDiscountLockReason : '할인율 변경 제한 없음'),
+                className: 'metric-card metric-card_wide metric-card_discount'
+            },
+            {
+                key: 'recent-interaction',
+                label: '최근 상호작용',
+                isList: true,
+                items: this.metricItems(c.hasInteractionIntelligence && c.interactionHistorySummary ? c.interactionHistorySummary.split('\n')[0] : null, '기록된 상호작용 없음', true),
+                className: 'metric-card metric-card_full metric-card_recent'
+            }
+        ];
+    }
+
+    metricItems(value, fallback = '—', splitPipes = false) {
+        const raw = (value || fallback).trim();
+        const items = (splitPipes ? raw.split(/\s*\|\s*|\n/) : raw.split('\n'))
+            .map((item) => this.normalizeBullet(item.trim()))
+            .filter(Boolean);
+        return items.length ? items.map((text, index) => ({ text, key: `metric-${index}` })) : [{ text: fallback, key: 'metric-0' }];
+    }
+
+    normalizeBullet(value) {
+        // Only strip a terminal full stop from short single-line guidance. IDs,
+        // dates, decimals, and longer prose retain their original punctuation.
+        if (value.length <= 120 && /[^0-9]\.$/.test(value)) return value.slice(0, -1);
+        return value;
     }
     get errorMessage() { return this.error?.body?.message || 'AI recommendation을 생성하지 못했습니다.'; }
     async loadRecommendation() {
@@ -65,7 +197,6 @@ export default class StageGuidance extends LightningElement {
     }
 
     get title() { return this.stageConfig.title; }
-    get subtitle() { return this.stageConfig.subtitle; }
     get isKnownStage() { return !!STAGES[this.context?.stageName]; }
 
     get facts() {
