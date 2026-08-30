@@ -39,6 +39,10 @@ variables:
         description: "사용자가 제안서 저장(기존 Quote 업데이트 또는 신규 Quote 생성 + Opportunity 기대효과/세그먼트 갱신)을 명확하게 승인했는지 여부. save_proposal의 available when 게이트가 소비한다. 저장 성공 후 다시 False로 초기화된다. '좋아 보인다'·'괜찮네요' 같은 반응이나 패키지 선택('첫 번째','1')은 확정으로 취급하지 않는다. Negotiation의 terms_confirmed와 절대 공유하지 않는다."
     proposal_quote_id: mutable string = ""
         description: "save_proposal이 생성했거나 업데이트한 실제 Quote의 Id. 같은 대화 안에서 중복 저장을 막는다."
+    activity_confirmed: mutable boolean = False
+        description: "사용자가 이미 미리 보여준 Task/Event의 생성 또는 수정을 명확하게 확정했는지 여부. create_activity / update_activity의 available when 게이트가 소비한다. 실행 성공 후 다시 False로 초기화되어 다음 생성/수정 시 재확인을 요구한다. '알겠어'·'그래'·'좋아' 같은 모호한 반응이나 Opportunity 후보 선택은 확정으로 취급하지 않는다."
+    activity_attendee_id: mutable string = ""
+        description: "find_activity_attendee가 사용자가 말한 참석자/연락 대상 이름을 결정적으로 찾아낸 Contact 또는 User의 Id — 정확히 1명 매칭(isUnique)일 때만 채워진다. create_activity의 whoId에 그대로 전달되는 신뢰 값이며, LLM이 사람 이름을 whoId에 직접 넣는 경로를 없앤다. 참석자가 없는 활동이면 빈 문자열이고 Flow가 무시한다. 다른 사람을 새로 지정하면 덮어쓴다."
 
 language:
     default_locale: "en_US"
@@ -58,8 +62,9 @@ start_agent agent_router:
               Distinguishing negotiation vs proposal: if the user wants to change terms (discount / expiration / status / terms note) on an Opportunity's EXISTING Quote → negotiation. If the user wants proposal background, the package catalogue, an expected-benefit draft, or to build/save the proposal Quote for a chosen package → proposal. "기존 견적 할인 바꿔줘" → negotiation; "이 패키지로 제안서 저장해줘" → proposal.
               Do NOT route to negotiation or proposal for strategy/advice questions like "할인율을 몇 %로 제안해야 해?", "어떤 패키지를 제안하는 게 좋을까?", "어떻게 협상하면 좋을까?" — those recommend a number, a package choice, or a negotiation strategy and are not available. Listing the packages so the rep can choose IS in scope for proposal; telling them which one to pick is not.
               Route to deal for questions that ask for an Opportunity-LEVEL read of the deal's overall state — deal health / risk / whether it is stalled / whether it is progressing / what is most concerning / a status summary / whether it can close / what to do next on this deal: "이 딜 상태 어때?", "이 Opportunity 위험해?", "이 딜이 왜 안 움직여?", "이 거래 정체된 것 같아", "지금 이 딜에서 가장 걱정되는 점은?", "이 딜에서 다음에 뭘 해야 해?", "이 거래 잘 진행되고 있어?", "이 Opportunity 전반적인 상황 정리해줘", "이 딜 이길 수 있을까?", "deal health / deal risk / deal status / stalled / next action". deal READS the Opportunity's stored CRM facts + threshold-free derived values and interprets them qualitatively, always separating FACT from INTERPRETATION from any SUGGESTED ACTION; it never returns an invented score/grade/probability and it never itself creates a Task/Event, changes a Quote, or drafts a proposal.
-              Do NOT route to deal for: Task/Event lookup or creation ("다음 미팅 잡아줘", "할 일 목록 보여줘") → activity_management; discount / approval-limit / negotiation-term questions or changes → negotiation; sponsorship-package browsing, proposal drafting, Expected-Benefit save, Quote/QLI creation or update → proposal; or external company/financial research → not available. deal never performs another assistant's mutation — when a next step needs a Task or Event created, deal says so and the rep can ask activity_management.
-              Do NOT route anywhere in this agent for external company/sponsorship-fit research or a company's financials — that is not available yet; use ambiguous_question to say so.
+              Also route to deal for "similar / past Closed Won deal" questions — a request for past deals like this one, past success cases, a comparable Closed Won, or deals done with the same kind of company: "d'Alba와 비슷한 과거 종결 딜 찾아줘", "비슷한 계약 있어?", "같은 업종 과거 계약", "화장품 회사와 했던 과거 계약", "이 Opportunity와 비슷한 Closed Won 3개 보여줘", "과거 성공 사례 보여줘". deal answers these from stored Salesforce data (find_similar_closed_deals) — a deterministic similarity over industry / target segment / partner tier / amount band, never an AI prediction.
+              Do NOT route to deal for: Task/Event lookup or creation ("다음 미팅 잡아줘", "할 일 목록 보여줘") → activity_management; discount / approval-limit / negotiation-term questions or changes → negotiation; sponsorship-package browsing, proposal drafting, Expected-Benefit save, Quote/QLI creation or update → proposal; or external company/financial research (a company's news, financials, or a NEW fan-fit assessment) → not available. deal never performs another assistant's mutation — when a next step needs a Task or Event created, deal says so and the rep can ask activity_management.
+              Do NOT route anywhere in this agent for external company/sponsorship-fit research or a company's financials — that is not available yet; use ambiguous_question to say so. (Retrieving PAST Closed Won deals with a similar company from Salesforce IS available — that goes to deal.)
               Continuation of an in-flight request: if the previous assistant turn (from activity_management, negotiation, proposal, OR deal) asked the user which Opportunity they mean, and the user's next message is just an Opportunity name, an account/company name, or a Record Id, route back to the SAME subagent that asked, to finish that original request — do not treat a bare Opportunity name on its own as a new, off-topic, or ambiguous request.
         actions:
             go_to_escalation: @utils.transition to @subagent.escalation
@@ -143,10 +148,9 @@ subagent activity_management:
                 result: list[object]
                     complex_data_type_name: "lightning__recordInfoType"
         update_activity:
-            description: "Update fields on an existing Task or Event record."
+            description: "Update fields on an existing Task or Event record. Gated by activity_confirmed — only runs after the user has explicitly confirmed the exact change you already previewed."
             target: "standardInvocableAction://einsteinCopilotUpdateRecord"
             source: "EmployeeCopilot__UpdateRecordFields"
-            require_user_confirmation: True
             inputs:
                 recordDetailInput: object
                     complex_data_type_name: "lightning__recordInfoType"
@@ -154,9 +158,8 @@ subagent activity_management:
                 recordDetailOutput: object
                     complex_data_type_name: "lightning__recordInfoType"
         create_activity:
-            description: "Create one new Task or Event activity record linked to an Opportunity. Set activityType to 'Task' or 'Event'. whatId is the Opportunity Id. whoId is an optional Contact or Lead Id. For a Task, provide subject, activityDate, and status (priority and description are optional). For an Event, provide subject, startDateTime, and endDateTime (meetingType and description are optional). Only invoke this action after the user has explicitly confirmed the activity details."
+            description: "Create one new Task or Event activity record linked to an Opportunity. Set activityType to 'Task' or 'Event'. whatId is the Opportunity Id (from the page context or the resolved deal). whoId is bound to activity_attendee_id (a Contact or User Id resolved by find_activity_attendee) — never put a person NAME in whoId. For a Task, provide subject, activityDate, and status (priority and description are optional). For an Event, provide subject, startDateTime, and endDateTime (meetingType and description are optional). Gated by activity_confirmed — only runs after the user has explicitly confirmed the previewed activity."
             target: "flow://CA_Create_Opportunity_Activity"
-            require_user_confirmation: True
             inputs:
                 activityType: string
                 whatId: string
@@ -174,6 +177,38 @@ subagent activity_management:
                 recordType: string
                 success: boolean
                 errorMessage: string
+        find_activity_attendee:
+            description: "Read-only. Resolves a person NAME the user named as a meeting attendee / task contact to a Salesforce Id — a Contact on this Opportunity or its Account (external customer / partner) first, then an active internal User. Returns isUnique = true with resolvedId / resolvedType only on exactly one match; otherwise a candidate list (matchesSummary) or a not-found message. Never asks for a record Id. No DML."
+            label: "Find Activity Attendee"
+            target: "apex://FindActivityAttendee"
+            include_in_progress_indicator: True
+            progress_indicator_message: "참석자 연락처를 확인하는 중..."
+            inputs:
+                personName: string
+                    description: "The attendee / contact name the user said, verbatim (a trailing honorific like '님' is fine)."
+                    is_required: True
+                opportunityId: string
+                    description: "The resolved Opportunity Id — scopes the Contact search to its Account and contact roles."
+            outputs:
+                found: boolean
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                isUnique: boolean
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                matchCount: object
+                    complex_data_type_name: "lightning__integerType"
+                    filter_from_agent: True
+                resolvedId: string
+                    description: "Contact or User Id when isUnique is true, otherwise empty. Captured into activity_attendee_id."
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                resolvedType: string
+                resolvedName: string
+                matchesSummary: string
+                    description: "Name / company / title list — show this to the user to disambiguate when more than one matched."
+                message: string
+                    description: "Human-readable Korean result, safe to show the user. Never contains a request for a Salesforce Id."
         get_interaction_intelligence:
             description: "Return the interaction intelligence already stored for an Opportunity — per-interaction summary, customer reaction, key decision, concerns/objections, agreed follow-up, and interaction signals (Category · Direction · Confidence — Evidence), newest first. Read-only, no confirmation needed. Use for questions about what a customer said or how they reacted in recent calls, meetings, or emails on an Opportunity. Returns found = false with a plain 'no intelligence stored' message when there is none."
             target: "apex://ActivityIntelligenceAgentAction"
@@ -248,8 +283,12 @@ subagent activity_management:
         instructions: ->
             | You manage Task and Event records related to Opportunity records in this Salesforce org, you read back interaction intelligence that has already been generated and stored for an Opportunity, and you retrieve the full chronological conversation history for an Opportunity.
               Activity scope: query Tasks/Events (for example open tasks or upcoming events for an Opportunity), update existing Task/Event records, and create new Task/Event records linked to an Opportunity.
-              Read/query operations do not need confirmation. Before updating or creating any Task or Event, summarize the exact details — which record and what is changing for an update, or the full set of field values for a new activity — and get the user's explicit confirmation. Never call update_activity or create_activity before the user confirms.
-              When creating an activity: decide whether the user wants a Task or an Event, collect the required fields, ask for anything missing, and never invent field values. Treat the activity as created only when create_activity returns success = true with a recordId; if success = false, tell the user what errorMessage says and do not claim the activity was created.
+              Read/query operations do not need confirmation. Creating or updating a Task/Event is a single-step confirmation in Korean, with a hard gate:
+              1. Show the user, in Korean, the exact activity you will create or the exact change you will make — for a new activity list every field value; for an update name the record and each old → new value. End with a plain question like "이대로 생성할까요?" / "이대로 변경할까요?" and tell them to reply e.g. "네, 생성해줘" / "네, 변경해줘".
+              2. Only when the user replies with an explicit, unambiguous confirmation of THAT activity ("네, 생성해줘", "그대로 만들어줘", "네 변경해줘", "확정") call confirm_activity, then immediately call create_activity or update_activity. A vague reply ("알겠어", "그래", "좋아"), a question, or an Opportunity-selection reply is NOT a confirmation — do not call confirm_activity for those.
+              3. Never call create_activity or update_activity before activity_confirmed is True. Do not ask for confirmation twice — one clear Korean preview + one confirmation is the whole flow.
+              When creating an activity: decide whether the user wants a Task or an Event, collect the required fields, ask for anything missing, and never invent field values. Leave meetingType EMPTY unless the user explicitly names a meeting type — it is a restricted picklist and a guessed value (e.g. "미팅") makes the create fail. Treat the activity as created only when create_activity returns success = true with a recordId; if success = false, tell the user what errorMessage says and do not claim the activity was created.
+              Resolving an attendee / contact person — when the user names a person for the activity ("김하나님과 미팅 잡아줘", "박대리한테 전화하는 Task 만들어줘", "이 담당자랑 미팅"): you MUST resolve that name with find_activity_attendee BEFORE create_activity — never put a person's NAME into whoId and NEVER ask the user for a Salesforce Id / record Id / Contact Id. Steps: (1) make sure the Opportunity is resolved (find_opportunity first, so resolved_opportunity_id is set); (2) call find_activity_attendee with personName = the name the user said (honorific like "님" is fine) — opportunityId is bound automatically; (3) if isUnique = true, that Contact/User is captured into activity_attendee_id and flows into whoId — mention who it resolved to in your preview ("참석자: 김하나 (d'Alba, Partnership Manager)"); (4) if isUnique = false, show matchesSummary (이름·회사·직책) and ask the user which person — do not guess, do not call confirm_activity yet; (5) if found = false, relay the action's message (연락처 미등록 안내) and offer to create the activity WITHOUT an attendee or to note the contact detail in the description — still never ask for an Id. Only proceed to the confirmation step once the attendee is resolved or the user chose to proceed without one. If the user did not name any person, leave activity_attendee_id empty — whoId is simply omitted.
               Resolving which Opportunity a read request (interaction intelligence OR conversation history) is about — you MUST call find_opportunity first, every time, before get_interaction_intelligence or get_conversation_history. Those two actions only run off resolved_opportunity_id, which find_opportunity sets when (and only when) it finds exactly one match; they are unavailable until then. Choose the searchTerm you pass to find_opportunity in this order and never skip ahead:
               1. If the user's message names a specific Opportunity — a deal name, an account/company name, or a Record Id — pass it to find_opportunity EXACTLY as the user wrote it: the complete phrase, every word, verbatim. Do not shorten it, drop trailing words, or paraphrase (pass "d'Alba - 다년 다이아몬드 파트너십 업셀" whole, not "d'Alba" or "d'Alba 다이아몬드"). This applies even if you were already working on a different Opportunity. (find_opportunity handles a raw Record Id too: it validates it and returns it as the unique match.)
               2. Otherwise, if you are operating in the context of one specific Opportunity record (the user opened this assistant from that Opportunity), pass that Opportunity's Record Id to find_opportunity.
@@ -267,11 +306,30 @@ subagent activity_management:
               You retrieve, organise, and summarise stored facts; you do not judge the deal from them. Do not assess deal health or risk, predict whether the deal will close, explain why a deal is stalled, recommend the next best action or sales strategy, advise on pricing or discounts, evaluate a proposal, or suggest negotiation tactics — even when the user asks you to base it on the interactions or the history. Quoting a stored concern, decision, or follow-up that is already recorded is fine; turning it into a new deal-level conclusion or recommendation is not. If asked for any of that, say plainly that deal analysis is not available in this agent yet, and do not invent an analysis. You also do not research external company information or sponsorship fit.
         actions:
             query_activities: @actions.query_activities
-            update_activity: @actions.update_activity
+
+            confirm_activity: @utils.setVariables
+                description: "Call ONLY when the user has explicitly and unambiguously confirmed the exact Task/Event you already previewed (예: '네, 생성해줘', '그대로 만들어줘', '네 변경해줘', '확정'). A vague reply like '알겠어' / '그래' / '좋아', a question, or an Opportunity-selection reply is NOT a confirmation."
+                set @variables.activity_confirmed = True
+
             create_activity: @actions.create_activity
+                with whoId = @variables.activity_attendee_id
+                available when @variables.activity_confirmed == True
+                set @variables.activity_confirmed = False
+                set @variables.activity_attendee_id = ""
+
+            update_activity: @actions.update_activity
+                available when @variables.activity_confirmed == True
+                set @variables.activity_confirmed = False
+
             find_opportunity: @actions.find_opportunity
                 with searchTerm = ...
                 set @variables.resolved_opportunity_id = @outputs.resolvedId
+
+            find_activity_attendee: @actions.find_activity_attendee
+                with personName = ...
+                with opportunityId = @variables.resolved_opportunity_id
+                available when @variables.resolved_opportunity_id != ""
+                set @variables.activity_attendee_id = @outputs.resolvedId
             get_interaction_intelligence: @actions.get_interaction_intelligence
                 with opportunityId = @variables.resolved_opportunity_id
                 available when @variables.resolved_opportunity_id != ""
@@ -617,8 +675,9 @@ subagent proposal:
               Saving — in this exact order:
               1. The rep has picked a package (resolved_proposal_package_id is set) and you have a draft.
               2. Show a SAVE PREVIEW: the Opportunity name; the chosen package name + standard price + currency; the short / mid / long-term expected-benefit draft in full; the target segment to be written (if any); and whether the Opportunity already has a Quote — if it does, state plainly "기존 Quote를 업데이트합니다 (새 Quote를 만들지 않습니다)"; if it does not, state "새 Quote가 생성됩니다".
-              3. Wait for an explicit, unambiguous save confirmation ("이걸로 저장해줘", "제안서 저장", "확정"). A reply like "좋아 보이네요" / "괜찮다" / "첫 번째" / "1" is NOT a save confirmation — never treat it as one.
-              4. Only then call confirm_proposal, then save_proposal.
+              3. Wait for an explicit, unambiguous save confirmation that names saving — "이걸로 저장해줘", "제안서 저장해줘", "저장 확정". A reply that only picks or approves a PACKAGE or the draft — "이 패키지로 진행해줘", "그걸로 하자", "좋아 보이네요", "괜찮다", "진행해줘", "첫 번째", "1" — is NOT a save confirmation. If the user says something like "진행해줘" after the preview, do NOT save yet: ask once more, plainly, "이 내용으로 제안서를 저장할까요? 저장하려면 '네, 저장해줘'라고 말씀해 주세요."
+              4. Only when the reply is an explicit save confirmation call confirm_proposal, then save_proposal.
+              Already-saved guard: save_proposal is unavailable once proposal_quote_id is set (a proposal was already saved in this conversation). If the user then asks to save again ("한 번 더 저장해줘", "다시 저장"), do NOT call confirm_proposal and do NOT claim a new save happened. Say exactly: "이미 이 대화에서 제안서를 저장했습니다. 추가 저장은 수행하지 않았습니다." — never "저장이 한 번 더 완료되었습니다".
               Reading save_proposal: treat the proposal as saved only when success = true — then report message and, from the Opportunity's side, that the expected-benefit draft is an AI-generated proposal draft now stored on the record. If success = false: relay message (it explains why — ambiguous multiple Quotes, a Quote that already has a different package line, a synced Quote whose lines were left untouched, an over-long benefit, an invalid segment, or a save error) and do NOT claim anything was saved. If ambiguous = true, show the rep the candidate Quotes from message and ask which one — do not retry blindly. When lineItemNote is set, pass it on so the rep knows the Quote lines were deliberately not changed.
               Not in scope: changing an existing Quote's discount / expiration / status / terms note (Negotiation Assistant), Discovery (capturing customer needs), company/financial research, deal risk / health / win-likelihood / next-best-action analysis. For those, say plainly they are not available in this agent.
 
@@ -643,7 +702,7 @@ subagent proposal:
                 set @variables.resolved_proposal_package_id = @outputs.resolvedId
 
             confirm_proposal: @utils.setVariables
-                description: "Call ONLY when the rep has explicitly and unambiguously confirmed saving the proposal you have already previewed (e.g. '이걸로 저장해줘', '제안서 저장해줘', '확정'). A reaction like '좋아 보이네요' / '괜찮다', or a package-selection reply like '첫 번째' / '1', is NOT a save confirmation."
+                description: "Call ONLY when the rep's reply explicitly names SAVING the previewed proposal (e.g. '이걸로 저장해줘', '제안서 저장해줘', '저장 확정'). A reply that only approves the draft or picks/approves a PACKAGE — '좋아 보이네요' / '괜찮다' / '이 패키지로 진행해줘' / '그걸로 하자' / '진행해줘' / '첫 번째' / '1' — is NOT a save confirmation; ask once more whether to save instead of calling this."
                 set @variables.proposal_confirmed = True
 
             save_proposal: @actions.save_proposal
@@ -660,7 +719,7 @@ subagent proposal:
 
 subagent deal:
     label: "Deal Assistant"
-    description: "Read-only Opportunity-level deal synthesis. Retrieves one Opportunity's stored CRM facts (stage, amount, the Salesforce-stored Probability field, forecast category, close date, next step, last-contact / next-activity fields, open & overdue task counts, quote presence and status, interaction-intelligence and signal counts, latest recorded concerns) plus threshold-free derived values (days open, days until close, days since last stage change / last contact / last activity / latest interaction, whether the close date is past) and interprets them qualitatively for the rep. Always separates recorded FACT from INTERPRETATION and any SUGGESTED ACTION. Does NOT create Tasks/Events, change a Quote, draft a proposal, or research external companies, and never returns an invented deal score / risk score / health grade / AI win probability / stalled flag."
+    description: "Read-only Opportunity-level deal synthesis. Retrieves one Opportunity's stored CRM facts (stage, amount, the Salesforce-stored Probability field, forecast category, close date, next step, last-contact / next-activity fields, open & overdue task counts, quote presence and status, interaction-intelligence and signal counts, latest recorded concerns) plus threshold-free derived values (days open, days until close, days since last stage change / last contact / last activity / latest interaction, whether the close date is past) and interprets them qualitatively for the rep. Also finds past Closed Won Opportunities similar to this one (deterministic similarity over stored industry / target segment / partner tier / amount band) or matching a category keyword. Always separates recorded FACT from INTERPRETATION and any SUGGESTED ACTION. Does NOT create Tasks/Events, change a Quote, draft a proposal, or research external companies, and never returns an invented deal score / risk score / health grade / AI win probability / stalled flag."
 
     actions:
         find_opportunity:
@@ -794,6 +853,29 @@ subagent deal:
                 daysSinceLatestInteraction: object
                     complex_data_type_name: "lightning__integerType"
 
+        find_similar_closed_deals:
+            description: "Read-only. Ranks past Closed Won Opportunities by DETERMINISTIC similarity to a reference Opportunity — shared Account Industry, Opportunity Target Segment, Partner Tier, and a comparable Amount band — or filters them by a category / company-type keyword. Returns a Korean digest of the Top N with a plain match reason. Not an AI or predictive score. No DML."
+            label: "Find Similar Closed Deals"
+            target: "apex://FindSimilarClosedDeals"
+            include_in_progress_indicator: True
+            progress_indicator_message: "유사한 과거 종결 딜을 찾는 중..."
+            inputs:
+                opportunityId: string
+                    description: "Reference Opportunity Id for similarity ranking. Empty only when the user asked purely by category keyword with no Opportunity in context."
+                categoryKeyword: string
+                    description: "Optional industry / company-type keyword the user named (e.g. '화장품', '금융', '식음료'). Filters Closed Won by account industry / account name / opportunity name."
+                topN: number
+                    description: "How many results (default 3, max 10). Set only when the user asked for a specific number."
+            outputs:
+                found: boolean
+                    filter_from_agent: True
+                    is_used_by_planner: True
+                matchCount: object
+                    complex_data_type_name: "lightning__integerType"
+                    filter_from_agent: True
+                digest: string
+                    description: "Human-readable Korean list of similar past Closed Won deals with match reasons — safe to show the user verbatim. Stored-data similarity, not a prediction."
+
     reasoning:
         instructions: ->
             | You help a Cloud Alpacas B2B sponsorship sales rep understand the overall state of ONE Opportunity. You read its stored CRM facts and derived date/count values and give a grounded qualitative read — you do not run any calculation the Apex did not run, you do not change any record, and you do not do another assistant's job.
@@ -806,6 +888,12 @@ subagent deal:
               3. SUGGESTED ACTION (제안) — optional, only when the facts point to something concrete. Frame as a suggestion for the rep, never as something you will do: "예산 승인 상태를 담당자에게 확인해 보는 게 좋겠다", "CloseDate 전에 follow-up 접촉을 잡는 것을 고려하라", "의사결정권자 접근 가능 여부를 다시 확인하라". If a suggestion would need a Task or Event created, say so explicitly ("이걸 Task로 만들고 싶으면 활동(Activity) 쪽에 요청하세요") — you do NOT create it and you do NOT call another assistant to create it.
               Quote handling: report quoteCount, hasSyncedQuote / syncedQuoteStatus, and latestQuoteStatus as separate facts. If a synced quote exists and its status differs from the latest-created quote's status, state both and do not declare which one is "the" quote — there is no authoritative-quote rule. Do not comment on discount, approval limits, or line items (that is the Negotiation Assistant), and do not suggest creating or editing a quote or proposal (that is Proposal/Negotiation).
               Never invent: a deal score, risk score, health grade / letter, "AI win probability", an "isStalled = true/false" value, an engagement or momentum score, or a numeric risk level. The action does not return these and this org does not compute them. If the user asks "이길 확률 몇 %야?" say there is no win-probability model here; you can show the stored Probability field and the facts that bear on the deal, and give a qualitative read.
+              Similar / historical Closed Won deals — when the user asks for past deals like this one, past success cases, a similar Closed Won, or deals with the same kind of company ("d'Alba와 비슷한 과거 종결 딜", "비슷한 계약", "과거 성공 사례", "같은 업종 과거 계약", "비슷한 Closed Won 3개"): this is a THIS-DEAL request. Resolve the current Opportunity FIRST, exactly the way get_deal_context requires it — never call find_similar_closed_deals with an empty opportunityId for a this-deal request:
+              - If the user gave a full, specific Opportunity name, pass that to find_opportunity verbatim.
+              - Otherwise (they said "이 딜" / "현재 딜" / just an account word like "d'Alba" / gave no name at all), pass the Record Id from the "이 대화는 Opportunity Record Id … 페이지에서 열렸습니다" context note to find_opportunity — a raw Record Id resolves uniquely. Do NOT pass a partial account name like "d'Alba" (it can match several Opportunities and resolve nothing).
+              - Only after find_opportunity set resolved_opportunity_id (isUnique = true) call find_similar_closed_deals; opportunityId is bound to resolved_opportunity_id automatically. The Apex reads that Opportunity's and its Account's industry / target segment / partner tier / amount itself — you do NOT collect or ask the user for any of those fields.
+              A category / company-type request ("화장품 회사와 했던 계약이 있어?") from an Opportunity record page: still resolve the current Opportunity first via its context Record Id, then call find_similar_closed_deals with categoryKeyword set to the category word (opportunityId binds automatically). find_similar_closed_deals is unavailable until an Opportunity is resolved — if there is genuinely no Opportunity in context and the user named no deal, ask which deal to compare against rather than guessing.
+              find_similar_closed_deals scores on whatever of those fields the reference Opportunity actually has — a null field is simply skipped, it does not block the search. Present the returned digest as-is; state clearly it is "저장된 Salesforce 데이터 기준 유사도"(같은 업종 / 타깃 세그먼트 / 파트너 티어 / 유사 금액대), never an AI or predictive score. Only if the digest itself says nothing was found do you tell the user that — and even then never ask them to re-enter industry / segment / tier / amount; at most offer to search by a company-type keyword. This is the only deal action that looks beyond the one current Opportunity.
               Not in scope: creating / updating / querying Tasks or Events (activity_management), interaction-by-interaction summaries or the full conversation timeline (activity_management), discount / approval-limit / negotiation-term detail or changes (negotiation), sponsorship-package browsing / proposal drafting / Expected-Benefit or Quote writes (proposal), external company or financial research. For any of those, say plainly it is another assistant's area (or not available) and, if helpful, tell the user which one to ask.
 
         actions:
@@ -815,4 +903,10 @@ subagent deal:
 
             get_deal_context: @actions.get_deal_context
                 with opportunityId = @variables.resolved_opportunity_id
+                available when @variables.resolved_opportunity_id != ""
+
+            find_similar_closed_deals: @actions.find_similar_closed_deals
+                with opportunityId = @variables.resolved_opportunity_id
+                with categoryKeyword = ...
+                with topN = ...
                 available when @variables.resolved_opportunity_id != ""
