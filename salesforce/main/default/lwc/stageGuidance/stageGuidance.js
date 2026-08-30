@@ -31,7 +31,23 @@ export default class StageGuidance extends LightningElement {
     }
     get hasRecommendation() { return !!this.recommendation; }
     get showFallbackFacts() { return !this.loading && !this.hasRecommendation; }
-    get recommendationHtml() { return (this.recommendation || '').replace(/\n/g, '<br/>'); }
+    get recommendationSections() {
+        const sections = [];
+        let current;
+        (this.recommendation || '').split('\n').forEach((raw) => {
+            const line = raw.trim().replace(/^\*\*(.+?)\*\*\.?$/, '$1');
+            if (!line) return;
+            if (/^[^:]{1,40}:$/.test(line) || /^(현재 상황|추천|확인 필요|Recommended Next Action)$/.test(line)) {
+                current = { title: line.replace(/:$/, ''), lines: [], key: `s-${sections.length}` };
+                sections.push(current);
+            } else {
+                if (/(감사드립니다|추가 확인사항|알려주시기 바랍니다)/.test(line)) return;
+                if (!current) { current = { title: '핵심 현황', lines: [], key: 's-0' }; sections.push(current); }
+                current.lines.push({ text: line.replace(/^-\s*/, ''), key: `${current.key}-${current.lines.length}` });
+            }
+        });
+        return sections;
+    }
     get errorMessage() { return this.error?.body?.message || 'AI recommendation을 생성하지 못했습니다.'; }
     async loadRecommendation() {
         this.loading = true;

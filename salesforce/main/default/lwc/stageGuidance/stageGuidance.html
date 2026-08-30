@@ -4,13 +4,12 @@
             <span class="guidance-mark" aria-hidden="true">✦</span>
             <div>
                 <h2>{title}</h2>
-                <p>Opportunity Agent · {subtitle}</p>
             </div>
         </header>
 
         <template lwc:if={hasContext}>
             <template lwc:if={loading}><p class="guidance-empty">Opportunity Agent가 현재 딜을 분석하고 있습니다.</p></template>
-            <template lwc:elseif={hasRecommendation}><section class="guidance-ai"><h3>AI Sales Brief</h3><lightning-formatted-rich-text value={recommendationHtml}></lightning-formatted-rich-text></section></template>
+            <template lwc:elseif={hasRecommendation}><section class="guidance-ai"><template for:each={recommendationSections} for:item="section"><section class="guidance-ai-section" key={section.key}><h3>{section.title}</h3><ul class="guidance-list"><template for:each={section.lines} for:item="line"><li key={line.key}>{line.text}</li></template></ul></section></template></section></template>
             <template lwc:if={error}><p class="guidance-error">{errorMessage}<lightning-button variant="base" label="다시 시도" onclick={retry}></lightning-button></p></template>
             <template lwc:if={showFallbackFacts}>
                 <section class="guidance-section"><h3>현재 확인된 정보</h3><ul><template for:each={facts} for:item="fact"><li key={fact.label}><span>{fact.label}</span><lightning-formatted-number lwc:if={fact.isCurrency} value={fact.value} format-style="currency" currency-code="KRW"></lightning-formatted-number><lightning-formatted-date-time lwc:elseif={fact.isDate} value={fact.value} year="numeric" month="short" day="2-digit"></lightning-formatted-date-time><strong lwc:else>{fact.value}</strong></li></template></ul></section>
