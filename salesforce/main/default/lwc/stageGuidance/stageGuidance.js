@@ -26,6 +26,8 @@ const SECTION_INFO = {
     '추천 협상 방향': '현재 협상 사실을 기반으로 생성한 추천 전략',
     '유지 권장 항목': '협상에서 유지하는 것이 권장되는 현재 조건',
     '조정 검토 가능 항목': '근거 확인 후 조정을 검토할 수 있는 항목',
+    '설득 전략': '현재 협상 사실에 기반한 설득 방향',
+    '협상 시 주의': '협상 과정에서 확인하거나 피해야 할 사항',
     '설득 전략 / 협상 시 주의': '협상 시 사용할 설득 방향과 주의할 점',
     '계약 결과': '저장된 계약 및 Quote 사실 요약',
     '성공 요인': '기록에서 확인된 수주 요인',
@@ -49,6 +51,8 @@ const SECTION_PRESENTATION = {
     '추천 협상 방향': { icon: '◎', tone: 'blue' },
     '유지 권장 항목': { icon: '✓', tone: 'success' },
     '조정 검토 가능 항목': { icon: '↔', tone: 'warning' },
+    '설득 전략': { icon: '✦', tone: 'purple' },
+    '협상 시 주의': { icon: '△', tone: 'warning' },
     '설득 전략 / 협상 시 주의': { icon: '✦', tone: 'purple' },
     '계약 결과': { icon: '✓', tone: 'success', keyValue: true },
     '성공 요인': { icon: '↑', tone: 'blue' },
@@ -58,7 +62,7 @@ const SECTION_PRESENTATION = {
     '향후 재접촉 조건': { icon: '◌', tone: 'blue' }
 };
 
-const FULL_WIDTH_SECTIONS = new Set(['계약 결과', 'Deal 결과']);
+const FULL_WIDTH_SECTIONS = new Set(['계약 결과', 'Deal 결과', '협상 시 주의']);
 const HIDDEN_SECTIONS = new Set(['확인 필요', '현재 제안', '고객 요구/제약']);
 
 export default class StageGuidance extends LightningElement {
@@ -85,6 +89,7 @@ export default class StageGuidance extends LightningElement {
     get hasContext() {
         return !!this.context;
     }
+    get showBrief() { return !!this.context && this.context.stageName !== 'Qualification'; }
     get hasRecommendation() { return !!this.recommendation; }
     get showFallbackFacts() { return !this.loading && !this.hasRecommendation; }
     get isNegotiation() { return this.context?.stageName === 'Negotiation'; }
@@ -119,7 +124,7 @@ export default class StageGuidance extends LightningElement {
                 if (/(감사드립니다|추가 확인사항|알려주시기 바랍니다)/.test(line)) return;
                 if (!current) return;
                 current.lines.push({
-                    text: this.normalizeBullet(line.replace(/^-\s*/, '')),
+                    text: this.normalizeBullet(line.replace(/^(?:[-•]\s*)/, '')),
                     key: `${current.key}-${current.lines.length}`,
                     className: current.keyValue && current.lines.length === 0 ? 'guidance-list_key' : ''
                 });
@@ -133,9 +138,9 @@ export default class StageGuidance extends LightningElement {
         const hasBudget = c.clientBudget !== null && c.clientBudget !== undefined;
         const hasQuote = c.quoteGrandTotal !== null && c.quoteGrandTotal !== undefined;
         const currency = (key, label, value) => value === null || value === undefined
-            ? { key, label, value: '정보 없음', className: 'metric-card' }
-            : { key, label, value, isCurrency: true, className: 'metric-card' };
-        const text = (key, label, value) => ({ key, label, value: value || '—', className: 'metric-card' });
+            ? { key, label, value: '정보 없음', className: 'metric-card metric-card_scalar' }
+            : { key, label, value, isCurrency: true, className: 'metric-card metric-card_scalar' };
+        const text = (key, label, value) => ({ key, label, value: value || '—', className: 'metric-card metric-card_scalar' });
         return [
             text('quote-status', 'Quote 상태', c.quoteStatus || (c.hasQuote ? '—' : '정보 없음')),
             currency('client-budget', '고객 예산', hasBudget ? c.clientBudget : null),
@@ -143,9 +148,9 @@ export default class StageGuidance extends LightningElement {
             currency('budget-gap', '예산 대비 견적 차이', hasBudget && hasQuote ? c.quoteGrandTotal - c.clientBudget : null),
             text('current-discount', '현재 할인율', c.quoteDiscount === null || c.quoteDiscount === undefined ? '—' : `${c.quoteDiscount}%`),
             text('approval-limit', '승인 없이 가능한 최대 할인율', c.maxDiscountPercent === null || c.maxDiscountPercent === undefined ? '—' : `${c.maxDiscountPercent}%`),
-            { key: 'expiration', label: 'Quote 유효기한', value: c.quoteExpirationDate || '—', isDate: !!c.quoteExpirationDate, className: 'metric-card' },
-            { ...text('discount-restriction', '할인율 변경 제한', c.lineItemDiscountUpdatable === false ? c.lineItemDiscountLockReason || '할인율 변경이 제한됩니다' : '할인율 변경 제한 없음'), className: 'metric-card metric-card_wide' },
-            { ...text('recent-interaction', '최근 상호작용', c.hasInteractionIntelligence && c.interactionHistorySummary ? c.interactionHistorySummary.split('\n')[0] : '기록된 상호작용 없음'), className: 'metric-card metric-card_wide' }
+            { key: 'expiration', label: 'Quote 유효기한', value: c.quoteExpirationDate || '—', isDate: !!c.quoteExpirationDate, className: 'metric-card metric-card_scalar' },
+            { ...text('discount-restriction', '할인율 변경 제한', c.lineItemDiscountUpdatable === false ? c.lineItemDiscountLockReason || '할인율 변경이 제한됩니다' : '할인율 변경 제한 없음'), className: 'metric-card metric-card_wide metric-card_text' },
+            { ...text('recent-interaction', '최근 상호작용', c.hasInteractionIntelligence && c.interactionHistorySummary ? c.interactionHistorySummary.split('\n')[0] : '기록된 상호작용 없음'), className: 'metric-card metric-card_wide metric-card_text' }
         ];
     }
 
