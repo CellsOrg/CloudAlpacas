@@ -1866,19 +1866,6 @@
         </itemInstances>
         <itemInstances>
             <componentInstance>
-                <componentName>c:negotiationContextSummary</componentName>
-                <identifier>CA_negotiationContextSummary</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.StageName}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>Negotiation</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>CA_DealSnapshotWON_Columns</value>
