@@ -122,6 +122,14 @@
         <apexClass>DealContext</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <!-- Deal Assistant: find_similar_closed_deals action. FindSimilarClosedDeals is a
+         read-only Closed Won similarity ranker (@InvocableMethod, `with sharing`, SOQL
+         `WITH USER_MODE`, zero DML) — deterministic scoring over stored industry / target
+         segment / partner tier / amount band, no AI or predictive score. -->
+    <classAccesses>
+        <apexClass>FindSimilarClosedDeals</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <!-- Embedded Opportunity Agent chat (opportunityAgentChat LWC, feature/opportunity-agent-embedded-chat).
          OpportunityAgentChatController is a transport-only bridge: it relays turns to the
          Opportunity Agent through the Salesforce Agent API, authenticated by the
