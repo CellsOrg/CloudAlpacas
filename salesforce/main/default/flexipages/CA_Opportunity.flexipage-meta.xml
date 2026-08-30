@@ -1491,6 +1491,12 @@
         </itemInstances>
         <itemInstances>
             <componentInstance>
+                <componentName>c:stageGuidance</componentName>
+                <identifier>c_stageGuidance</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>CA_DealSnapshot_Columns</value>
