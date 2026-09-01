@@ -148,6 +148,13 @@
             </value>
         </assignmentItems>
         <assignmentItems>
+            <assignToReference>varEvent.External_ID__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>meetingKey</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
             <assignToReference>varEvent.Description</assignToReference>
             <operator>Assign</operator>
             <value>
@@ -251,6 +258,21 @@
             <targetReference>Set_Invalid_Type</targetReference>
         </defaultConnector>
         <defaultConnectorLabel>Invalid</defaultConnectorLabel>
+        <rules>
+            <name>Online_Meeting_Is_Event</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>meetingType</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Online</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Build_Event</targetReference>
+            </connector>
+            <label>Online Meeting is always an Event</label>
+        </rules>
         <rules>
             <name>Is_Task</name>
             <conditionLogic>and</conditionLogic>
@@ -482,6 +504,13 @@
     </variables>
     <variables>
         <name>meetingType</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>meetingKey</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>
